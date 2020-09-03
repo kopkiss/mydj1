@@ -1,0 +1,35 @@
+{% extends 'importDB/base.html' %}
+{% block content %}
+    <h2 align = "center">Show DB-Oracle</h2>
+    <table class="table">
+        <thead class="thead-dark">
+          <tr>
+            <th scope="col">รหัส</th>
+            <th scope="col">psu_project_id</th>
+            <th scope="col">กลุ่มงบประมาณ</th>
+            <th scope="col">ประเภทงบประมาณ</th>
+            <th scope="col">แหล่งงบประมาณ</th>
+            <th scope="col">ปีงบประมาณ</th>
+            <th scope="col">งบประมาณ</th>
+          </tr>
+        </thead>
+        <tbody>
+            {% for post in posts %}  <!--posts คือ obj ใน fn showDB ที่อยู่ในไฟล์ view.py-->
+                <tr>
+                    <th scope="row">{{post.id}}</th>
+                    <td>{{post.psu_project_id}}</td>
+                    <td>{{post.budget_group_desc}}</td>
+                    <td>{{post.budget_type_th}}</td>
+                    <td>{{post.budget_source_th}}</td>
+                    <td>{{post.budget_year}}</td>
+                    <td>{{post.budget_amount}}</td>
+                </tr>
+            {% endfor %}
+        <!--<tr>
+            <th scope="row">3</th>
+            <td>Larry</td>
+            <td>the Bird</td>
+        </tr>--> 
+        </tbody>
+      </table>
+{% endblock %}

@@ -1,0 +1,600 @@
+{% load static %}
+{% load humanize %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>SB Admin 2 - Dashboard</title>
+  <!-- css -->
+      
+  <!-- Custom fonts for this template-->
+  <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+
+  <!-- Custom styles for this template-->
+  <link href="{% static 'css/sb-admin-2.min.css' %}" rel="stylesheet">
+      <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script>
+   
+    function random()
+    {
+      alert('working');
+    }
+
+  function updateArticleDisplayResult(search_keyword) {
+      // API TCI
+      // alert('working');
+      var year_filter_arr = [];
+      var yearNum = 10;
+      var size_of_page = 10;
+      var opt = ['or', 'or'];
+      var keyword = [search_keyword,search_keyword,search_keyword];
+      var criteria = ['title', 'article_abstract', 'keyword'];
+      var url = 'https://tci-thailand.org/wp-content/themes/magazine-style/tci_search/php/search/advance_search.php';
+              $.ajax({
+          url: url,            
+          type: "POST", /* or type:"GET" or type:"PUT" */         
+          data: {
+              "cur_page": 1,
+              "page_size": size_of_page,
+              "perform_advance_search": "true",
+              "opt": opt,
+              "keyword": keyword,
+              "year_filter": "" + year_filter_arr,
+              "criteria": criteria,
+              "year_num": yearNum
+          },
+          success: function (data) {
+              
+              var json = JSON.parse(data)
+              console.log(json)
+
+              var totalItem = json['total_item'];
+              console.log(totalItem);
+              var articles = json['article_ids'];
+              var yearArticle = json['year_articles'];
+              var all_article_id = json['all_article_id'];
+
+              var all_article_json = JSON.stringify(all_article_id);             
+          },
+          error: function (data) {
+              console.log(data.responseText);
+          }
+      })
+  }
+  
+  
+  function toggle() {
+    
+    // ฟังชั่น hide show tablerow 
+    if( document.getElementById("gov").style.display=='none' ){
+      // document.getElementById("gov").style.display = 'table-row'; // set to table-row instead of an empty string
+      $('#row_national').css('background', '#BDEAFF');
+    }else{
+      // document.getElementById("gov").style.display = 'none';
+      $('#row_national').css('background', 'white');
+    }
+    // if( document.getElementById("comp").style.display=='none' ){
+    //   document.getElementById("comp").style.display = 'table-row'; // set to table-row instead of an empty string
+    // }else{
+    //   document.getElementById("comp").style.display = 'none';
+    // }
+
+  
+  }
+
+  
+
+
+</script>
+
+<link rel="stylesheet" href="https://unpkg.com/bootstrap@4.1.0/dist/css/bootstrap.min.css" >
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.7/css/all.css">   
+<style type="text/css">
+
+@media screen and (min-width: 1px) and (max-width: 1360px)  {
+ .revenues-col{
+    width:1000% !important;
+    }
+}
+
+@media screen and (min-width: 1361px) and (max-width: 9999px)   {
+ .revenues-col{
+    width:40% !important;
+    }
+}
+
+@media screen and (min-width: 1px) and (max-width: 985px)  {
+ .header-col{
+    width:100% !important;
+    }
+}
+
+@media screen and (min-width: 986px) and (max-width: 1493px)  {
+ .header-col{
+    width:50% !important;
+    }
+}
+
+@media screen and (min-width: 1494px) {
+ .header-col{
+    width:25% !important;
+    }
+}
+
+
+
+.widget-ch.widget-ch-hover {
+  transition: all .2s;
+}
+
+.widget-ch {
+  text-align: left;
+  padding: 1rem;
+  position: relative;
+}
+
+.widget-ch.widget-ch-hover:hover {
+  z-index: 15;
+  transform: scale(1.15);
+  box-shadow: 0 0.46875rem 4.1875rem rgba(4,9,20,0.05), 0 0.9375rem 2.40625rem rgba(4,9,20,0.05), 0 0.25rem 1.3125rem rgba(4,9,20,0.06), 0 0.125rem 1.1875rem rgba(4,9,20,0.06);
+  cursor: pointer;
+  background: #fff;
+}
+
+.widget-ch2.widget-ch2-hover {
+  transition: all .2s;
+}
+
+.widget-ch2 {
+  text-align: left;
+  padding: 1rem;
+  position: relative;
+}
+
+.box-hover:hover {
+    border:1px solid #0033FF;
+}
+
+
+.graph-hover:hover {
+    z-index: 15;
+    transform: scale(1.07);
+    box-shadow: 0 0.46875rem 4.1875rem rgba(4,9,20,0.05), 0 0.9375rem 2.40625rem rgba(4,9,20,0.05), 0 0.25rem 1.3125rem rgba(4,9,20,0.06), 0 0.125rem 1.1875rem rgba(4,9,20,0.06);
+    cursor: pointer;
+    
+}
+
+.widget-ch2.widget-ch2-hover:hover {
+  z-index: 15;
+  transform: scale(1.03);
+  box-shadow: 0 0.46875rem 4.1875rem rgba(4,9,20,0.05), 0 0.9375rem 2.40625rem rgba(4,9,20,0.05), 0 0.25rem 1.3125rem rgba(4,9,20,0.06), 0 0.125rem 1.1875rem rgba(4,9,20,0.06);
+  cursor: pointer;
+  background: #BDEAFF;
+}
+
+.reservation_fontcolor {
+        color: #fff;
+}
+
+.bgcolor-blueshade1 {
+  background: #81D4FA;
+}
+
+.bgcolor-blueshade2 {
+  background: #4FC3F7 ;
+}
+
+.bgcolor-blueshade3 {
+  background: #00BFFF;
+}
+
+.bgcolor-blueshade4 {
+  background: #3399FF;
+}
+
+.bgcolor-blueshade5 {
+  background: #1E90FF;
+}
+
+.bgcolor-blueshade6 {
+  background: #00FFFF;
+}
+
+.bgcolor-table-head {
+  background: #D0D3D4  ;
+}
+
+.seed-grid{
+  margin-top: 5px;
+  margin-bottom: 5px;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.bg-premium-dark {
+    background-image: linear-gradient(to right, #434343 0%, black 100%) !important;
+}
+
+.bg-grow-early {
+    background-image: linear-gradient(to top, #0ba360 0%, #3cba92 100%) !important;
+}
+
+.bg-arielle-smile {
+    background-image: radial-gradient(circle 248px at center, #16d9e3 0%, #30c7ec 47%, #46aef7 100%) !important;
+}
+
+.bg-midnight-bloom {
+    background-image: linear-gradient(-20deg, #2b5876 0%, #4e4376 100%) !important;
+}
+
+.card-hover-shadow-2x {
+    box-shadow: 0 0.46875rem 2.1875rem rgba(4,9,20,0.03), 0 0.9375rem 1.40625rem rgba(4,9,20,0.03), 0 0.25rem 0.53125rem rgba(4,9,20,0.05), 0 0.125rem 0.1875rem rgba(4,9,20,0.03);
+    border-width: 0;
+    transition: all .2s;
+}
+
+.widget-chart-content {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    flex: 1;
+    position: relative;
+}
+
+.widget-numbers{
+  font-weight: normal;
+}
+
+.fsize-1 {
+    font-size: 1rem !important;
+}
+
+.opacity-5 {
+    opacity: .5 !important;
+}
+
+.card-btm-border {
+    border-bottom: transparent solid 4px;
+}
+
+.widget-chart {
+   
+    padding: 1rem;
+    position: relative;
+}
+
+.widget-chart .widget-chart-wrapper {
+    position: relative;
+    bottom: 0;
+    left: 0;
+    width: 80%; 
+    
+    z-index: 4;
+    border-bottom-right-radius: .25rem;
+    border-bottom-left-radius: .25rem;
+    overflow: hidden;
+}
+
+
+.card-shadow-primary {
+    box-shadow: 0 0.46875rem 2.1875rem rgba(31, 28, 202, 0.03), 0 0.9375rem 1.40625rem rgba(31, 28, 202, 0.03), 0 0.25rem 0.53125rem rgba(31, 28, 202, 0.03), 0 0.125rem 0.1875rem rgba(31, 28, 202, 0.03);
+}
+
+.widget-chart.text-left {
+    flex-direction: row;
+    align-items: center;
+}
+
+.widget-chart2 .widget-chat-wrapper-outer {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    max-width: 100%;
+}
+
+.widget-content-right {
+    margin-left: auto;
+}
+
+.widget-heading {
+    opacity: .8;
+    font-weight: bold;
+}
+
+.widget-subheading {
+    opacity: .5;
+}
+
+.bottom {
+  position:absolute; /* ตำแหน่งเทียบกับ container */
+  bottom:10%; /* กำหนดให้ชิดด้านล่าง */
+  
+  text-align:center; /* 2 บรรทัดนี้ถ้าต้องการให้ข้อความอยู่กลาง */
+  width:100%;
+
+}
+
+select {
+text-align-last: center;
+padding-right: 29px;
+}
+
+.subtitle {
+    position: relative;
+    color: #3a3a3a;
+    left: 0;
+    /* height: 10%; */
+    margin: 0mm;
+    border-left: 5px solid #303F9F;
+    background: #ffffff;
+}
+
+.subtitle_diy_1 {
+    position: relative;
+    color: #3a3a3a;
+    left: 0;
+    /* height: 10%; */
+    margin: 0mm;
+    border-left: 5px solid #F7DC6F ;
+    background: #ffffff;
+}
+
+.subtitle_diy_2 {
+    position: relative;
+    color: #3a3a3a;
+    left: 0;
+    /* height: 10%; */
+    margin: 0mm;
+    border-left: 5px solid #45B39D ;
+    background: #ffffff;
+}
+
+.subtitle_diy_3 {
+    position: relative;
+    color: #3a3a3a;
+    left: 0;
+    /* height: 10%; */
+    margin: 0mm;
+    border-left: 5px solid #808B96  ;
+    background: #ffffff;
+}
+
+.subtitle_diy_4 {
+    position: relative;
+    color: #3a3a3a;
+    left: 0;
+    /* height: 10%; */
+    margin: 0mm;
+    border-left: 5px solid #52BE80 ;
+    background: #ffffff;
+}
+
+.pretty_container {
+    border-radius: 5px;
+    background-color: #FDFEFE ;
+    /* margin: 1%;
+    padding: 1%; */
+    position: relative;
+    box-shadow: 1px 1px 1px slategrey;
+}
+
+.clearfix {
+  overflow: auto;
+}
+
+.img_center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  
+}
+
+
+</style>
+
+</head>
+
+<body id="page-top">
+
+  <!-- Page Wrapper -->
+  <div id="wrapper">
+
+    <!-- Sidebar -->
+      {% include 'importDB/partials/_sidebar.html' %}
+    <!-- End of Sidebar -->
+
+    <!-- Content Wrapper -->
+    <div id="content-wrapper" class="d-flex flex-column">
+
+      <!-- Main Content -->
+      <div id="content">
+        <!-- Topbar -->
+          {% include 'importDB/partials/_topbar.html' %}
+        <!-- End of Topbar -->
+
+        <!-- Begin Page Content -->
+        <div class="container-fluid">
+
+          <div class='row'>
+            <div class="container-fluid">
+              <!-- Page Heading -->
+              <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+                <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
+              </div>
+          
+              <!-- Content Row -->
+              <div class="row">
+                <!-- Earnings (Monthly) Card Example -->
+                
+                <div class=" header-col mb-3" onclick="location.href= '/research_man';" id = "tab_A" >
+                  <div class="widget-ch widget-ch-hover br-br" >
+                    <div class="card border-left-primary shadow h-100 py-2 ">
+                      <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                          <div class="col ">
+                            <div class="text-primary font-weight-bold mb-1"><h6><b>จำนวนผู้วิจัยหลัก ปี {{now_year}}</b></h6></div>
+                            <div class=" mb-0 text-gray-800" >
+                              <h6>{{ head_page.total_of_guys }} คน 
+                                <img src="{% static 'img/bulb_2251110.png' %}" style="float:center;"
+                                  title="จำนวนผู้วิจัยหลัก คือ การนับจำนวนผู้วิจัย ในตำแหน่ง อาจารย์, นักวิจัย และ นักวิจัยหลักปริญญาเอก 
+                                  ที่ถูกระบุว่าเป็น First Author หรือ Coresponding Author
+                                  ซึ่งงานวิจัยนั้นต้องได้รับตีพิมพ์ แบบ Publications และ Proceedings 
+                                  ในฐานข้อมูล ISI-WoS หรือ Scopus เท่านั้น" 
+                                  alt="จำนวนผู้วิจัยหลัก"    
+                                  style="display: block; margin-left: auto; margin-right: auto;" 
+                                  width="10" height="10"/> 
+                              </h6>
+                            </div>  
+                          </div>
+                          <div class="col-auto">
+                            <i class="fas fa-user-alt fa-2x text-gray-300"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- รายได้งานวิจัย -->
+                    
+                <div class=" header-col mb-3" onclick="location.href= '/revenues';" id = "tab_B">
+                  <div class="widget-ch widget-ch-hover br-br" >
+                    <div class="card border-left-success shadow h-100 py-2">
+                      <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                          <div class="col ">
+                            <div class="text-success font-weight-bold text-uppercase mb-1"><h6><b>รายได้งานวิจัย ปี {{now_year}}</b></h6></div>
+                            <div class=" mb-0 text-gray-800"><h6>{{  head_page.total_of_budget| floatformat:2|intcomma }} บาท</div> 
+                          </div>
+                          <div class="col-auto ">
+                            <i class="fas fa-money-bill-alt fa-2x text-gray-300"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Earnings (Monthly) Card Example -->
+                <!-- <newrow> -->
+                  <div class=" header-col mb-3 " onclick="location.href= '/ranking';" id = "tab_C" >
+                    <div class="widget-ch widget-ch-hover br-br" >
+                      <div class="card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                          <div class="row no-gutters align-items-center">
+                            <div class="col ">
+                              <div class="text-info font-weight-bold text-uppercase mb-1" ><h6><b>จำนวนงานวิจัย ปี {{now_year}}</b></h6></div>
+                                <div class="row ">
+                                  <div class="col-auto ">  
+                                    <div class="mb-0 text-gray-800"><h6>Scopus : {{head_page.num_of_pub_sco}} </h6></div>
+                                  </div>
+                                  <div class="col-auto ">  
+                                    <div class="mb-0 text-gray-800 float-left" ><h6>ISI : {{head_page.num_of_pub_isi}}</h6></div>
+                                  </div>
+                                </div>
+                            </div>
+                            <div class="col-auto ">
+                              <i class="fas fa-book-open fa-2x text-gray-300"></i>    
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+              
+                  <!-- Pending Requests Card Example -->
+                  <div class=" header-col mb-3" onclick="location.href= '/exFund';" id = "tab_D">
+                    <div class="widget-ch widget-ch-hover br-br" >
+                      <div class="card border-left-warning shadow h-100 py-2">
+                        <div class="card-body">
+                          <div class="row no-gutters align-items-center">
+                            <div class="col ">
+                              <div class="text-warning font-weight-bold text-uppercase mb-1"><h6><b>แหล่งทุนภายนอก</b></h6></div>
+                              <div class="h6 mb-0  text-gray-800"><h6>{{head_page.num_of_networks}} หน่วยงาน </h6></div>
+                            </div>
+                            <div class="col-auto">
+                              <i class="fas fa-hands-helping fa-2x text-gray-300"></i>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                <!-- </newrow> -->
+              </div>
+            </div>  
+            {% block content %}
+
+            {% endblock content %}
+          </div>
+          
+
+        </div>
+      <!-- End of Main Content -->
+
+      <!-- Footer -->
+        {% include 'importDB/partials/_footer.html' %}
+      <!-- End of Footer -->
+
+      </div>
+    <!-- End of Content Wrapper -->
+
+   </div>
+  <!-- End of Page Wrapper -->
+
+  <!-- Scroll to Top Button-->
+  <a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+  </a>
+
+  <!-- Logout Modal-->
+  <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+          <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+          <a class="btn btn-primary" href="login.html">Logout</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+  <!-- Bootstrap core JavaScript-->
+  <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+  <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+
+  <!-- Core plugin JavaScript-->
+  <script src="{% static 'vendor/jquery-easing/jquery.easing.min.js' %}"></script>
+
+  <!-- Custom scripts for all pages-->
+  <script src="{% static 'js/sb-admin-2.min.js' %}"></script>
+
+  <!-- Page level plugins -->
+  <script src="{% static 'vendor/chart.js/Chart.min.js' %}"></script>
+
+  <!-- Page level custom scripts -->
+  <script src="{% static 'js/demo/chart-area-demo.js' %}"></script>
+  <script src="{% static 'js/demo/chart-pie-demo.js' %}"></script>
+  {% block js %}
+
+
+  {% endblock js %}
+</body>
+</html>

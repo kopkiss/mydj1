@@ -1,0 +1,145 @@
+{% extends 'importDB/base.html' %}
+{% load static %}
+{% block content %}
+{% load plotly_dash %}
+{% load humanize %}
+
+
+
+
+<div class="container-fluid">
+  <div class="row"  >
+    <div class="col-lg-7 ml-5 mb-1  "  >
+    </div>
+    <div class="col-lg-4 ml-4 mb-1  "  style="font-size:15px;" align="right">
+      Last updated: {{date}}
+    </div>
+  </div>
+  <div class="row"  >
+    <div class=" col-lg-7 col-sm-11 ml-3 mb-3 card pretty_container " >
+      <div class="row mb-2" >
+        <div class = "col">
+          <h5 class = "subtitle mt-3 mb-0"> &nbsp; จำนวนผู้วิจัยที่ได้รับทุน  
+          <img src="{% static 'img/bulb_2251110.png' %}" style="float:right;"
+          title="ผู้ที่ได้รับทุน คือ ผู้ที่เป็นหัวหน้าโครงการวิจัย ซึ่งงานวิจัยนั้นต้องได้รับทุนจากหน่วยงานภายนอกมหาวิทยาลัย ที่จัดสรรให้ในแต่ละปี" 
+          alt="ผู้ที่ได้รับทุน"    
+          style="display: block; margin-left: auto; margin-right: auto;" 
+          width="15" height="15"/> </h5>
+        </div> 
+       
+      </div>
+      
+        {{ graph_revenue_research | safe }}
+      
+    </div>
+    <div class=" col-lg-4 col-sm-11 mx-3 mb-3 card pretty_container" style="width:100%; ">            
+      <div class="row" >
+        <div class="col-xs-12 col-md-12 col-lg-12 "  >
+          <h5 class = "subtitle mt-3 mb-3 ml-1" style="display:inline-block;">&nbsp;จำนวนผู้วิจัย 
+            
+            &nbsp;&nbsp;| ปีพ.ศ.&nbsp;
+          </h5> 
+          <div class="pt-3 pr-3" style=" float: right;">
+            <img  src="{% static 'img/bulb_2251110.png' %}" 
+                title="ผู้วิจัย คือ การนับจำนวนผู้วิจัยที่ถูกระบุว่าเป็น First Author หรือ Coresponding Author เท่านั้น  
+                ซึ่งงานวิจัยนั้นต้องได้รับตีพิมพ์ แบบ Publications และ Proceedings ในฐานข้อมูล ISI-WoS หรือ Scopus เท่านั้น" 
+                alt="ผู้วิจัย"    
+                style="display: block;" 
+                width="15" height="15"/>
+          </div>
+          <form  name='filter' method=POST style="display:inline-block;" >
+            {% csrf_token %}
+              <select id="year" name = "year" class=" mb-1 btn ex2 btn-primary dropdown-toggle" onChange="filter.submit();">
+                {% for y in year  %}
+                    {% if y == filter_year%} 
+                        <option value="{{ y }}" selected>{{ y }} </option>
+                    {% else %}
+                        <option value="{{ y }}" >{{ y }} </option>
+                    {%endif%}
+                {% endfor %}
+            </select>
+          </form>
+          
+        </div>
+      </div>
+      <div class="row" >
+        <div class="card pretty_container ml-5 my-2 " style="width: 70%;"> 
+          <h7 class = "subtitle_diy_1 mt-1 ml-3">&nbsp;อาจารย์ </h7 >
+          <div class="row" >
+            <div class=" col-xs-12 text-warning mb-1 mx-4" style="text-align: center; font-size: 250%; width: 100%;" >
+              {{num_main_research.teacher}} 
+              <span class="text-gray-800 pt-3 pr-3" style="float: right;  font-size: 23px">
+                คน
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row" >
+        <div class="card pretty_container ml-5 my-2 " style="width: 70%;"> 
+          <h7 class = "subtitle_diy_2 mt-1 ml-3">&nbsp;นักวิจัย </h7 >
+          <div class="row" >
+            <div class=" col-xs-12 text-info mb-1 mx-4" style="text-align: center; font-size: 250%; width: 100%;" >
+              {{num_main_research.res_staff}} 
+              <span class="text-gray-800 pt-3 pr-3" style="float: right;  font-size: 23px">
+                คน
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row" >
+        <div class="card pretty_container ml-5 my-2 " style="width: 70%;"> 
+          <h7 class = "subtitle_diy_3 mt-1 ml-3">&nbsp;นักวิจัยหลังปริญญาเอก </h7 >
+          <div class="row" >
+            <div class=" col-xs-12 text-muted mb-1 mx-4" style="text-align: center; font-size: 250%; width: 100%;" >
+              {{num_main_research.post_doc}}
+              <span class="text-gray-800 pt-3 pr-3" style="float: right;  font-size: 23px">
+                คน
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row" >
+        <div class="card pretty_container ml-5 my-2 " style="width: 70%;"> 
+          <h7 class = "subtitle_diy_4 mt-1 ml-3">&nbsp;ผู้ช่วยวิจัย </h7 >
+          <div class="row" >
+            <div class=" col-xs-12 text-success mb-1 mx-4" style="text-align: center; font-size: 250%; width: 100%;" >
+              {{num_main_research.asst_staff}}
+              <span class="text-gray-800 pt-3 pr-3" style="float: right;  font-size: 23px">
+                คน
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock content %}
+
+{% block js %}
+<script>
+  $(document).ready( function () {
+    $('#bar2').hide();
+  } );
+
+  $('select').on('change', function() {
+    var value = $(this).val();
+    
+    if (value == "categ") {
+      $('#bar1').show();
+      $('#bar2').hide();
+    } else if (value == "resea") {
+      $('#bar2').show();
+      $('#bar1').hide();
+    }
+  });
+
+
+</script>
+
+{% endblock js %}

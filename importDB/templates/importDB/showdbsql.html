@@ -1,0 +1,31 @@
+{% extends 'importDB/base.html' %}
+
+{% block content %}
+    <h2 align = "center">Show DB-MYSQL</h2>
+    <table class="table">
+        <thead class="thead-dark">
+          <tr>
+            <th scope="col">รหัสตาราง</th>
+            <th scope="col">id</th>
+            <th scope="col">firstName</th>
+            <th scope="col">LastName</th>
+          </tr>
+        </thead>
+        <tbody>
+            {% for post in posts %}  <!--posts คือ obj ใน fn showDB ที่อยู่ในไฟล์ view.py-->
+                <tr>
+                    <th scope="row">{{post.id}}</th>
+                    <td>{{post.customer_id}}</td>
+                    <td>{{post.first_name}}</td>
+                    <td>{{post.last_name}}</td>
+                </tr>
+            {% endfor %}
+        <!--<tr>
+            <th scope="row">3</th>
+            <td>Larry</td>
+            <td>the Bird</td>
+        </tr>--> 
+        </tbody>
+      </table>
+      
+{% endblock %}

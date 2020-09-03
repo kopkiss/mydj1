@@ -1,0 +1,73 @@
+2020-03-31 16:40:01,339 - elsapy.elsclient - INFO - Module loaded.
+2020-03-31 16:40:01,342 - elsapy.elsentity - INFO - Module loaded.
+2020-03-31 16:40:01,343 - elsapy.utils - INFO - Module loaded.
+2020-03-31 16:40:01,343 - elsapy.elsprofile - INFO - Module loaded.
+2020-03-31 16:40:01,345 - elsapy.elsdoc - INFO - Module loaded.
+2020-03-31 16:40:01,346 - elsapy.elssearch - INFO - Module loaded.
+2020-03-31 16:41:06,090 - elsapy.elsclient - INFO - Module loaded.
+2020-03-31 16:41:06,091 - elsapy.elsentity - INFO - Module loaded.
+2020-03-31 16:41:06,092 - elsapy.utils - INFO - Module loaded.
+2020-03-31 16:41:06,099 - elsapy.elsprofile - INFO - Module loaded.
+2020-03-31 16:41:06,100 - elsapy.elsdoc - INFO - Module loaded.
+2020-03-31 16:41:06,101 - elsapy.elssearch - INFO - Module loaded.
+2020-03-31 16:42:10,678 - elsapy.elsclient - INFO - Module loaded.
+2020-03-31 16:42:10,680 - elsapy.elsentity - INFO - Module loaded.
+2020-03-31 16:42:10,681 - elsapy.utils - INFO - Module loaded.
+2020-03-31 16:42:10,681 - elsapy.elsprofile - INFO - Module loaded.
+2020-03-31 16:42:10,682 - elsapy.elsdoc - INFO - Module loaded.
+2020-03-31 16:42:10,683 - elsapy.elssearch - INFO - Module loaded.
+2020-03-31 16:43:16,600 - elsapy.elsclient - INFO - Module loaded.
+2020-03-31 16:43:16,601 - elsapy.elsentity - INFO - Module loaded.
+2020-03-31 16:43:16,602 - elsapy.utils - INFO - Module loaded.
+2020-03-31 16:43:16,603 - elsapy.elsprofile - INFO - Module loaded.
+2020-03-31 16:43:16,604 - elsapy.elsdoc - INFO - Module loaded.
+2020-03-31 16:43:16,605 - elsapy.elssearch - INFO - Module loaded.
+2020-03-31 16:45:52,920 - elsapy.elsclient - INFO - Module loaded.
+2020-03-31 16:45:52,922 - elsapy.elsentity - INFO - Module loaded.
+2020-03-31 16:45:52,923 - elsapy.utils - INFO - Module loaded.
+2020-03-31 16:45:52,923 - elsapy.elsprofile - INFO - Module loaded.
+2020-03-31 16:45:52,924 - elsapy.elsdoc - INFO - Module loaded.
+2020-03-31 16:45:52,925 - elsapy.elssearch - INFO - Module loaded.
+2020-03-31 16:45:59,095 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/affiliation/affiliation_id/60006314
+2020-03-31 16:46:01,158 - elsapy.elsentity - INFO - Data loaded for https://api.elsevier.com/content/affiliation/affiliation_id/60006314
+2020-03-31 16:46:01,159 - elsapy.elsentity - INFO - Wrote https://api.elsevier.com/content/affiliation/affiliation_id/60006314 to file
+2020-03-31 16:46:02,158 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/search/scopus?query=AF-ID%2860006314%29+AND+PUBYEAR+%3D+2019
+2020-03-31 16:46:06,310 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/search/scopus?start=25&count=25&query=AF-ID%2860006314%29+AND+PUBYEAR+%3D+2019
+2020-03-31 16:46:09,202 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/search/scopus?start=50&count=25&query=AF-ID%2860006314%29+AND+PUBYEAR+%3D+2019
+2020-03-31 16:46:11,908 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/search/scopus?start=75&count=25&query=AF-ID%2860006314%29+AND+PUBYEAR+%3D+2019
+2020-03-31 16:46:14,973 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/search/scopus?start=100&count=25&query=AF-ID%2860006314%29+AND+PUBYEAR+%3D+2019
+2020-03-31 16:46:17,774 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/search/scopus?start=125&count=25&query=AF-ID%2860006314%29+AND+PUBYEAR+%3D+2019
+2020-03-31 16:46:20,583 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/search/scopus?start=150&count=25&query=AF-ID%2860006314%29+AND+PUBYEAR+%3D+2019
+2020-03-31 16:46:46,535 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/affiliation/affiliation_id/60006314
+2020-03-31 16:46:47,777 - elsapy.elsentity - INFO - Data loaded for https://api.elsevier.com/content/affiliation/affiliation_id/60006314
+2020-03-31 16:46:47,783 - elsapy.elsentity - INFO - Wrote https://api.elsevier.com/content/affiliation/affiliation_id/60006314 to file
+2020-03-31 16:46:48,779 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/search/scopus?query=AF-ID%2860006314%29+AND+PUBYEAR+%3D+2019
+2020-03-31 16:46:52,100 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/search/scopus?start=25&count=25&query=AF-ID%2860006314%29+AND+PUBYEAR+%3D+2019
+2020-03-31 16:46:54,763 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/search/scopus?start=50&count=25&query=AF-ID%2860006314%29+AND+PUBYEAR+%3D+2019
+2020-03-31 16:46:57,497 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/search/scopus?start=75&count=25&query=AF-ID%2860006314%29+AND+PUBYEAR+%3D+2019
+2020-03-31 16:47:00,738 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/search/scopus?start=100&count=25&query=AF-ID%2860006314%29+AND+PUBYEAR+%3D+2019
+2020-03-31 16:47:03,571 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/search/scopus?start=125&count=25&query=AF-ID%2860006314%29+AND+PUBYEAR+%3D+2019
+2020-03-31 16:47:19,730 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/affiliation/affiliation_id/60006314
+2020-03-31 16:47:21,102 - elsapy.elsentity - INFO - Data loaded for https://api.elsevier.com/content/affiliation/affiliation_id/60006314
+2020-03-31 16:47:21,108 - elsapy.elsentity - INFO - Wrote https://api.elsevier.com/content/affiliation/affiliation_id/60006314 to file
+2020-03-31 16:47:22,104 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/search/scopus?query=AF-ID%2860006314%29+AND+PUBYEAR+%3D+2019
+2020-03-31 16:47:38,367 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/affiliation/affiliation_id/60006314
+2020-03-31 16:47:39,666 - elsapy.elsentity - INFO - Data loaded for https://api.elsevier.com/content/affiliation/affiliation_id/60006314
+2020-03-31 16:47:39,670 - elsapy.elsentity - INFO - Wrote https://api.elsevier.com/content/affiliation/affiliation_id/60006314 to file
+2020-03-31 16:47:40,667 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/search/scopus?query=AF-ID%2860006314%29+AND+PUBYEAR+%3D+2019
+2020-03-31 16:47:43,395 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/search/scopus?start=25&count=25&query=AF-ID%2860006314%29+AND+PUBYEAR+%3D+2019
+2020-03-31 16:47:46,361 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/search/scopus?start=50&count=25&query=AF-ID%2860006314%29+AND+PUBYEAR+%3D+2019
+2020-03-31 16:48:10,494 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/affiliation/affiliation_id/60006314
+2020-03-31 16:48:24,457 - elsapy.elsentity - WARNING - HTTPSConnectionPool(host='api.elsevier.com', port=443): Max retries exceeded with url: /content/affiliation/affiliation_id/60006314 (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+2020-03-31 16:48:24,458 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/search/scopus?query=AF-ID%2860006314%29+AND+PUBYEAR+%3D+2019
+2020-03-31 16:48:48,737 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/affiliation/affiliation_id/60006314
+2020-03-31 16:49:04,459 - elsapy.elsentity - WARNING - HTTPSConnectionPool(host='api.elsevier.com', port=443): Max retries exceeded with url: /content/affiliation/affiliation_id/60006314 (Caused by SSLError(SSLError("bad handshake: SysCallError(-1, 'Unexpected EOF')")))
+2020-03-31 16:49:04,462 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/search/scopus?query=AF-ID%2860006314%29+AND+PUBYEAR+%3D+2019
+2020-03-31 16:49:28,240 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/affiliation/affiliation_id/60006314
+2020-03-31 16:49:29,683 - elsapy.elsentity - INFO - Data loaded for https://api.elsevier.com/content/affiliation/affiliation_id/60006314
+2020-03-31 16:49:29,686 - elsapy.elsentity - INFO - Wrote https://api.elsevier.com/content/affiliation/affiliation_id/60006314 to file
+2020-03-31 16:49:30,685 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/search/scopus?query=AF-ID%2860006314%29+AND+PUBYEAR+%3D+2019
+2020-03-31 16:49:33,679 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/search/scopus?start=25&count=25&query=AF-ID%2860006314%29+AND+PUBYEAR+%3D+2019
+2020-03-31 16:49:36,908 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/search/scopus?start=50&count=25&query=AF-ID%2860006314%29+AND+PUBYEAR+%3D+2019
+2020-03-31 16:49:39,596 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/search/scopus?start=75&count=25&query=AF-ID%2860006314%29+AND+PUBYEAR+%3D+2019
+2020-03-31 16:49:42,569 - elsapy.elsclient - INFO - Sending GET request to https://api.elsevier.com/content/search/scopus?start=100&count=25&query=AF-ID%2860006314%29+AND+PUBYEAR+%3D+2019
