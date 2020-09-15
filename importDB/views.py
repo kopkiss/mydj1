@@ -1485,39 +1485,7 @@ def dQuery(request): # Query ฐานข้อมูล Mysql (เป็น .cs
 
     elif request.POST['row']=='Query2': # รายได้ในประเทศ รัฐ/เอกชน
         try:
-            # sql_cmd =  """with temp1 as ( 
-            #                 select psu_project_id, budget_year, budget_source_group_id, sum(budget_amount) as budget_amount
-            #                 from cleaned_prpm_budget_eis
-            #                 where budget_group = 4 
-            #                 group by 1, 2
-            #                 order by 1
-            #             ),
-                        
-            #             temp2 as (
-            #                 select psu_project_id, user_full_name_th, camp_name_thai, fac_name_thai,research_position_id,research_position_th ,lu_percent
-            #                 from cleaned_prpm_team_eis
-            #                 where psu_staff = "Y" 
-            #                 order by 1
-            #             ),
-                        
-            #             temp3 as (
-            #                 select A.psu_project_id, A.fund_budget_year as submit_year, A.fund_type_id, A.fund_type_th, B.fund_type_group, C.fund_type_group_th
-			# 											from importdb_prpm_v_grt_project_eis as A
-			# 											join importdb_prpm_r_fund_type as B on A.fund_type_id = B.fund_type_id
-			# 											join fund_type_group as C on B.fund_type_group = C.fund_type_group_id
-            #             )
-												
-                
-            #         select t1.psu_project_id,fund_type_group, fund_type_group_th,t3.submit_year, t1.budget_year, budget_source_group_id, budget_amount, user_full_name_th, camp_name_thai,fac_name_thai, research_position_th,lu_percent, lu_percent/100*budget_amount as final_budget
-            #         from temp1 as t1
-            #         join temp2 as t2 on t1.psu_project_id = t2.psu_project_id
-            #         join temp3 as t3 on t1.psu_project_id = t3.psu_project_id
-            #         where  budget_year between YEAR(date_add(NOW(), INTERVAL 543 YEAR))-10 and YEAR(date_add(NOW(), INTERVAL 543 YEAR))
-			# 				and submit_year > 2553 
-			# 				and research_position_id <> 2 
-            #         order by 3
-                                                                    
-            #  """
+            
             sql_cmd = """with temp1 as ( 
                             select psu_project_id, budget_year, budget_source_group_id, sum(budget_amount) as budget_amount
                             from cleaned_prpm_budget_eis
@@ -2684,7 +2652,7 @@ def pageRevenues(request): # page รายได้งานวิจัย
 
     def get_budget_campas():  # แสดงเงินวิทยาเขต
         df = pd.read_csv("""mydj1/static/csv/budget_of_fac.csv""")
-
+        print(df)
         index_df = df["camp_name_thai"].unique()
 
         df = df[(df["budget_year"] == selected_year)]
@@ -2697,7 +2665,7 @@ def pageRevenues(request): # page รายได้งานวิจัย
                 print(df["sum_final_budget"][i])
             except Exception as e :
                 df.loc[i] = [0]
-        
+
         re_df = pd.DataFrame(
                             {'col0' : [df["sum_final_budget"]["วิทยาเขตหาดใหญ่"]], 
                             'col1' : [df["sum_final_budget"]["วิทยาเขตปัตตานี"]],
@@ -2705,7 +2673,7 @@ def pageRevenues(request): # page รายได้งานวิจัย
                             'col3' : [df["sum_final_budget"]["วิทยาเขตสุราษฎร์ธานี"]],
                             'col4' : [df["sum_final_budget"]["วิทยาเขตตรัง"]],
                             })
-
+        
         return re_df
     
     def get_sum_budget(): #แสดง จำนวนของเงินรวม ภายนอก ภายใน
