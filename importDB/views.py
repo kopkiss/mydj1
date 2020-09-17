@@ -912,13 +912,15 @@ def isi():
         for item in data.values('short_name','name_eng','flag_used'):
             if item['flag_used'] == True:
                 searches.update( {item['short_name'] : item['name_eng']} )
-
+        
         last_df =pd.DataFrame()    
-        driver.get('http://apps.webofknowledge.com/WOS_GeneralSearch_input.do?product=WOS&SID=D2Ji7v7CLPlJipz1Cc4&search_mode=GeneralSearch')
-        for key, value in searches.items(): 
-            # print(value)
-            # กำหนด URL ของ ISI
+        
+        for key, value in searches.items():
+            # key = "CU" 
+            # value = "Chulalongkorn University"
+            print(key)
             driver.get('http://apps.webofknowledge.com/WOS_GeneralSearch_input.do?product=WOS&SID=D2Ji7v7CLPlJipz1Cc4&search_mode=GeneralSearch')
+            # กำหนด URL ของ ISI
             wait = WebDriverWait(driver, 10)
             element = wait.until(EC.element_to_be_clickable((By.ID, 'container(input1)')))
 
@@ -939,28 +941,50 @@ def isi():
             # กดปุ่ม Publication Years
             WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, 'select2-selection.select2-selection--single')))
             driver.find_element_by_xpath('//*[contains(text(),"Publication Years")]').click()  # กดจากการค้าหา  ด้วย text
-    
+
             # ดึงข้อมูล ในปีปัจุบัน ใส่ใน row1 และ ปัจุบัน -1 ใส่ใน row2
             WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.CLASS_NAME, 'd-flex.align-items-center')))
-            row1 = driver.find_element_by_class_name("RA-NEWRAresultsEvenRow" ).text.split(' ')[:2]
+            all_even_rows = driver.find_elements_by_class_name("RA-NEWRAresultsEvenRow" )
             WebDriverWait(driver, 15)  
-            row2 = driver.find_element_by_class_name("RA-NEWRAresultsOddRow" ).text.split(' ') [:2]
-            # print(row2)
-            for i in range(len(row2)):
-                row2[i] =  row2[i].replace(",","")  # ตัด , ในตัวเลขที่ได้มา เช่น 1,000 เป็น 1000
-                row1[i] =  row1[i].replace(",","")
-            
+            all_odd_rows = driver.find_elements_by_class_name("RA-NEWRAresultsOddRow" )
+            WebDriverWait(driver, 15)  
+
+            # กำหนดตัวแปรปีปัจจุบัน
+            now_year = int(datetime.now().year)
+            result_row_2 = []
+            result_row_1 = []
+
+            # ดึง isi value ใน ปีปัจจุบัน และ ปีปัจจุบัน - 1 
+            for i in  range(len(all_even_rows)):
+                if( (now_year == int(all_even_rows[i].text[:4])) | (now_year-1 == int(all_even_rows[i].text[:4]))):
+                    result_row_1 = all_even_rows[i].text.split()[:2]
+                    break
+
+
+            for i in  range(len(all_odd_rows)):
+                if( (now_year == int(all_odd_rows[i].text[:4])) | (now_year-1 == int(all_odd_rows[i].text[:4]))):
+                    result_row_2 = all_odd_rows[i].text.split()[:2]
+                    break
+
+            # ตัด , ในตัวเลขที่ได้มา เช่น 1,000 เป็น 1000
+            for i in range(len(result_row_2)):
+                result_row_2[i] =  result_row_2[i].replace(",","")  # ตัด , ในตัวเลขที่ได้มา เช่น 1,000 เป็น 1000
+                result_row_1[i] =  result_row_1[i].replace(",","")
+
             # ใส่ ตัวเลขที่ได้ ลง dataframe
-            df1=pd.DataFrame({'year':row1[0] , key:row1[1]}, index=[0])
-            df2=pd.DataFrame({'year':row2[0] , key:row2[1]}, index=[1])
+            df1=pd.DataFrame({'year':result_row_1[0] , key:result_row_1[1]}, index=[0])
+            df2=pd.DataFrame({'year':result_row_2[0] , key:result_row_2[1]}, index=[1])
             df_records = pd.concat([df1,df2],axis = 0) # ต่อ dataframe
             
             df_records[key] = df_records[key].astype('int') # เปลี่ยนตัวเลขเป็น int
+            df_records = df_records.sort_values(by=['year'], ascending=False).reset_index(drop=True) # sort ให้ ปี ปัจจุบัน อยู่บน
+            print(df_records)
             if(key=='PSU'):
                 last_df = pd.concat([last_df,df_records], axis= 1)
             else:
                 last_df = pd.concat([last_df,df_records[key]], axis= 1)
-            
+
+            print(last_df)
 
         last_df['year'] = last_df['year'].astype('int')
         last_df['year'] = last_df['year'] + 543
@@ -1330,7 +1354,7 @@ def chrome_driver_get_catagories_ISI(driver):
 ######################################################
 #### function ในการ query ข้อมูล ที่จะเเสดงใน dashboard####
 ######################################################
-def query1():
+def query1(): # 12 types of budget, budget_of_fac
     print("-"*20)
     print("Starting Query#1 ...")
     checkpoint = True
@@ -1483,7 +1507,7 @@ def query1():
         print('At Query#1: Something went wrong :', e)
         return checkpoint
 
-def query2():
+def query2(): # รายได้ในประเทศ รัฐ/เอกชน
     print("-"*20)
     print("Starting Query#2 ...")
     checkpoint = True
@@ -1543,7 +1567,7 @@ def query2():
         print('At Query#2: Something went wrong :', e)    
         return checkpoint
 
-def query3():
+def query3(): # Query รูปกราฟ ที่จะแสดงใน ตารางของ tamplate revenues.html
     print("-"*20)
     print("Starting Query#3 ...")
     checkpoint = True
@@ -1791,7 +1815,7 @@ def query3():
         print('At Query#3: Something went wrong :', e) 
         return checkpoint
 
-def query4(): 
+def query4(): # ตารางแหล่งทุนภายนอก exFund.html
     print("-"*20)
     print("Starting Query#4 ...")
     checkpoint = True
@@ -1827,7 +1851,7 @@ def query4():
         print('At Query#4: Something went wrong :', e)
         return checkpoint
 
-def query5():
+def query5(): # ตาราง marker * และ ** ของแหล่งทุน
     print("-"*20)
     print("Starting Query#5 ...")
     checkpoint = True
@@ -1892,7 +1916,7 @@ def query5():
         print('At Query#5: Something went wrong :', e)
         return checkpoint
 
-def query6():
+def query6(): # ISI SCOPUS TCI
     print("-"*20)
     print("Starting Query#6 ...")
     checkpoint = True
@@ -2016,7 +2040,7 @@ def query6():
     print("Results: ",ranking)
     return ranking,checkpoint
 
-def query7():
+def query7(): # Head Page
     print("-"*20)
     print("Starting Query#7 ...")
     checkpoint = True
@@ -2073,7 +2097,7 @@ def query7():
         print('At Query#7: Something went wrong :', e)
         return checkpoint
 
-def query8():
+def query8(): # web of science Research Areas
     print("-"*20)
     print("Starting Query#8 ...")
     checkpoint = True
@@ -2107,7 +2131,7 @@ def query8():
         print('At Query#8: Something went wrong :', e)
         return checkpoint
  
-def query9():
+def query9(): # web of science catagories
     print("-"*20)
     print("Starting Query#9 ...")
     checkpoint = True
@@ -2143,7 +2167,7 @@ def query9():
         print('At Query#9: Something went wrong :', e)
         return checkpoint
 
-def query10():
+def query10(): # Citation ISI and H-index
     print("-"*20)
     print("Starting Query#10 ...")
     checkpoint = True
@@ -2201,7 +2225,7 @@ def query10():
         print('At Query#10: Something went wrong :', e)
         return checkpoint
 
-def query11():
+def query11(): # Filled area chart กราฟหน้าแรก รูปแรก
     print("-"*20)
     print("Starting Query#11 ...")
     checkpoint = True
@@ -2231,7 +2255,7 @@ def query11():
         print('At Query#11: Something went wrong :', e)
         return checkpoint
 
-def query12():
+def query12(): # จำนวนผู้วิจัยที่ได้รับทุน
     print("-"*20)
     print("Starting Query#12 ...")
     checkpoint = True
@@ -2290,7 +2314,7 @@ def query12():
         print('At Query#12: Something went wrong :', e)
         return checkpoint
 
-def query13():
+def query13(): # จำนวนผู้วิจัยหลัก
 
     print("-"*20)
     print("Starting Query#13 ...")
