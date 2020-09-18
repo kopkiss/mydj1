@@ -3774,28 +3774,49 @@ def pageRanking(request): # page Ranking ISI/SCOPUS/TCI
         df_sco_dot = df_sco[-2:]['PSU'].to_frame()
         df_tci_dot = df_tci[-2:]['PSU'].to_frame()
         
-     
+        # scopus dot line
         fig.add_trace(go.Scatter(x=df_sco_dot.index, y=df_sco_dot["PSU"],
-                    mode='markers',
-                    name='Scopus',
+                    mode='lines',
                     line=dict( width=2, dash='dot',color='red'),
                     showlegend=False,
+                    hoverinfo='skip',
                     legendgroup = 'sco'))
-        fig.add_trace(go.Scatter(x=df_isi_dot.index, y=df_isi_dot["PSU"],
+        fig.add_trace(go.Scatter(x=df_sco_dot.index[-1::], y=df_sco_dot["PSU"][-1::],
                     mode='markers',
-                    name='ISI-WoS' ,
+                    name='Scopus' ,
+                    line=dict(color='red'),
+                    showlegend=False,
+                    legendgroup = 'sco'))
+
+        # isi dot line
+        fig.add_trace(go.Scatter(x=df_isi_dot.index, y=df_isi_dot["PSU"],
+                    mode='lines',
                     line=dict( width=2, dash='dot',color='royalblue'),
                     showlegend=False,
+                    hoverinfo='skip',
                     legendgroup = 'isi'))
-        fig.add_trace(go.Scatter(x=df_tci_dot.index, y=df_tci_dot["PSU"],
+        fig.add_trace(go.Scatter(x=df_isi_dot.index[-1::], y=df_isi_dot["PSU"][-1::],
                     mode='markers',
-                    name='TCI' ,
+                    name='ISI-WoS' ,
+                    line=dict(color='royalblue'),
+                    showlegend=False,
+                    legendgroup = 'isi'))
+
+        # tci dot line
+        fig.add_trace(go.Scatter(x=df_tci_dot.index, y=df_tci_dot["PSU"],
+                    mode='lines',
                     line=dict( width=2, dash='dot',color='#F39C12'),
                     showlegend=False,
+                    hoverinfo='skip',
                     legendgroup = 'tci'))
-
+        fig.add_trace(go.Scatter(x=df_tci_dot.index[-1::], y=df_tci_dot["PSU"][-1::],
+                    mode='markers',
+                    name='TCI' ,
+                    line=dict(color='#F39C12'),
+                    showlegend=False,
+                    legendgroup = 'tci'))
         
-        fig.update_traces(mode='lines+markers')
+        # fig.update_traces(mode='lines+markers')
         fig.update_layout(
             xaxis_title="<b>Year</b>",
             yaxis_title="<b>Number of Publications</b>",
@@ -3994,12 +4015,16 @@ def compare_ranking(request): #page เพื่อเปรียบเที�
         print(data)
         for item in columns:  # วนวาดกราฟเส้นทึบ ที่ไม่ใช้ PSU เพราะ อยากให้ PSU วาดกราฟอยุ่บนกราฟอื่นๆ ต้องว่างสุดท้าย
             if item != "PSU":
+                visible = True if (item == 'CMU') | (item == 'KKU') else "legendonly"  # ทำให้ CMU และ KKU แสดงอยู่บนกราฟ ส่วน ม. อื่น ให้ legendonly ( legendonly หมายความว่า ต้องกด เเล้วจะเเสดงให้เห็นในกราฟ )
                 fig.add_trace(go.Scatter(x=df_line.index, y=df_line[item],
-                        mode='lines+markers',
-                        name=item+": "+df_names[item][0] ,
-                        line=dict( width=2,color=df_names[item][1]),
-                        legendgroup = item
-                        ))
+                        mode='lines+markers', # กำหนดว่า เป็นเส้นและมีจุด
+                        name=item+": "+df_names[item][0] , # กำหนด ชื่อเวลา hover เอา mouse ชี้บนเส้น
+                        line=dict( width=2,color=df_names[item][1]), # กำหนดสี และความหนาของเส้น
+                        legendgroup = item, # กำหนดกลุ่ม ของเส้น เพื่อ สามารถกด show หรือ ไม่ show กราฟได้
+                        visible = visible, # กำหนดว่าให้ เส้นใดๆ แสดงตอนเริ่มกราฟ หรือไม่
+                        # hoverinfo='skip',  # กำหนดว่า ไม่มีการแสดงอะไรเมื่อเอาเมาส์ ไปชี้ 
+                        # showlegend=False, # กำหนดว่าจะ show legend หรือไม่
+                        ))                      
 
         fig.add_trace(go.Scatter(x=df_line.index, y=df_line['PSU'],  # วาดกราฟ PSU
                         mode='lines+markers',
@@ -4007,7 +4032,6 @@ def compare_ranking(request): #page เพื่อเปรียบเที�
                         line=dict( width=2,color='royalblue' ),
                         # marker={'size':10},
                         legendgroup = 'PSU'
-                        # visible = False
                         ))
         
         
@@ -4018,26 +4042,46 @@ def compare_ranking(request): #page เพื่อเปรียบเที�
                 df_dot[item['short_name']] = df_isi[-2:][item['short_name']]
                 
 
-        for item in columns:  # วนวาดกราฟเส้นทึบ ที่ไม่ใช้ PSU เพราะ อยากให้ PSU วาดกราฟอยุ่บนกราฟอื่นๆ ต้องว่างสุดท้าย
+        for item in columns:  # วนวาดกราฟเส้นประ ที่ไม่ใช้ PSU เพราะ อยากให้ PSU วาดกราฟอยุ่บนกราฟอื่นๆ ต้องว่างสุดท้าย
             if item != "PSU":
+                visible = True if (item == 'CMU') | (item == 'KKU') else "legendonly"  # ทำให้ CMU และ KKU แสดงอยู่บนกราฟ ส่วน ม. อื่น ให้ legendonly ( legendonly หมายความว่า ต้องกด เเล้วจะเเสดงให้เห็นในกราฟ )
+                
                 fig.add_trace(go.Scatter(x=df_dot.index, y=df_dot[item],
-                        mode='markers',
-                        name=item+": "+df_names[item][0] ,
+                        mode='lines',
+                        # name=item+": "+df_names[item][0] ,
                         line=dict( width=2, dash='dot',color=df_names[item][1]),
                         showlegend=False,
-                        legendgroup = item
+                        hoverinfo='skip', 
+                        legendgroup = item,
+                        visible = visible
                          ))
 
-        fig.add_trace(go.Scatter(x=df_dot.index, y=df_dot['PSU'],  # วาดกราฟ PSU
+                fig.add_trace(go.Scatter(x=df_dot.index[-1::], y=df_dot[item][-1::],
                         mode='markers',
+                        name=item+": "+df_names[item][0] ,
+                        line=dict(color=df_names[item][1]),
+                        showlegend=False,
+                        visible = visible,
+                        legendgroup = item))
+
+        fig.add_trace(go.Scatter(x=df_dot.index, y=df_dot['PSU'],  # วาดกราฟ เส้นประ PSU
+                        mode='lines',
                         name="PSU: Prince of Songkla University" ,
                         line=dict( width=2, dash='dot',color='royalblue'),
                         showlegend=False,
+                        hoverinfo='skip',
                         # marker={'size':10},
                         legendgroup = 'PSU'
                         ))
+        
+        fig.add_trace(go.Scatter(x=df_dot.index[-1::], y=df_dot['PSU'][-1::],
+                        mode='markers',
+                        name='PSU'+": "+df_names['PSU'][0] ,
+                        line=dict(color='royalblue'),
+                        showlegend=False,
+                        legendgroup = 'PSU'))
          
-        fig.update_traces(mode="markers+lines", hovertemplate=None)
+        fig.update_traces(hovertemplate=None,)
         fig.update_layout(hovermode="x")    
         fig.update_layout(
             xaxis_title="<b>Year</b>",
@@ -4099,11 +4143,13 @@ def compare_ranking(request): #page เพื่อเปรียบเที�
         ####  กราฟเส้นทึบ     
         for item in columns:  # วนวาดกราฟเส้นทึบ ที่ไม่ใช้ PSU เพราะ อยากให้ PSU วาดกราฟอยุ่บนกราฟอื่นๆ ต้องว่างสุดท้าย
             if item != "PSU":
+                visible = True if (item == 'CMU') | (item == 'KKU') else "legendonly"  # ทำให้ CMU และ KKU แสดงอยู่บนกราฟ ส่วน ม. อื่น ให้ legendonly ( legendonly หมายความว่า ต้องกด เเล้วจะเเสดงให้เห็นในกราฟ )
                 fig.add_trace(go.Scatter(x=df_line.index, y=df_line[item],
                         mode='lines+markers',
                         name=item+": "+df_names[item][0] ,
                         line=dict( width=2,color=df_names[item][1]),
-                        legendgroup = item
+                        legendgroup = item,
+                        visible = visible,
                         ))
 
         fig.add_trace(go.Scatter(x=df_line.index, y=df_line['PSU'],  # วาดกราฟ PSU
@@ -4121,26 +4167,45 @@ def compare_ranking(request): #page เพื่อเปรียบเที�
                 df_dot[item['short_name']] = df_sco[-2:][item['short_name']]
                 
 
-        for item in columns:  # วนวาดกราฟเส้นทึบ ที่ไม่ใช้ PSU เพราะ อยากให้ PSU วาดกราฟอยุ่บนกราฟอื่นๆ ต้องว่างสุดท้าย
+        for item in columns:  # วนวาดกราฟเส้นประ ที่ไม่ใช้ PSU เพราะ อยากให้ PSU วาดกราฟอยุ่บนกราฟอื่นๆ ต้องว่างสุดท้าย
             if item != "PSU":
+                visible = True if (item == 'CMU') | (item == 'KKU') else "legendonly"  # ทำให้ CMU และ KKU แสดงอยู่บนกราฟ ส่วน ม. อื่น ให้ legendonly ( legendonly หมายความว่า ต้องกด เเล้วจะเเสดงให้เห็นในกราฟ )
                 fig.add_trace(go.Scatter(x=df_dot.index, y=df_dot[item],
-                        mode='markers',
+                        mode='lines',
                         name=item+": "+df_names[item][0] ,
                         line=dict( width=2, dash='dot',color=df_names[item][1]),
                         showlegend=False,
-                        legendgroup = item
+                        hoverinfo='skip',
+                        legendgroup = item,
+                        visible = visible,
                          ))
-
-        fig.add_trace(go.Scatter(x=df_dot.index, y=df_dot['PSU'],  # วาดกราฟ PSU
+                         
+                fig.add_trace(go.Scatter(x=df_dot.index[-1::], y=df_dot[item][-1::],
                         mode='markers',
+                        name=item+": "+df_names[item][0] ,
+                        line=dict(color=df_names[item][1]),
+                        showlegend=False,
+                        visible = visible,
+                        legendgroup = item))
+
+        fig.add_trace(go.Scatter(x=df_dot.index, y=df_dot['PSU'],  # วาดกราฟ เส้นประ PSU
+                        mode='lines',
                         name="PSU: Prince of Songkla University" ,
                         line=dict( width=2, dash='dot',color='royalblue'),
                         showlegend=False,
+                        hoverinfo='skip',
                         # marker={'size':10},
                         legendgroup = 'PSU'
                         ))
         
-        fig.update_traces(mode="markers+lines", hovertemplate=None)
+        fig.add_trace(go.Scatter(x=df_dot.index[-1::], y=df_dot['PSU'][-1::],
+                        mode='markers',
+                        name='PSU'+": "+df_names['PSU'][0] ,
+                        line=dict(color='royalblue'),
+                        showlegend=False,
+                        legendgroup = 'PSU'))
+        
+        fig.update_traces(hovertemplate=None)
         fig.update_layout(hovermode="x")    
         fig.update_layout(
             xaxis_title="<b>Year</b>",
@@ -4202,11 +4267,13 @@ def compare_ranking(request): #page เพื่อเปรียบเที�
 
         for item in columns:  # วนวาดกราฟเส้นทึบ ที่ไม่ใช้ PSU เพราะ อยากให้ PSU วาดกราฟอยุ่บนกราฟอื่นๆ ต้องว่างสุดท้าย
             if item != "PSU":
+                visible = True if (item == 'CMU') | (item == 'KKU') else "legendonly"  # ทำให้ CMU และ KKU แสดงอยู่บนกราฟ ส่วน ม. อื่น ให้ legendonly ( legendonly หมายความว่า ต้องกด เเล้วจะเเสดงให้เห็นในกราฟ )
                 fig.add_trace(go.Scatter(x=df_line.index, y=df_line[item],
                         mode='lines+markers',
                         name=item+": "+df_names[item][0] ,
                         line=dict( width=2,color=df_names[item][1]),
-                        legendgroup = item
+                        legendgroup = item,
+                        visible = visible,
                         ))
 
         fig.add_trace(go.Scatter(x=df_line.index, y=df_line['PSU'],  # วาดกราฟ PSU
@@ -4226,26 +4293,45 @@ def compare_ranking(request): #page เพื่อเปรียบเที�
                 df_dot[item['short_name']] = df_tci[-2:][item['short_name']]
                 
 
-        for item in columns:  # วนวาดกราฟเส้นทึบ ที่ไม่ใช้ PSU เพราะ อยากให้ PSU วาดกราฟอยุ่บนกราฟอื่นๆ ต้องว่างสุดท้าย
+        for item in columns:  # วนวาดกราฟเส้นประ ที่ไม่ใช้ PSU เพราะ อยากให้ PSU วาดกราฟอยุ่บนกราฟอื่นๆ ต้องว่างสุดท้าย
             if item != "PSU":
+                visible = True if (item == 'CMU') | (item == 'KKU') else "legendonly"  # ทำให้ CMU และ KKU แสดงอยู่บนกราฟ ส่วน ม. อื่น ให้ legendonly ( legendonly หมายความว่า ต้องกด เเล้วจะเเสดงให้เห็นในกราฟ )
                 fig.add_trace(go.Scatter(x=df_dot.index, y=df_dot[item],
-                        mode='markers',
+                        mode='lines',
                         name=item+": "+df_names[item][0] ,
                         line=dict( width=2, dash='dot',color=df_names[item][1]),
+                        hoverinfo='skip',
                         showlegend=False,
-                        legendgroup = item
+                        legendgroup = item,
+                        visible = visible,
                          ))
-
-        fig.add_trace(go.Scatter(x=df_dot.index, y=df_dot['PSU'],  # วาดกราฟ PSU
+                         
+                fig.add_trace(go.Scatter(x=df_dot.index[-1::], y=df_dot[item][-1::],
                         mode='markers',
+                        name=item+": "+df_names[item][0] ,
+                        line=dict(color=df_names[item][1]),
+                        showlegend=False,
+                        visible = visible,
+                        legendgroup = item))
+
+        fig.add_trace(go.Scatter(x=df_dot.index, y=df_dot['PSU'],  # วาดกราฟ เส้นประ PSU
+                        mode='lines',
                         name="PSU: Prince of Songkla University" ,
                         line=dict( width=2, dash='dot',color='royalblue'),
                         showlegend=False,
+                        hoverinfo='skip',
                         # marker={'size':10},
                         legendgroup = 'PSU'
                         ))
+        
+        fig.add_trace(go.Scatter(x=df_dot.index[-1::], y=df_dot['PSU'][-1::],
+                        mode='markers',
+                        name='PSU'+": "+df_names['PSU'][0] ,
+                        line=dict(color='royalblue'),
+                        showlegend=False,
+                        legendgroup = 'PSU'))
          
-        fig.update_traces(mode="markers+lines", hovertemplate=None)
+        fig.update_traces(hovertemplate=None)
         fig.update_layout(hovermode="x")    
         fig.update_layout(
             xaxis_title="<b>Year</b>",
