@@ -32,7 +32,7 @@ ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [  # เป็นการบอกว่า ในชั้น ของตึก Mydj1 มีชั้นอะไรบ้าง เช่นชั้น importDB 
     'django.contrib.admin',
-    'django.contrib.auth',
+    'django.contrib.auth', # ใช้จัดการ user เช่น login logout
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -196,13 +196,21 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'mydj1/static')
 ]
 
+########## set ค่าในการ login and logout ##################################
+LOGIN_URL = 'login'
+LOGOUT_REDIRECT_URL = 'login'  # เมื่อกดปุ่ม logout ให้วิ่ง ไปที่ name = 'login' ในไฟล์ urls.py
+LOGIN_REDIRECT_URL = 'home-page' # เมื่อ loginเสร็จ ให้วิ่ง ไปที่ name = 'home-page' ในไฟล์ urls.py
+##########################################################################
  
 # Access-Control-Allow-Origin : http://localhost:3000
 # Access-Control-Allow-Credentials : true
 # Access-Control-Allow-Methods : GET, POST, OPTIONS
 # Access-Control-Allow-Headers : Origin, Content-Type, Accept
 
+
+##### ใช้ในการ update ข้อมูล โดยการใช้ Celery Scheduler #####
 CELERY_BROKER_URL = 'redis://h:p00634b4bbcaae541336b6ae31adc8d93e2cd88f1886df232b8006d9ff8e9d27f@ec2-52-72-186-42.compute-1.amazonaws.com:22939'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERYBEAT_SCHEDULER = 'djcelery_schedulers_DatabaseScheduler'
+#########################################################

@@ -89,4 +89,11 @@ class master_ranking_university_name(models.Model):
     def __str__(self):  # def นี้ ทำให้ ชื่อของ model ไปแสดงในหน้า /admin 
         return self.short_name+" "+self.name_eng 
 
+class auth_executive_user(models.Model):
+    BOOL_CHOICES = ((True,'ใช้'),(False, 'ไม่ใช้'))
+    employee_ID = models.CharField(max_length = 7)
+    employee_name_th = models.CharField(max_length = 100, blank = True, null = True)
+    flag_used = models.BooleanField(choices=BOOL_CHOICES, default=True)
+    def __str__(self):  # def นี้ ทำให้ ชื่อของ model ไปแสดงในหน้า /admin 
+        return self.employee_ID+" "+self.employee_name_th 
 

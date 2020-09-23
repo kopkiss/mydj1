@@ -1,4 +1,4 @@
-from django.shortcuts import render    # หมายถึง เป็นการเรียกจาก Template ที่เราสร้างไว้
+from django.shortcuts import render, redirect    # หมายถึง เป็นการเรียกจาก Template ที่เราสร้างไว้
 from django.http import HttpResponse   # หมายถึง เป็นการ วาด HTML เอง
 import pandas as pd
 import numpy as np
@@ -18,6 +18,7 @@ from .models import PRPM_v_grt_pj_team_eis  # " . " หมายถึง subfol
 from .models import PRPM_v_grt_pj_budget_eis
 from .models import Prpm_v_grt_project_eis
 from .models import master_ranking_university_name
+from .models import auth_executive_user
 
 import pymysql
 import cx_Oracle
@@ -41,11 +42,19 @@ from selenium.webdriver.support import expected_conditions as EC
 
 # เกี่ยวกับการ login
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
 
+from django.contrib.auth.models import User
 
 # เกี่ยวกับการ predictions
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
+
+# ดึง script PHP
+import subprocess
+from subprocess import check_output
+
 # Create your views here.
 
 def getConstring(check):  # สร้างไว้เพื่อ เลือกที่จะ get database ด้วย mysql หรือ oracle
@@ -4709,6 +4718,7 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
     
     return render(request,'importDB/ranking_prediction.html',context)  
 
+@login_required(login_url='login')
 def pageResearchMan(request):
     
     selected_year = datetime.now().year+543 # กำหนดให้ ปี ใน dropdown เป็นปีปัจจุบัน
@@ -4811,8 +4821,43 @@ def pageResearchMan(request):
     
     return render(request,'importDB/research_man.html',context)  
 
+def login_(request):
+    print("login")
+    username = ""
+    passowrd = ""
+    default_pass = 'pass12345678'
+    if request.method == "POST":
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        # ทำการ ตรวจสอบ user และ pass จาก index.php และ ldappsu.php โดย ถ้ามี user ใน psupassport จะ Return เป็น "1,รหัสพนักงาน" ถ้าไม่มีจะ return 0
+        proc = subprocess.Popen("php importDB/index.php "+username+" "+password , shell=True, stdout=subprocess.PIPE)
+        script_response = proc.stdout.read()
+        decode = script_response.decode("utf-8")  # ทำการ decode จาก bit เป็น string
+        print(decode)
+        # test 
+        decode = "1,0022976" 
+        #######
+        user_list = decode.split(",") # split ข้อมูล ด้วย , 
+        print(user_list[0])
+        print(user_list[1])
+
+        user = authenticate(request, username = user_list[1] , password = default_pass) # นำ รหัสพนักงาน (user_list[1]) มาตรวจสอบว่าอยู่ใน ฐานข้อมูล django หรือไม่ โดยใช้รหัส default
+        print("user : ",user)
+
+        if ((user_list[0] == "1") & (user is not None)):  # ถ้า เจอ user ใน ระบบ psupassport และ เจอ user ใน ฐานข้อมูล django ให้ทำการเข้าสู่ระบบได้
+            login(request, user)  # ทำการเข้าสู่ระบบ
+            return redirect('home-page')  # เมื่อเข้าสู่ระบบเเล้ว ทำการเปิดหน้าแรกของ page
+            
+        else:
+            print("ไม่พบ user")
+            messages.info(request, 'Username หรือ password ไม่ถูกต้อง')
 
 
+    context={
+        
+    }
+    return render(request,'importDB/login.html',context)
 # %%
 print("Running")
 

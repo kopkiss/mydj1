@@ -1,11 +1,11 @@
 from django.urls import path, include
 from . import views  # . คือ อยู่ใน folder เดียวกัน
-from django.views.generic import TemplateView
 
 
 
 urlpatterns = [
     path('', views.pageResearchMan, name = 'home-page'),
+    # path('', include("django.contrib.auth.urls")),
     # path('django_plotly_dash/', include('django_plotly_dash.urls')),
     path('showdbsql/', views.showdbsql),
     path('showdboracle/', views.showdbOracle),
@@ -22,6 +22,7 @@ urlpatterns = [
     path('ranking/prediction', views.pridiction_ranking , name = 'ranking-pridiction'),
     path('revenues/graph/<str:value>/', views.revenues_graph, name = 'revenues-graph-page'),
     path('revenues/show_table', views.revenues_table, name = 'revenues-show-table-page'),
+    
     
     
 ]
