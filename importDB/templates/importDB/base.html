@@ -12,7 +12,7 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>SB Admin 2 - Dashboard</title>
+  <title>::ESS:: ระบบสนับสนุนผู้บริหารระดับสูง (Executive Support Systems)</title>
   <!-- css -->
       
   <!-- Custom fonts for this template-->
@@ -23,11 +23,6 @@
   <link href="{% static 'css/sb-admin-2.min.css' %}" rel="stylesheet">
       <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <script>
-   
-    function random()
-    {
-      alert('working');
-    }
 
   function updateArticleDisplayResult(search_keyword) {
       // API TCI
@@ -398,6 +393,11 @@ padding-right: 29px;
   
 }
 
+.responsive {
+  width: auto;
+  height: auto;
+}
+
 
 </style>
 
@@ -409,7 +409,9 @@ padding-right: 29px;
   <div id="wrapper">
 
     <!-- Sidebar -->
+    {% if user.is_staff %}
       {% include 'importDB/partials/_sidebar.html' %}
+    {% endif %}
     <!-- End of Sidebar -->
 
     <!-- Content Wrapper -->
@@ -427,7 +429,7 @@ padding-right: 29px;
           <div class='row'>
             <div class="container-fluid">
               <!-- Page Heading -->
-              <div class="d-sm-flex align-items-center justify-content-between mb-4">
+              <div class="d-sm-flex align-items-center justify-content-between mb-2">
                 <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
                 <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
               </div>
@@ -496,10 +498,13 @@ padding-right: 29px;
                               <div class="text-info font-weight-bold text-uppercase mb-1" ><h6><b>จำนวนงานวิจัย ปี {{now_year}}</b></h6></div>
                                 <div class="row ">
                                   <div class="col-auto ">  
-                                    <div class="mb-0 text-gray-800"><h6>Scopus : {{head_page.num_of_pub_sco}} </h6></div>
+                                    <div class="mb-0 text-gray-800"><h6 style="color:red; display: inline;">Sco : </h6><h6 style ="display: inline;"> {{head_page.num_of_pub_sco}}</h6> </div>
                                   </div>
                                   <div class="col-auto ">  
-                                    <div class="mb-0 text-gray-800 float-left" ><h6>ISI : {{head_page.num_of_pub_isi}}</h6></div>
+                                    <div class="mb-0 text-gray-800 float-left" ><h6 style="color:royalblue; display: inline;">ISI : </h6><h6 style ="display: inline;">{{head_page.num_of_pub_isi}}</h6></div>
+                                  </div>
+                                  <div class="col-auto ">  
+                                    <div class="mb-0 text-gray-800 float-left" ><h6 style="color:#F39C12; display: inline;">TCI : </h6><h6 style ="display: inline;">{{head_page.num_of_pub_tci}}</h6></div>
                                   </div>
                                 </div>
                             </div>

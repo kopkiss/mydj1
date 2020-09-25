@@ -209,7 +209,7 @@ LOGIN_REDIRECT_URL = 'home-page' # เมื่อ loginเสร็จ ให�
 
 
 ##### ใช้ในการ update ข้อมูล โดยการใช้ Celery Scheduler #####
-CELERY_BROKER_URL = 'redis://h:p00634b4bbcaae541336b6ae31adc8d93e2cd88f1886df232b8006d9ff8e9d27f@ec2-52-72-186-42.compute-1.amazonaws.com:22939'
+CELERY_BROKER_URL = 'redis://h:p00634b4bbcaae541336b6ae31adc8d93e2cd88f1886df232b8006d9ff8e9d27f@ec2-54-160-125-169.compute-1.amazonaws.com:28879'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERYBEAT_SCHEDULER = 'djcelery_schedulers_DatabaseScheduler'

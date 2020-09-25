@@ -2,26 +2,34 @@
     // include ('../connect_db.php');
     // session_start();
     // --- Check LDAP ----//
-        $user = $argv[1];
-        $pass = $argv[2];
-        // echo ($user);
-        // echo ($pass );
+        error_reporting(0);
+
+        # ป้องกันการ SQL Injection 
+        # โดยการใช้ $mysqli -> real_escape_string( ) เป็นฟังก์ชันสำหรับเลี่ยงการใช้ตัวอักขระพิเศษในคำสั่ง sql เช่น เครื่องหมาย " เครื่องหมาย ' เป็นต้น 
+        $mysqli = new mysqli("localhost","root","");
+        $user = $mysqli -> real_escape_string($argv[1]);
+        $pass = $mysqli -> real_escape_string($argv[2]);
+        
         if(isset($user)){
-          // echo ("in if"); 
+
           //Include PHPLDAP Class File
-          require "ldappsu.php";
+          require "ldappsu.php"; # เรียก ldapp ของระบบ psu Passport เพื่อ ตรวจสอบ password และ user
+
           //DC1(VM),2(RACK),7(VM)-Hatyai,DC3(RACK)-Pattani,DC5(RACK)-Surat,DC6(RACK)-Trang
           $server = array("dc2.psu.ac.th","dc7.psu.ac.th","dc1.psu.ac.th");
           $basedn = "dc=psu,dc=ac,dc=th";
           $domain = "psu.ac.th";
-          $username = $user;
-          $password = $pass;
+          
           //Call function authentication
           error_reporting(0);
-          $ldap = authenticate($server,$basedn,$domain,$username,$password);
+          $ldap = authenticate($server,$basedn,$domain,$user,$pass);
+
+          # echo ข้อมูลที่จะเอาไปใช้ ใน Django เพราะว่า Django ดักข้อมูล ที่ผ่านการ echo ใน php ได้
           echo $ldap[0]; 
           echo ",";
           echo $ldap[1]['personid'];
+          
+          
           // if($ldap[0]==1){
           //   echo "<br/>>> User Profile <<<br/>";
           //   echo "Account Name : ".$ldap[1]['accountname']."<br/>";
