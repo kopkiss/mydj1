@@ -10,10 +10,9 @@ urlpatterns = [
     path('showdbsql/', views.showdbsql),
     path('showdboracle/', views.showdbOracle),
     path('rodreport/', views.rodReport),
-    path('prpmdump/',views.prpmdump), 
-    path('prpmdump/prpmdumpResults',views.dump,name = 'dump-page'),
-    path('dQueryReports/',views.dQueryReports),
-    path('dQueryReports/queryDumpResults',views.dQuery, name = 'query-page'),
+
+    path('dump-data/',views.dump,name = 'dump-page'),
+    path('query-data/',views.query ,name = 'query-page'),
     path('revenues/',views.pageRevenues, name = 'revenues-page'),
     path('exFund/',views.pageExFund, name = 'exFund-page'),
     path('ranking/',views.pageRanking, name = 'ranking-page' ),

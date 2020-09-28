@@ -1,7 +1,8 @@
 {% extends 'importDB/base_2.html' %}
 {% block content %}
     <!-- Content Row -->
-    <form action = "queryDumpResults" method ="POST">
+<div class="container ml-2">
+    <form action = "" method ="POST">
         {% csrf_token %}
         <table class="table">
             <thead class="thead-dark">
@@ -34,7 +35,7 @@
                 <tr>
                     <td>2</td>
                     <td> รายได้รัฐ/เอกชน </td>
-                    <td><button type="submit" name="row"  value ="Query2" class="btn btn-primary">get</button></td>
+                    <td><button type="submit" name="row"  value ="Query2" class="btn btn-primary">Query</button></td>
                     <td>
                         {% if whichrow == 'row2'%}
                             {{result}}
@@ -98,7 +99,7 @@
                 <tr>
                     <td>6</td>
                     <td>ISI, Scopus, TCI</td>
-                    <td><button type="submit" name="row"  value ="Query6" class="btn btn-primary">get</button></td>
+                    <td><button type="submit" name="row"  value ="Query6" class="btn btn-primary">Query</button></td>
                     <td>
                         {% if whichrow == 'row6'%}
                             {{result}}
@@ -162,7 +163,7 @@
                 <tr>
                     <td>10</td>
                     <td> Citation and H-index </td>
-                    <td><button type="submit" name="row"  value ="Query10" class="btn btn-primary">get</button></td>
+                    <td><button type="submit" name="row"  value ="Query10" class="btn btn-primary">Query</button></td>
                     <td>
                         {% if whichrow == 'row10'%}
                             {{result}}
@@ -292,7 +293,8 @@
                 </tr> -->
             </tbody>
         </table>
-    </form>    
+    </form>  
+</div>  
     
 
     

@@ -86,9 +86,6 @@
   
   }
 
-  
-
-
 </script>
 
 <link rel="stylesheet" href="https://unpkg.com/bootstrap@4.1.0/dist/css/bootstrap.min.css" >
@@ -401,7 +398,7 @@ padding-right: 29px;
 
 </style>
 
-</head>
+</had>
 
 <body id="page-top">
 
@@ -409,9 +406,7 @@ padding-right: 29px;
   <div id="wrapper">
 
     <!-- Sidebar -->
-    {% if user.is_staff %}
-      {% include 'importDB/partials/_sidebar.html' %}
-    {% endif %}
+    {% include 'importDB/partials/_sidebar.html' %}
     <!-- End of Sidebar -->
 
     <!-- Content Wrapper -->
@@ -449,7 +444,7 @@ padding-right: 29px;
                               <h6>{{ head_page.total_of_guys }} คน 
                                 <img src="{% static 'img/bulb_2251110.png' %}" style="float:center;"
                                   title="จำนวนผู้วิจัยหลัก คือ การนับจำนวนผู้วิจัย ในตำแหน่ง อาจารย์, นักวิจัย และ นักวิจัยหลักปริญญาเอก 
-                                  ที่ถูกระบุว่าเป็น First Author หรือ Coresponding Author
+                                  ที่ถูกระบุว่าเป็น First Author หรือ Corresponding Author
                                   ซึ่งงานวิจัยนั้นต้องได้รับตีพิมพ์ แบบ Publications และ Proceedings 
                                   ในฐานข้อมูล ISI-WoS หรือ Scopus เท่านั้น" 
                                   alt="จำนวนผู้วิจัยหลัก"    
@@ -497,14 +492,14 @@ padding-right: 29px;
                             <div class="col ">
                               <div class="text-info font-weight-bold text-uppercase mb-1" ><h6><b>จำนวนงานวิจัย ปี {{now_year}}</b></h6></div>
                                 <div class="row ">
-                                  <div class="col-auto ">  
+                                  <div class="col-auto pr-0 pl-3 "  >  
                                     <div class="mb-0 text-gray-800"><h6 style="color:red; display: inline;">Sco : </h6><h6 style ="display: inline;"> {{head_page.num_of_pub_sco}}</h6> </div>
                                   </div>
-                                  <div class="col-auto ">  
-                                    <div class="mb-0 text-gray-800 float-left" ><h6 style="color:royalblue; display: inline;">ISI : </h6><h6 style ="display: inline;">{{head_page.num_of_pub_isi}}</h6></div>
+                                  <div class="col-auto pr-0 pl-2"  >  
+                                    <div class="mb-0 text-gray-800 " ><h6 style="color:royalblue; display: inline;">ISI : </h6><h6 style ="display: inline;">{{head_page.num_of_pub_isi}}</h6></div>
                                   </div>
-                                  <div class="col-auto ">  
-                                    <div class="mb-0 text-gray-800 float-left" ><h6 style="color:#F39C12; display: inline;">TCI : </h6><h6 style ="display: inline;">{{head_page.num_of_pub_tci}}</h6></div>
+                                  <div class="col-auto  pr-0 pl-2"  >  
+                                    <div class="mb-0 text-gray-800 " ><h6 style="color:#F39C12; display: inline;">TCI : </h6><h6 style ="display: inline;">{{head_page.num_of_pub_tci}}</h6></div>
                                   </div>
                                 </div>
                             </div>

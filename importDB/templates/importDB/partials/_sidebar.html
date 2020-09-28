@@ -3,9 +3,9 @@
     <!-- Sidebar - Brand -->
     <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
       <div class="sidebar-brand-icon rotate-n-15">
-        <i class="fas fa-laugh-wink"></i>
+        <i class="fab fa-elementor"></i>
       </div>
-      <div class="sidebar-brand-text mx-3">EIS REPORTS <sup>2</sup></div>
+      <div class="sidebar-brand-text mx-3">Dashboard </div>
     </a>
 
     <!-- Divider -->
@@ -13,9 +13,9 @@
 
     <!-- Nav Item - Dashboard -->
     <li class="nav-item active">
-      <a class="nav-link" href='/'>
-        <i class="fas fa-fw fa-tachometer-alt"></i>
-        <span>Dashboard</span></a>
+      <a class="nav-link" href='{% url "home-page"%}'>
+        <i class="fas fa-home"></i> 
+        <span>HOME PAGE</span></a>
     </li>
 
     <!-- Divider -->
@@ -23,11 +23,11 @@
 
     <!-- Heading -->
     <div class="sidebar-heading">
-      ROD
+      นำเข้าข้อมูล
     </div>
 
     <!-- Nav Item - Pages Collapse Menu -->
-    <li class="nav-item">
+    <!-- <li class="nav-item">
       <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
         <i class="fas fa-fw fa-cog"></i>
         <span>Report ด้านวิจัย</span>
@@ -40,21 +40,21 @@
           <a class="collapse-item" href="/rodreport">RodReport</a>
         </div>
       </div>
-    </li>
+    </li> -->
 
     <!-- Nav Item - Utilities Collapse Menu -->
     {% if user.is_staff %}
     <li class="nav-item">
       <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities" aria-expanded="true" aria-controls="collapseUtilities">
         <i class="fas fa-fw fa-wrench"></i>
-        <span>Dump Data</span>
+        <span>Data Management</span>
       </a>
       <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
         <div class="bg-white py-2 collapse-inner rounded">
           
             <h6 class="collapse-header">Custom Dump Data:</h6>
-            <a class="collapse-item" href="/prpmdump">PRPM</a>
-            <a class="collapse-item" href="/dQueryReports">Dump Query Reports</a>
+            <a class="collapse-item" href="/dump-data">Dump Data</a>
+            <a class="collapse-item" href="/query-data">Query Data</a>
             <a class="collapse-item" href="utilities-other.html">Other</a>
           
         </div>
