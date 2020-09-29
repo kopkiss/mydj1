@@ -485,8 +485,13 @@ def rodReport(request):
     data = PRPM_v_grt_pj_team_eis.objects.all()  #ดึงข้อมูลจากตาราง  มาทั้งหมด
     return render(request,'importDB/rodreport.html',{'posts':data})
 
+###################################################################
+#### " DUMP " เพื่อ dump ข้อมูลจาก External Data เช่น Oracle ####
+#### " Query " เพื่อ query ข้อมูลจาก MySQL ####
+###################################################################
+
 @login_required(login_url='login')
-def dump(request):  # ดึงข้อมูล เข้าสู่ ฐาน Mysql
+def dump(request):  # ดึงข้อมูล จาก Oracle เข้าสู่ ฐาน Mysql
     print('dumping')
     if request.method == "POST":
         # print(f'pymysql version: {pymysql.__version__}')
@@ -3395,6 +3400,7 @@ def pageRevenues(request): # page รายได้งานวิจัย
         'campus' : get_budget_campas(),
         'graph1' :graph1(),
         'date' : get_date_file(),
+        'top_bar_title': "รายได้งานวิจัย"
     
     }
     
@@ -3740,6 +3746,7 @@ def pageExFund(request): # page รายได้จากทุนภายน
         'df_Na_Fx_fund' : getNationalEXFUND(),
         #### tables1 
         'df_Inter_Fx_fund':getInterNationalEXFUND(),
+        'top_bar_title': "แหล่งทุนภายนอก"
     }
 
     # return render(request, 'importDB/exFund.html', context)
@@ -4079,6 +4086,7 @@ def pageRanking(request): # page Ranking ISI/SCOPUS/TCI
         'h_index' : h_index(),
         'total_publication' :total_publications(),
         'date' : get_date_file(),
+        'top_bar_title': "จำนวนงานวิจัย"
     }
 
     return render(request,'importDB/ranking.html', context)   
@@ -4816,7 +4824,7 @@ def pageResearchMan(request):
         print("post = ",request.POST )
         selected_year = int(filter_year)      # ตัวแปร selected_year เพื่อ ให้ใน dropdown หน้าต่อไป แสดงในปีที่เลือกไว้ก่อนหน้า(จาก year)
     
-    print(type(selected_year))
+    # print(type(selected_year))
     
     def num_main_research():
 
@@ -4897,6 +4905,7 @@ def pageResearchMan(request):
         'filter_year' : selected_year,
         'num_main_research' : num_main_research(),
         'graph_revenue_research' : graph_revenue_research(),
+        'top_bar_title': "จำนวนผู้วิจัย"
         
        
     }
@@ -4927,8 +4936,8 @@ def login_(request):
 
         user_list = decode.split(",") # split ข้อมูล ด้วย , 
         # print("list --> ",user_list)
-        print(user_list[0])
-        print(user_list[1])
+        # print(user_list[0])
+        # print(user_list[1])
         
         #Call function authentication from django
         # user_list[1]
@@ -4947,6 +4956,8 @@ def login_(request):
         
     }
     return render(request,'importDB/login.html',context)
+
+
 # %%
 print("Running")
 

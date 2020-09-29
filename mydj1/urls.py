@@ -19,7 +19,7 @@ from importDB import views
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('ess-admin/', admin.site.urls),
     path('', include('importDB.urls')),
 
     path('login/' , views.login_, name = 'login'),

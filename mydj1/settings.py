@@ -200,6 +200,13 @@ STATICFILES_DIRS = [
 LOGIN_URL = 'login'
 LOGOUT_REDIRECT_URL = 'login'  # เมื่อกดปุ่ม logout ให้วิ่ง ไปที่ name = 'login' ในไฟล์ urls.py
 LOGIN_REDIRECT_URL = 'home-page' # เมื่อ loginเสร็จ ให้วิ่ง ไปที่ name = 'home-page' ในไฟล์ urls.py
+
+#Handle session logout อัตโนมัติ
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
+
+MIDDLEWARE_CLASSES = ['mydj1.middleware.AutoLogout',]
+# Auto logout delay in minutes
+AUTO_LOGOUT_DELAY = 5 #equivalent to 5 minutes
 ##########################################################################
  
 # Access-Control-Allow-Origin : http://localhost:3000
@@ -214,3 +221,4 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERYBEAT_SCHEDULER = 'djcelery_schedulers_DatabaseScheduler'
 #########################################################
+
