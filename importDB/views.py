@@ -50,6 +50,7 @@ from django.contrib.auth.models import User
 # เกี่ยวกับการ predictions
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
+from statsmodels.tsa.arima_model import ARIMA
 
 # ดึง script PHP
 import subprocess
@@ -4595,7 +4596,7 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
         end_row = {'year':now_year-1,'pred':df_y.iloc[-1][0]}
         results_pred = results_pred.append(end_row,ignore_index = True) 
         results_pred = results_pred.sort_values(by=['year'])
-
+        
         return df_x, df_y, results_pred, df_y_pre
         
     def support_vector_regression(ranking, shortname): # Support vector regression 
@@ -4641,6 +4642,43 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
                    columns=['y_pre'])
 
         return  df_x, df_y, results_pred, df_y_pre 
+
+    def ARIMA_regression(ranking, shortname): # ARIMA regression 
+        now_year = (datetime.now().year)+543
+        
+        df = pd.read_csv("""mydj1/static/csv/"""+ranking+""".csv""")
+        df = df[['year', 'PSU']]
+        dataset = df[df['year'] != now_year]
+        df_x = df["year"][:-1:].to_frame().rename(columns={'year': "x"})
+        df_y = df["PSU"][:-1:].to_frame().rename(columns={'PSU': "y"})
+  
+        df_2 = df[['year','PSU']][:-1:]
+        df_2 = df_2.set_index("year")
+
+
+        model = ARIMA(df_2["PSU"], order=(1,1,2))
+        model_fit = model.fit(disp=0)
+
+        trend = model_fit.predict(typ='levels')
+        results_trend = trend.to_frame()
+        results_trend.rename(columns={0: "trend"}, inplace=True)
+        join1 = df_2.join(results_trend)
+        df_pred = join1['trend'].reset_index().drop(columns=['year'])
+        df_pred.rename(columns={'trend': "y_pre"}, inplace=True)
+        # print(results_pred)
+
+        index = df[df['year']==now_year].index.values
+        
+        pred = model_fit.predict(index[0],index[0]+3, typ='levels')
+        results_pred = pred.to_frame().reset_index()
+        results_pred = results_pred.drop(columns=['index'])
+
+        results_pred[0][0] = df_2.iloc[index[0]-1][0]
+        results_pred.rename(columns={0: "pred"}, inplace=True)
+        new_col = [now_year-1, now_year, now_year+1 ,now_year+2]
+        results_pred.insert(loc=0, column='year', value=new_col)
+
+        return  df_x, df_y, results_pred, df_pred
        
     def plot_graph(ranking, shortname):
 
@@ -4696,7 +4734,7 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
         color = ""
         visible = True
         
-        for n in range(3):
+        for n in range(4):
             if n == 0:
                 df_x, df_y, results_pred, df_y_pre = poly_regression(ranking, shortname)
                 label = "Polynomial Regression" 
@@ -4716,6 +4754,14 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
                 color_line = "#F9E79F"
                 visible = "legendonly"  # ไม่ใช้แสดง legend ตอนเริ่มแรก
 
+            elif n == 3: 
+                
+                df_x, df_y, results_pred, df_y_pre = ARIMA_regression(ranking, shortname)
+                label = "ARIMA Regression"
+                color_dot = "#2ECC71"
+                color_line = "#82E0AA"
+                visible = "legendonly"  # ไม่ใช้แสดง legend ตอนเริ่มแรก
+            
             fig.add_trace(go.Scatter(x=results_pred['year'], y=results_pred['pred'],  # เส้นผลลัพธ์การทำนาย เส้นประ
                             mode='markers+lines',
                             line=dict( width=2, dash='dot',color=color_dot),
@@ -4795,6 +4841,10 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
         filter_ranking =  ranking_name[request.POST["data"]]   #รับ ชื่อ ranking จาก dropdown 
         selected_ranking = request.POST["data"]
 
+
+    
+
+        
     context={
         ###### Head_page ########################    
         # 'head_page': get_head_page(),
@@ -4805,6 +4855,7 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
         'ranking_name'  :ranking_name.keys(),
         'filter_ranking' : selected_ranking,
         'graph' : plot_graph(filter_ranking, selected_ranking),
+        
 
     }
     
