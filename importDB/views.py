@@ -1208,23 +1208,17 @@ def query(request): # Query ฐานข้อมูล Mysql (เป็น .csv
             timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
             whichrows = 'row10'
             
-        elif request.POST['row']=='Query11': # Filled area chart กราฟหน้าแรก รูปแรก 
+        elif request.POST['row']=='Query11': # จำนวนผู้วิจัยที่ได้รับทุน 
             checkpoint = query11() 
             dt = datetime.now()
             timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
             whichrows = 'row11'  
         
-        elif request.POST['row']=='Query12': # จำนวนผู้วิจัยที่ได้รับทุน
+        elif request.POST['row']=='Query12': #จำนวนผู้วิจัยหลัก
             checkpoint = query12() 
             dt = datetime.now()
             timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
             whichrows = 'row12'
-            
-        elif request.POST['row']=='Query13': #จำนวนผู้วิจัยหลัก
-            checkpoint = query13() 
-            dt = datetime.now()
-            timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
-            whichrows = 'row13'
 
         
         if checkpoint == 'chk_ranking':
