@@ -8,7 +8,7 @@ from .models import PRPM_v_grt_pj_budget_eis
 from .models import PRPM_r_fund_type
 from .models import master_ranking_university_name
 from .models import HRMIS_V_AW_FOR_RANKING
-from .models import auth_executive_user
+
 
 # Register your models here.
 admin.site.register(Get_db)
@@ -46,12 +46,7 @@ class master_university_name(admin.ModelAdmin):
 admin.site.register(master_ranking_university_name, master_university_name )
 
 
-class master_executive_user(admin.ModelAdmin):
-    list_display = ['employee_ID', 'employee_name_th', 'flag_used'] 
-    list_display_links = ('employee_ID',)
-    list_filter = ['employee_ID']
 
-admin.site.register(auth_executive_user, master_executive_user)
 
 
 

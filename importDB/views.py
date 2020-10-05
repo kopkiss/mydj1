@@ -12,13 +12,13 @@ from datetime import datetime
 import time
 
 # เกี่ยวกับฐานข้อมูล
-from .models import Get_db       
+from .models import Get_db       # " . " หมายถึง subfolder ต่อมาจาก root dir
 from .models import Get_db_oracle
-from .models import PRPM_v_grt_pj_team_eis  # " . " หมายถึง subfolder ต่อมาจาก root dir
+from .models import PRPM_v_grt_pj_team_eis  
 from .models import PRPM_v_grt_pj_budget_eis
 from .models import Prpm_v_grt_project_eis
 from .models import master_ranking_university_name
-from .models import auth_executive_user
+
 
 import pymysql
 import cx_Oracle
@@ -51,6 +51,7 @@ from django.contrib.auth.models import User
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
 from statsmodels.tsa.arima_model import ARIMA
+from statsmodels.tsa.statespace.sarimax import SARIMAX
 
 # ดึง script PHP
 import subprocess
@@ -1644,6 +1645,7 @@ def isi():
     df = pd.read_csv("""mydj1/static/csv/ranking_isi.csv""", index_col=0)
     flag = False
     col_used = df.columns.tolist()  # เก็บชื่อย่อมหาลัย ที่อยู่ใน ranking_isi.csv ตอนนี้
+   
     # print(path+'/chromedriver.exe')
     driver = webdriver.Chrome(path+'/chromedriver.exe')  # เปิด chromedriver
     # os.chdir(path)  # setpath
@@ -1653,12 +1655,12 @@ def isi():
         
         # new_df = pd.DataFrame()
         for item in data.values('short_name','name_eng','flag_used'): # วน for เพื่อตรวจสอบ ว่า มี มหาวิทยาลัยใหม่ ถูกเพิ่ม/หรือ ไม่ได้ใช้ (flag_used = false )มาในฐานข้อมูลหรือไม่
-            if (item['flag_used'] == True) & (item['short_name'] not in col_used) :
+            if ((item['flag_used'] == True) | (item['flag_used'] == '1')) & (item['short_name'] not in col_used) :
                 flag = True  # ธง ตั้งไว้เพื่อ จะตรวจสอบว่าต้อง save csv ตอนท้าย
                 print(f"""There is a new university "{item['name_eng']}", saving isi value of the university to csv.....""")
                 df = get_new_uni_isi(item, driver, df)
 
-            if (item['flag_used'] == False) & (item['short_name'] in col_used):  # ถ้า มีมหาลัย flag_used == False ทำการลบออกจาก df เดิม
+            if ((item['flag_used'] == False) | (item['flag_used'] == '0')) & (item['short_name'] in col_used):  # ถ้า มีมหาลัย flag_used == False ทำการลบออกจาก df เดิม
                 flag = True 
                 print(f"""ไม่ได้ใช้เเล้ว คือ :{item['name_eng']} ..... """)
                 df = df.drop([item['short_name']], axis = 1)
@@ -1674,10 +1676,9 @@ def isi():
             df.to_csv ("""mydj1/static/csv/ranking_isi.csv""", index = True, header=True)
             print("ranking_isi is updated")
 
-    
         searches = {}
         for item in data.values('short_name','name_eng','flag_used'):
-            if item['flag_used'] == True:
+            if ((item['flag_used'] == True) | (item['flag_used'] == '1')):
                 searches.update( {item['short_name'] : item['name_eng']} )
         
         last_df =pd.DataFrame()    
@@ -1823,12 +1824,12 @@ def tci():
         data = master_ranking_university_name.objects.all() # ดึงรายละเอียดมหาลัยที่จะค้นหา จากฐานข้อมูล Master
         
         for item in data.values('short_name','name_eng','name_th','flag_used'): # วน for เพื่อตรวจสอบ ว่า มี มหาวิทยาลัยใหม่ ถูกเพิ่ม/หรือ ไม่ได้ใช้ (flag_used = false )มาในฐานข้อมูลหรือไม่
-            if (item['flag_used'] == True) & (item['short_name'] not in col_used) :
+            if ((item['flag_used'] == True) | (item['flag_used'] == '1')) & (item['short_name'] not in col_used) :
                 flag = True  # ธง ตั้งไว้เพื่อ จะตรวจสอบว่าต้อง save csv ตอนท้าย
                 print(f"""There is a new university "{item['name_eng']}", saving isi value of the university to csv.....""")
                 df = get_new_uni_tci(item, driver, df)
 
-            if (item['flag_used'] == False) & (item['short_name'] in col_used):  # ถ้า มีมหาลัย flag_used == False ทำการลบออกจาก df เดิม
+            if ((item['flag_used'] == False) | (item['flag_used'] == '0')) & (item['short_name'] in col_used):  # ถ้า มีมหาลัย flag_used == False ทำการลบออกจาก df เดิม
                 flag = True 
                 print(f"""ไม่ได้ใช้เเล้ว คือ :{item['name_eng']} ..... """)
                 df = df.drop([item['short_name']], axis = 1)
@@ -1846,7 +1847,7 @@ def tci():
         searches = {} # ตัวแปรเก็บชื่อมหาลัย ที่ต้องการ update ข้อมูลปี ล่าสุด และ ล่าสุด-1
         
         for item in data.values('short_name','name_eng','name_th','flag_used'):
-            if item['flag_used'] == True:
+            if ((item['flag_used'] == True) | (item['flag_used'] == '1')):
                 searches.update( {item['short_name'] : [item['name_eng'],item['name_th']]} )
         print(searches)
         final_df =pd.DataFrame()   
@@ -1885,7 +1886,7 @@ def tci():
         final_df['year'] =final_df['year'].astype(int) + 543
         
         for item in data.values('short_name','flag_used'):   # ทำการเปลี่ยน type ให้เป็น int 
-            if item['flag_used'] == True:
+            if ((item['flag_used'] == True) | (item['flag_used'] == '1')):
                 final_df[item['short_name']] = final_df[item['short_name']].astype(int)
         
         print("--TCI--")
@@ -1946,13 +1947,13 @@ def sco(year):
     data = master_ranking_university_name.objects.all() # ดึงรายละเอียดมหาลัยที่จะค้นหา จากฐานข้อมูล Master
 
     for item in data.values('short_name','name_eng','af_id','flag_used'): # วน for เพื่อตรวจสอบ ว่า มี มหาวิทยาลัยใหม่ ถูกเพิ่ม/หรือ ไม่ได้ใช้ (flag_used = false )มาในฐานข้อมูลหรือไม่
-        if (item['flag_used'] == True) & (item['short_name'] not in col_used) :
+        if ((item['flag_used'] == True) | (item['flag_used'] == '1')) & (item['short_name'] not in col_used) :
             flag = True  # ธง ตั้งไว้เพื่อ จะตรวจสอบว่าต้อง save csv ตอนท้าย
             print(f"""There is a new university "{item['name_eng']}", saving isi value of the university to csv.....""")
             df = get_new_uni_scopus(item , df, apiKey, URL , year)
             print(df)
 
-        if (item['flag_used'] == False) & (item['short_name'] in col_used):  # ถ้า มีมหาลัย flag_used == False ทำการลบออกจาก df เดิม
+        if ((item['flag_used'] == False) | (item['flag_used'] == '0')) & (item['short_name'] in col_used):  # ถ้า มีมหาลัย flag_used == False ทำการลบออกจาก df เดิม
             flag = True 
             print(f"""ไม่ได้ใช้เเล้ว คือ :{item['name_eng']} ..... """)
             df = df.drop([item['short_name']], axis = 1)
@@ -1968,7 +1969,7 @@ def sco(year):
 
     searches = {}
     for item in data.values('short_name','af_id', 'flag_used'):
-        if item['flag_used'] == True:
+        if ((item['flag_used'] == True) | (item['flag_used'] == '1')):
             searches.update( {item['short_name'] : item['af_id']} )  
 
     last_df =pd.DataFrame()
@@ -2174,13 +2175,16 @@ def query1(): # 12 types of budget, budget_of_fac
                     group by 1,2,3 """
 
         con_string = getConstring('sql')
-        df = pm.execute_query(sql_cmd, con_string)
 
+        df = pm.execute_query(sql_cmd, con_string)
+        
         ############## build dataframe for show in html ##################
         index_1 = df["budget_year"].unique()
-        df2 = pd.DataFrame(columns=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],index = index_1)    
+        df2 = pd.DataFrame(columns=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],index = index_1)  
+ 
         for index, row in df.iterrows():
-            df2[row['budget_source_group_id']][row["budget_year"]] = row['sum_final_budget']
+            df2[int(row['budget_source_group_id'])][row["budget_year"]] = row['sum_final_budget']
+ 
         df2 = df2.fillna(0.0)
         df2 = df2.sort_index(ascending=False)
         df2 = df2.head(10).sort_index()
@@ -2992,39 +2996,9 @@ def query10(): # Citation ISI and H-index
         print('At Query#10: Something went wrong :', e)
         return checkpoint
 
-def query11(): # Filled area chart กราฟหน้าแรก รูปแรก
+def query11(): # จำนวนผู้วิจัยที่ได้รับทุน
     print("-"*20)
     print("Starting Query#11 ...")
-    checkpoint = True
-    os.environ["NLS_LANG"] = ".UTF8"  # ทำให้แสดงข้อความเป็น ภาษาไทยได้
-    try:
-           
-        sql_cmd = """select *
-                from revenues
-                where year between YEAR(date_add(NOW(), INTERVAL 543 YEAR))-10 AND YEAR(date_add(NOW(), INTERVAL 543 YEAR))-1"""
-    
-        con_string = getConstring('sql')
-        df = pm.execute_query(sql_cmd, con_string) 
-
-        # save to csv
-        if not os.path.exists("mydj1/static/csv"):
-                os.mkdir("mydj1/static/csv")
-                
-        df.to_csv ("""mydj1/static/csv/Filled_area_chart.csv""", index = False, header=True)
-        
-        print ("Data is saved")
-        print("Ending Query#11 ...")
-
-        return checkpoint
-
-    except Exception as e :
-        checkpoint = False
-        print('At Query#11: Something went wrong :', e)
-        return checkpoint
-
-def query12(): # จำนวนผู้วิจัยที่ได้รับทุน
-    print("-"*20)
-    print("Starting Query#12 ...")
     checkpoint = True
     os.environ["NLS_LANG"] = ".UTF8"  # ทำให้แสดงข้อความเป็น ภาษาไทยได้
     try:    
@@ -3072,19 +3046,19 @@ def query12(): # จำนวนผู้วิจัยที่ได้รั
         df.to_csv ("""mydj1/static/csv/main_research_revenue.csv""", index = True, header=True)
 
         print ("Data is saved")
-        print("Ending Query#12 ...")
+        print("Ending Query#11 ...")
 
         return checkpoint
 
     except Exception as e :
         checkpoint = False
-        print('At Query#12: Something went wrong :', e)
+        print('At Query#11: Something went wrong :', e)
         return checkpoint
 
-def query13(): # จำนวนผู้วิจัยหลัก
+def query12(): # จำนวนผู้วิจัยหลัก
 
     print("-"*20)
-    print("Starting Query#13 ...")
+    print("Starting Query#12 ...")
     checkpoint = True
     os.environ["NLS_LANG"] = ".UTF8"  # ทำให้แสดงข้อความเป็น ภาษาไทยได้
     try:
@@ -3210,13 +3184,13 @@ def query13(): # จำนวนผู้วิจัยหลัก
         df.to_csv ("""mydj1/static/csv/main_research.csv""", index = True, header=True)
 
         print ("Data is saved")
-        print("Ending Query#13 ...")
+        print("Ending Query#12 ...")
 
         return checkpoint
 
     except Exception as e :
         checkpoint = False
-        print('At Query#13: Something went wrong :', e)
+        print('At Query#12: Something went wrong :', e)
         return checkpoint
 
 
@@ -3235,7 +3209,6 @@ def pageRevenues(request): # page รายได้งานวิจัย
         filter_year =  request.POST["year"]   #รับ ปี จาก dropdown 
         print("post = ",request.POST )
         selected_year = int(filter_year)      # ตัวแปร selected_year เพื่อ ให้ใน dropdown หน้าต่อไป แสดงในปีที่เลือกไว้ก่อนหน้า(จาก year)
-    
     
     def graph1():  # แสดงกราฟโดนัด ของจำนวน เงินทั้ง 11 หัวข้อ
         df = pd.read_csv("""mydj1/static/csv/12types_of_budget.csv""")
@@ -3279,7 +3252,6 @@ def pageRevenues(request): # page รายได้งานวิจัย
         plot_div = plot(fig, output_type='div', include_plotlyjs=False)
         
         return plot_div
-
 
     def get_budget_amount(): #แสดง จำนวนของเงิน 11 ประเภท ในตาราง
         
@@ -3328,7 +3300,7 @@ def pageRevenues(request): # page รายได้งานวิจัย
 
     def get_budget_campas():  # แสดงเงินวิทยาเขต
         df = pd.read_csv("""mydj1/static/csv/budget_of_fac.csv""")
-        print(df)
+        # print(df)
         index_df = df["camp_name_thai"].unique()
 
         df = df[(df["budget_year"] == selected_year)]
@@ -4107,7 +4079,7 @@ def compare_ranking(request): #page เพื่อเปรียบเที�
         df_dot = pd.DataFrame()  # ตัวแปร dot เก็บ ค่าคะเเนน isi ในแต่ละปี ของแต่ละมหาลัย เพื่อวาดกราฟเส้นประ
         for item in data.values('short_name','name_eng','flag_used','color'): # วน for เพื่อตรวจสอบ ว่า มี มหาวิทยาลัยใหม่ ถูกเพิ่ม/หรือ ไม่ได้ใช้ (flag_used = false )มาในฐานข้อมูลหรือไม่
             print(item['flag_used'],' and ',item['short_name'])
-            if (item['flag_used'] == True) & (item['short_name'] in columns) :
+            if ((item['flag_used'] == True) | (item['flag_used'] == '1')) & (item['short_name'] in columns) :
                 df_line[item['short_name']] = df_isi[-20:-1][item['short_name']]
                 df_names[item['short_name']] = [item['name_eng'],item['color']]
                     
@@ -4139,7 +4111,7 @@ def compare_ranking(request): #page เพื่อเปรียบเที�
         
         ######  กราฟเส้นประ  #########
         for item in data.values('short_name','name_eng','flag_used','color'): # วน for เพื่อตรวจสอบ ว่า มี มหาวิทยาลัยใหม่ ถูกเพิ่ม/หรือ ไม่ได้ใช้ (flag_used = false )มาในฐานข้อมูลหรือไม่
-            if (item['flag_used'] == True) & (item['short_name'] in columns) :
+            if ((item['flag_used'] == True) | (item['flag_used'] == '1')) & (item['short_name'] in columns) :
                 df_dot[item['short_name']] = df_isi[-2:][item['short_name']]
                 
 
@@ -4235,7 +4207,7 @@ def compare_ranking(request): #page เพื่อเปรียบเที�
         df_line = pd.DataFrame()  # ตัวแปร line เก็บ ค่าคะเเนน scopus ในแต่ละปี ของแต่ละมหาลัย เพื่อวาดกราฟเส้นทึบ
         df_dot = pd.DataFrame()  # ตัวแปร dot เก็บ ค่าคะเเนน scopus ในแต่ละปี ของแต่ละมหาลัย เพื่อวาดกราฟเส้นประ
         for item in data.values('short_name','name_eng','flag_used','color'): # วน for เพื่อตรวจสอบ ว่า มี มหาวิทยาลัยใหม่ ถูกเพิ่ม/หรือ ไม่ได้ใช้ (flag_used = false )มาในฐานข้อมูลหรือไม่
-            if (item['flag_used'] == True) & (item['short_name'] in columns) :
+            if ((item['flag_used'] == True) | (item['flag_used'] == '1')) & (item['short_name'] in columns) :
                 df_line[item['short_name']] = df_sco[-20:-1][item['short_name']]
                 df_names[item['short_name']] = [item['name_eng'],item['color']]
           
@@ -4264,7 +4236,7 @@ def compare_ranking(request): #page เพื่อเปรียบเที�
         
         # # ####  กราฟเส้นประ
         for item in data.values('short_name','name_eng','flag_used','color'): # วน for เพื่อตรวจสอบ ว่า มี มหาวิทยาลัยใหม่ ถูกเพิ่ม/หรือ ไม่ได้ใช้ (flag_used = false )มาในฐานข้อมูลหรือไม่
-            if (item['flag_used'] == True) & (item['short_name'] in columns) :
+            if ((item['flag_used'] == True) | (item['flag_used'] == '1')) & (item['short_name'] in columns) :
                 df_dot[item['short_name']] = df_sco[-2:][item['short_name']]
                 
 
@@ -4359,7 +4331,7 @@ def compare_ranking(request): #page เพื่อเปรียบเที�
         df_line = pd.DataFrame()  # ตัวแปร line เก็บ ค่าคะเเนน tci ในแต่ละปี ของแต่ละมหาลัย เพื่อวาดกราฟเส้นทึบ
         df_dot = pd.DataFrame()  # ตัวแปร dot เก็บ ค่าคะเเนน tci ในแต่ละปี ของแต่ละมหาลัย เพื่อวาดกราฟเส้นประ
         for item in data.values('short_name','name_eng','flag_used','color'): # วน for เพื่อตรวจสอบ ว่า มี มหาวิทยาลัยใหม่ ถูกเพิ่ม/หรือ ไม่ได้ใช้ (flag_used = false )มาในฐานข้อมูลหรือไม่
-            if (item['flag_used'] == True) & (item['short_name'] in columns) :
+            if ((item['flag_used'] == True) | (item['flag_used'] == '1')) & (item['short_name'] in columns) :
                 df_line[item['short_name']] = df_tci[-20:-1][item['short_name']]
                 df_names[item['short_name']] = [item['name_eng'],item['color']]
                         
@@ -4390,7 +4362,7 @@ def compare_ranking(request): #page เพื่อเปรียบเที�
         
         ######  กราฟเส้นประ  #########
         for item in data.values('short_name','name_eng','flag_used','color'): # วน for เพื่อตรวจสอบ ว่า มี มหาวิทยาลัยใหม่ ถูกเพิ่ม/หรือ ไม่ได้ใช้ (flag_used = false )มาในฐานข้อมูลหรือไม่
-            if (item['flag_used'] == True) & (item['short_name'] in columns) :
+            if ((item['flag_used'] == True) | (item['flag_used'] == '1')) & (item['short_name'] in columns) :
                 df_dot[item['short_name']] = df_tci[-2:][item['short_name']]
                 
 
@@ -4524,7 +4496,7 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
 
         lin_reg = LinearRegression()
         lin_reg.fit(x, y)
-
+        # print(lin_reg.coef_) # ความชัน
         y_pre = lin_reg.predict(x)
 
        
@@ -4573,7 +4545,7 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
         X=poly_features.fit_transform(x) 
         poly_reg = LinearRegression()
         poly_reg.fit(X, y)
-
+        # print(poly_reg.coef_) # ความชัน
         y_pre = poly_reg.predict(X)
         
         # print(type( poly_reg.predict([[2563]])))
@@ -4623,7 +4595,7 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
         regressor = SVR(kernel = 'rbf')
 
         regressor.fit(X,y)
-
+        # print(regressor.coef_)  # ความชัน
         # ทำนาย
         x_test_1 = sc_y.inverse_transform(regressor.predict(sc_X.transform([[now_year]])))
         x_test_2 = sc_y.inverse_transform(regressor.predict(sc_X.transform([[now_year+1]])))
@@ -4647,17 +4619,23 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
         now_year = (datetime.now().year)+543
         
         df = pd.read_csv("""mydj1/static/csv/"""+ranking+""".csv""")
+        
         df = df[['year', 'PSU']]
         dataset = df[df['year'] != now_year]
+        
         df_x = df["year"][:-1:].to_frame().rename(columns={'year': "x"})
         df_y = df["PSU"][:-1:].to_frame().rename(columns={'PSU': "y"})
   
         df_2 = df[['year','PSU']][:-1:]
         df_2 = df_2.set_index("year")
-
-
-        model = ARIMA(df_2["PSU"], order=(1,1,2))
+        
+        
+        model = ARIMA(df_2["PSU"], order=(1,1,2))   # Order = (p,d,q)
+        # where p is preiods taken for autoregressive model
+        # d is Inteegrated order , difference
+        # q is preiods in moving average model 
         model_fit = model.fit(disp=0)
+        # print(model.coef_) # ความชัน
 
         trend = model_fit.predict(typ='levels')
         results_trend = trend.to_frame()
@@ -4666,13 +4644,13 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
         df_pred = join1['trend'].reset_index().drop(columns=['year'])
         df_pred.rename(columns={'trend': "y_pre"}, inplace=True)
         # print(results_pred)
-
+        
         index = df[df['year']==now_year].index.values
         
         pred = model_fit.predict(index[0],index[0]+3, typ='levels')
         results_pred = pred.to_frame().reset_index()
         results_pred = results_pred.drop(columns=['index'])
-
+        
         results_pred[0][0] = df_2.iloc[index[0]-1][0]
         results_pred.rename(columns={0: "pred"}, inplace=True)
         new_col = [now_year-1, now_year, now_year+1 ,now_year+2]
@@ -4735,48 +4713,51 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
         visible = True
         
         for n in range(4):
-            if n == 0:
-                df_x, df_y, results_pred, df_y_pre = poly_regression(ranking, shortname)
-                label = "Polynomial Regression" 
-                color_dot = "#9B59B6"
-                color_line = "#D2B4DE"
-                visible = True
-            elif n ==1:
-                df_x, df_y, results_pred, df_y_pre = linear_regression(ranking, shortname)
-                label = "Linear Regression"
-                color_dot = "#E74C3C"   
-                color_line = "#F5B7B1"
-                visible = "legendonly"  # ไม่ใช้แสดง legend ตอนเริ่มแรก 
-            elif n == 2: 
-                df_x, df_y, results_pred, df_y_pre = support_vector_regression(ranking, shortname)
-                label = "Support Vector Regression"
-                color_dot = "#F1C40F"
-                color_line = "#F9E79F"
-                visible = "legendonly"  # ไม่ใช้แสดง legend ตอนเริ่มแรก
-
-            elif n == 3: 
+            try:
                 
-                df_x, df_y, results_pred, df_y_pre = ARIMA_regression(ranking, shortname)
-                label = "ARIMA Regression"
-                color_dot = "#2ECC71"
-                color_line = "#82E0AA"
-                visible = "legendonly"  # ไม่ใช้แสดง legend ตอนเริ่มแรก
-            
-            fig.add_trace(go.Scatter(x=results_pred['year'], y=results_pred['pred'],  # เส้นผลลัพธ์การทำนาย เส้นประ
-                            mode='markers+lines',
-                            line=dict( width=2, dash='dot',color=color_dot),
-                            name=label+'| Predicted Line',
-                            legendgroup = label,
-                            visible = visible
-                            ))
+                if n == 0: # poly_regression
+                    df_x, df_y, results_pred, df_y_pre = poly_regression(ranking, shortname)
+                    label = "Polynomial Regression" 
+                    color_dot = "#9B59B6"
+                    color_line = "#D2B4DE"
+                    visible = True
+                elif n ==1: # linear_regression
+                    df_x, df_y, results_pred, df_y_pre = linear_regression(ranking, shortname)
+                    label = "Linear Regression"
+                    color_dot = "#E74C3C"   
+                    color_line = "#F5B7B1"
+                    visible = "legendonly"  # ไม่ใช้แสดง legend ตอนเริ่มแรก 
+                elif n == 2: # support_vector_regression
+                    df_x, df_y, results_pred, df_y_pre = support_vector_regression(ranking, shortname)
+                    label = "Support Vector Regression"
+                    color_dot = "#F1C40F"
+                    color_line = "#F9E79F"
+                    visible = "legendonly"  # ไม่ใช้แสดง legend ตอนเริ่มแรก
 
-            fig.add_trace(go.Scatter(x=df_x['x'], y=df_y_pre['y_pre'],  # วาด Trend Line สีเทา
-                            mode='lines',
-                            line=dict( width=2,color=color_line),
-                            name=label+'| Trend Line',
-                            legendgroup = label,
-                            visible = visible
-                            ))
+                elif n == 3: # ARIMA_regression
+                    df_x, df_y, results_pred, df_y_pre = ARIMA_regression(ranking, shortname)
+                    label = "ARIMA Regression"
+                    color_dot = "#2ECC71"
+                    color_line = "#82E0AA"
+                    visible = "legendonly"  # ไม่ใช้แสดง legend ตอนเริ่มแรก
+                
+                fig.add_trace(go.Scatter(x=results_pred['year'], y=results_pred['pred'],  # เส้นผลลัพธ์การทำนาย เส้นประ
+                                mode='markers+lines',
+                                line=dict( width=2, dash='dot',color=color_dot),
+                                name=label+'| Predicted Line',
+                                legendgroup = label,
+                                visible = visible
+                                ))
+                
+                fig.add_trace(go.Scatter(x=df_x['x'], y=df_y_pre['y_pre'],  # วาด Trend Line สีเทา
+                                mode='lines',
+                                line=dict( width=2,color=color_line),
+                                name=label+'| Trend Line',
+                                legendgroup = label,
+                                visible = visible
+                                ))
+            except:
+                continue
 
         fig.add_trace(go.Scatter(x=df_x['x'], y=df_y['y'],  # วาดเส้น Actual line สีฟ้า
                 mode='markers+lines',
@@ -4842,9 +4823,6 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
         selected_ranking = request.POST["data"]
 
 
-    
-
-        
     context={
         ###### Head_page ########################    
         # 'head_page': get_head_page(),
@@ -4964,6 +4942,10 @@ def pageResearchMan(request):
     
     
     return render(request,'importDB/research_man.html',context)  
+
+##################################################################
+##### " function Login ##############
+##################################################################
 
 def login_(request):
     print("---login---")

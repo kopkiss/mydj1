@@ -201,12 +201,14 @@ LOGIN_URL = 'login'
 LOGOUT_REDIRECT_URL = 'login'  # เมื่อกดปุ่ม logout ให้วิ่ง ไปที่ name = 'login' ในไฟล์ urls.py
 LOGIN_REDIRECT_URL = 'home-page' # เมื่อ loginเสร็จ ให้วิ่ง ไปที่ name = 'home-page' ในไฟล์ urls.py
 
-#Handle session logout อัตโนมัติ
-SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
+############### Handle session logout อัตโนมัติ ############################
+SESSION_COOKIE_AGE = 60 * 60 #  5 * 60 = 5 นาที
+# SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
+# SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
-MIDDLEWARE_CLASSES = ['mydj1.middleware.AutoLogout',]
+# MIDDLEWARE_CLASSES = ['importDB.middleware.AutoLogout',]
 # Auto logout delay in minutes
-AUTO_LOGOUT_DELAY = 5 #equivalent to 5 minutes
+# AUTO_LOGOUT_DELAY = 1 #equivalent to 5 minutes
 ##########################################################################
  
 # Access-Control-Allow-Origin : http://localhost:3000
