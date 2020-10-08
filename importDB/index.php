@@ -2,7 +2,7 @@
     // include ('../connect_db.php');
     // session_start();
     // --- Check LDAP ----//
-        error_reporting(0);
+        // error_reporting(0);
 
         # ป้องกันการ SQL Injection 
         # โดยการใช้ $mysqli -> real_escape_string( ) เป็นฟังก์ชันสำหรับเลี่ยงการใช้ตัวอักขระพิเศษในคำสั่ง sql เช่น เครื่องหมาย " เครื่องหมาย ' เป็นต้น 
@@ -10,8 +10,9 @@
         $user = $mysqli -> real_escape_string($argv[1]);
         $pass = $mysqli -> real_escape_string($argv[2]);
         
+        
         if(isset($user)){
-
+                
           //Include PHPLDAP Class File
           require "ldappsu.php"; # เรียก ldapp ของระบบ psu Passport เพื่อ ตรวจสอบ password และ user
 
@@ -21,9 +22,9 @@
           $domain = "psu.ac.th";
           
           //Call function authentication
-          error_reporting(0);
+        //   error_reporting(0);
           $ldap = authenticate($server,$basedn,$domain,$user,$pass);
-
+          echo($ldap);
           # echo ข้อมูลที่จะเอาไปใช้ ใน Django เพราะว่า Django ดักข้อมูล ที่ผ่านการ echo ใน php ได้
           echo $ldap[0]; 
           echo ",";

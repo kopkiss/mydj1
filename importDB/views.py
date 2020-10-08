@@ -19,7 +19,6 @@ from .models import PRPM_v_grt_pj_budget_eis
 from .models import Prpm_v_grt_project_eis
 from .models import master_ranking_university_name
 
-
 import pymysql
 import cx_Oracle
 from sqlalchemy.engine import create_engine
@@ -2121,6 +2120,8 @@ def query1(): # 12 types of budget, budget_of_fac
     print("Starting Query#1 ...")
     checkpoint = True
     os.environ["NLS_LANG"] = ".UTF8"  # ทำให้แสดงข้อความเป็น ภาษาไทยได้
+    fiscal_year = get_fiscal_year() # ปีงบประมาณ
+    print("ปีงบประมาณ",fiscal_year)
     try:   
         sql_cmd =  """with temp1 as ( 
                         select psu_project_id, budget_year, budget_source_group_id, sum(budget_amount) as budget_amount
@@ -2165,13 +2166,13 @@ def query1(): # 12 types of budget, budget_of_fac
                             
                         select budget_year, budget_source_group_id,budget_source_group_th, sum(sum_final_budget) as sum_final_budget
                     from temp5
-                    where budget_year between YEAR(date_add(NOW(), INTERVAL 543 YEAR))-10 and YEAR(date_add(NOW(), INTERVAL 543 YEAR))
+                    where budget_year between """+str(fiscal_year-9)+""" and """+str(fiscal_year)+"""
                     group by 1,2,3 """
 
         con_string = getConstring('sql')
 
         df = pm.execute_query(sql_cmd, con_string)
-        
+        print(df)
         ############## build dataframe for show in html ##################
         index_1 = df["budget_year"].unique()
         df2 = pd.DataFrame(columns=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],index = index_1)  
@@ -2190,10 +2191,10 @@ def query1(): # 12 types of budget, budget_of_fac
                 
         df2.to_csv ("""mydj1/static/csv/12types_of_budget.csv""", index = True, header=True)
         print ("Data#1 is saved")
-        ##################################################
-        ################## save ตาราง แยกคณะ #############
-        ##################################################
-        sql_cmd =  '''WITH temp1 AS (
+        #################################################
+        ################# save ตาราง แยกคณะ #############
+        #################################################
+        sql_cmd =  """WITH temp1 AS (
                             SELECT
                                 psu_project_id,
                                 budget_year,
@@ -2255,9 +2256,9 @@ def query1(): # 12 types of budget, budget_of_fac
                             FROM
                                 temp5 AS A
                                 JOIN importdb_budget_source_group AS B ON A.budget_source_group_id = B.budget_source_group_id 
-                            WHERE budget_year between YEAR(date_add(NOW(), INTERVAL 543 YEAR))-10 and YEAR(date_add(NOW(), INTERVAL 543 YEAR))      
+                            where budget_year between """+str(fiscal_year-9)+""" and """+str(fiscal_year)+"""
                             GROUP BY 1, 2, 3, 4, 5, 6
-                                '''
+                                """
 
         con_string = getConstring('sql')
         df = pm.execute_query(sql_cmd, con_string)
@@ -2277,12 +2278,15 @@ def query2(): # รายได้ในประเทศ รัฐ/เอก�
     print("Starting Query#2 ...")
     checkpoint = True
     os.environ["NLS_LANG"] = ".UTF8"  # ทำให้แสดงข้อความเป็น ภาษาไทยได้
+    fiscal_year = get_fiscal_year() # ปีงบประมาณ
+    print("ปีงบประมาณ",fiscal_year)
+
     try:      
         sql_cmd = """with temp1 as ( 
                         select psu_project_id, budget_year, budget_source_group_id, sum(budget_amount) as budget_amount
                         from cleaned_prpm_budget_eis
                         where budget_group = 4 
-                                                                and budget_source_group_id = 3
+                              and budget_source_group_id = 3
                         group by 1, 2,3 
                         order by 1
                     ),
@@ -2302,11 +2306,11 @@ def query2(): # รายได้ในประเทศ รัฐ/เอก�
                     )
                                         
                                             
-                                    select t1.budget_year,fund_type_group, fund_type_group_th, camp_name_thai,fac_name_thai,lu_percent, lu_percent/100*budget_amount as final_budget
+                select t1.budget_year,fund_type_group, fund_type_group_th, camp_name_thai,fac_name_thai,lu_percent, lu_percent/100*budget_amount as final_budget
                 from temp1 as t1
                 join temp2 as t2 on t1.psu_project_id = t2.psu_project_id
                 join temp3 as t3 on t1.psu_project_id = t3.psu_project_id
-                where  budget_year between YEAR(date_add(NOW(), INTERVAL 543 YEAR))-10 and YEAR(date_add(NOW(), INTERVAL 543 YEAR))
+                where budget_year between """+str(fiscal_year-9)+""" and """+str(fiscal_year)+"""
                         and submit_year > 2553 
                         and research_position_id <> 2
                         
@@ -2337,14 +2341,15 @@ def query3(): # Query รูปกราฟ ที่จะแสดงใน �
     print("Starting Query#3 ...")
     checkpoint = True
     os.environ["NLS_LANG"] = ".UTF8"  # ทำให้แสดงข้อความเป็น ภาษาไทยได้
+    fiscal_year = get_fiscal_year() # ปีงบประมาณ
+    print("ปีงบประมาณ",fiscal_year)
     try:
-        ### 11 กราฟ ในหัวข้อ 1 - 11
-        FUND_SOURCES = ["0","1","2","3","4","5","6","7","8","9","10","11"]  # ระบุหัว column ทั้ง 11 ห้วข้อใหญ๋
+        ### 11 กราฟ ในหัวข้อ 1 - 11  หรือ 12 ที่ไม่ระบุที่มา
+        FUND_SOURCES = ["0","1","2","3","4","5","6","7","8","9","10","11"]  # ระบุหัว column ทั้ง 12 ห้วข้อใหญ๋
 
         df = pd.read_csv("""mydj1/static/csv/12types_of_budget.csv""", index_col=0)
-
-        now = datetime.now()
-        now_year = now.year+543
+        # now = datetime.now()
+        now_year = fiscal_year # ปีงบประมาณ
         temp = 0 
         for i, index in enumerate(df.index):  # temp เพื่อเก็บ ว่า ปีปัจจุบัน อยุ่ใน row ที่เท่าไร
             if index == now_year:
@@ -2355,7 +2360,8 @@ def query3(): # Query รูปกราฟ ที่จะแสดงใน �
             print(i)
             df2 = df[FUND_SOURCE][:temp-1].to_frame()   # กราฟเส้นทึบ
             df3 = df[FUND_SOURCE][temp-2:temp].to_frame()  # กราฟเส้นประ
-            df4 = df['11'][:10-(now_year-2563)].to_frame() # กราฟ ของ แหล่งงบประมาณที่ไม่ระบุ (สีเทา)
+            # df4 = df['11'][:10-(now_year-2563)].to_frame() # กราฟ ของ แหล่งงบประมาณที่ไม่ระบุ (สีเทา)
+            df4 = df['11'][:].to_frame() # กราฟ ของ แหล่งงบประมาณที่ไม่ระบุ (สีเทา)
             print(df4)
             
             # กราฟสีเทา
@@ -3187,7 +3193,11 @@ def query12(): # จำนวนผู้วิจัยหลัก
         print('At Query#12: Something went wrong :', e)
         return checkpoint
 
-
+def get_fiscal_year(): # return ปีงบประมาณ
+    date = datetime.now()
+    return ((date.year+1)+543) if (date.month >= 10) else ((date.year)+543)
+    
+    
 ##################################################################
 ##### " function หลัก " ในการ สร้าง page html และ อื่นๆ ##############
 ##################################################################
@@ -3353,6 +3363,13 @@ def pageRevenues(request): # page รายได้งานวิจัย
 
         return str(d.day)+'/'+str(d.month)+'/'+str(d.year+543)
 
+    def get_fiscal_year(): # return ปีงบประมาณ
+        date = datetime.now()
+        if date.month >= 10:  # ปีงบประมาณใหม่
+            return (date.year)+543+1
+        else:
+            return (date.year)+543  #ปีงบประมาณเดิม
+
     context={
         ###### Head_page ########################    
         'head_page': get_head_page(),
@@ -3362,7 +3379,8 @@ def pageRevenues(request): # page รายได้งานวิจัย
         'sum' : get_sum_budget(),
         'gov': get_budget_gov(),
         'comp': get_budget_comp(),
-        'year' :range((datetime.now().year+1)+533,(datetime.now().year+1)+543),
+        # 'year' :range((datetime.now().year+1)+533,(datetime.now().year+1)+543),
+        'year' :range(get_fiscal_year()-9 ,get_fiscal_year()+1),
         'filter_year': selected_year,
         'campus' : get_budget_campas(),
         'graph1' :graph1(),
@@ -3379,6 +3397,10 @@ def revenues_graph(request, value):  # รับค่า value มาจาก 
     def moneyformat(x):  # เอาไว้เปลี่ยน format เป็นรูปเงิน
         return "{:,.2f}".format(x)
 
+    def get_fiscal_year(): # return ปีงบประมาณ
+        date = datetime.now()
+        return ((date.year+1)+543) if (date.month >= 10) else ((date.year)+543)
+
     def graph(source):
         
         if  int(source) < 14:
@@ -3386,7 +3408,7 @@ def revenues_graph(request, value):  # รับค่า value มาจาก 
             
             dff2 = pd.read_csv("""mydj1/static/csv/12types_of_budget.csv""", index_col=0)
             now = datetime.now()
-            now_year = now.year+543
+            now_year = get_fiscal_year()
             # now_year = 2565
             temp = 0 
             for i, index in enumerate(df.index):  # temp เพื่อเก็บ ว่า ปีปัจจุบัน อยุ่ใน row ที่เท่าไร
@@ -4715,24 +4737,26 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
                     color_dot = "#9B59B6"
                     color_line = "#D2B4DE"
                     visible = True
-                elif n ==1: # linear_regression
-                    df_x, df_y, results_pred, df_y_pre = linear_regression(ranking, shortname)
-                    label = "Linear Regression"
-                    color_dot = "#E74C3C"   
-                    color_line = "#F5B7B1"
-                    visible = "legendonly"  # ไม่ใช้แสดง legend ตอนเริ่มแรก 
-                elif n == 2: # support_vector_regression
-                    df_x, df_y, results_pred, df_y_pre = support_vector_regression(ranking, shortname)
-                    label = "Support Vector Regression"
-                    color_dot = "#F1C40F"
-                    color_line = "#F9E79F"
-                    visible = "legendonly"  # ไม่ใช้แสดง legend ตอนเริ่มแรก
 
-                elif n == 3: # ARIMA_regression
+                elif n ==1: # linear_regression
                     df_x, df_y, results_pred, df_y_pre = ARIMA_regression(ranking, shortname)
                     label = "ARIMA Regression"
                     color_dot = "#2ECC71"
                     color_line = "#82E0AA"
+                    visible = "legendonly"  # ไม่ใช้แสดง legend ตอนเริ่มแรก
+
+                elif n == 2: # support_vector_regression
+                    df_x, df_y, results_pred, df_y_pre = linear_regression(ranking, shortname)
+                    label = "Linear Regression"
+                    color_dot = "#E74C3C"   
+                    color_line = "#F5B7B1"
+                    visible = "legendonly"  # ไม่ใช้แสดง legend ตอนเริ่มแรก
+
+                elif n == 3: # ARIMA_regression
+                    df_x, df_y, results_pred, df_y_pre = support_vector_regression(ranking, shortname)
+                    label = "Support Vector Regression"
+                    color_dot = "#F1C40F"
+                    color_line = "#F9E79F"
                     visible = "legendonly"  # ไม่ใช้แสดง legend ตอนเริ่มแรก
                 
                 fig.add_trace(go.Scatter(x=results_pred['year'], y=results_pred['pred'],  # เส้นผลลัพธ์การทำนาย เส้นประ
@@ -4962,7 +4986,8 @@ def login_(request):
         decode = script_response.decode("utf-8")  # ทำการ decode จาก bit เป็น string
 
         user_list = decode.split(",") # split ข้อมูล ด้วย , 
-        # print("list --> ",user_list)
+        print(script_response)
+        print("list --> ",decode)
         # print(user_list[0])
         # print(user_list[1])
         
