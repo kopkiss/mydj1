@@ -6,7 +6,8 @@ import os
 import json
 import requests
 from pprint import pprint
-
+import warnings
+import itertools
 # เกี่ยวกับวันที่ 
 from datetime import datetime
 import time
@@ -4643,37 +4644,67 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
         df_y = df["PSU"][:-1:].to_frame().rename(columns={'PSU': "y"})
   
         df_2 = df[['year','PSU']][:-1:]
-        df_2 = df_2.set_index("year")
         
+        # log test : ทำการ take log ฐาน e ให้กับ ค่าจำนวนการตีพิมพ์ เพื่อ ให้เหมาะสมกับการทำ ARIMA_regression
+        log = np.log(df_2["PSU"])
+        df_log = pd.DataFrame({'year':df.year[:-1],'PSU': log})
+        df_log = df_log.set_index('year')
         
-        model = ARIMA(df_2["PSU"], order=(1,1,2))   # Order = (p,d,q)
-        # where p is preiods taken for autoregressive model
-        # d is Inteegrated order , difference
-        # q is preiods in moving average model 
-        model_fit = model.fit(disp=0)
-        # print(model.coef_) # ความชัน
+        ### สร้าง pdq parameter เพื่อ วน test หา parameter ที่ดีที่สุด
+        p=d=q = range(0,3)
+        pdq = list(itertools.product(p,d,q))
 
-        trend = model_fit.predict(typ='levels')
-        results_trend = trend.to_frame()
-        results_trend.rename(columns={0: "trend"}, inplace=True)
-        join1 = df_2.join(results_trend)
-        df_pred = join1['trend'].reset_index().drop(columns=['year'])
-        df_pred.rename(columns={'trend': "y_pre"}, inplace=True)
-        # print(results_pred)
+        ###ทำการ วน test หา parameter ที่ดีที่สุด #####
+        warnings.filterwarnings('ignore')
+        aics = []
+        combs = {}
+        for param in pdq:
+            try:
+        #         print(param)
+                model = ARIMA(df_log, order=param)
+                model_fit = model.fit(disp=0)
+        #         results = model_fit.plot_predict(dynamic=False)
+        #         plt.show()
+                print(param,":",model_fit.aic)
+                combs.update({model_fit.aic : [param]})
+                aics.append(model_fit.aic)
+            except:
+                continue
+
+        ## เมื่อได้ parameter ที่ดีที่สุด ทำการ fit model
+        model = ARIMA(df_log, order=combs[min(aics)][0])
+        model_fit = model.fit() 
+
+        ## ทำการเตรียม output เพื่อ return ไป plot graph
+        now_year = (datetime.now().year)+543
         
         index = df[df['year']==now_year].index.values
-        
-        pred = model_fit.predict(index[0],index[0]+3, typ='levels')
-        results_pred = pred.to_frame().reset_index()
-        results_pred = results_pred.drop(columns=['index'])
-        
-        results_pred[0][0] = df_2.iloc[index[0]-1][0]
-        results_pred.rename(columns={0: "pred"}, inplace=True)
-        new_col = [now_year-1, now_year, now_year+1 ,now_year+2]
-        results_pred.insert(loc=0, column='year', value=new_col)
 
+        con_df1 = pd.DataFrame({'year':[now_year-1],'pred':df_2.iloc[index[0]-1][1]})
+        con_df2 = pd.DataFrame({'year':[2563,2564,2565],'pred':model_fit.forecast(steps=3)[0]})
+        con_df2['pred'] = con_df2['pred'].apply(lambda x : np.e**x )
+        results_pred= pd.concat([con_df1,con_df2], ignore_index=True)
+
+        # trend line
+        trend = model_fit.predict(typ='levels')
+        results_trend = trend.to_frame()
+        results_trend.rename(columns={0: "y_pre"}, inplace=True)
+        results_trend_real= results_trend.apply(lambda x : np.e**x )
+        
+        df_pred = results_trend_real.reset_index()  
+        df_pred = df_pred['y_pre']
+        df_pred = df_pred.to_frame()
+
+        y_pre_df1 = pd.DataFrame({'y_pre':[0]})
+
+        df_pred= pd.concat([y_pre_df1,df_pred], ignore_index=True)
+
+        # print(df_x)
+        # print(df_y)
+        # print(results_pred)
+        # print(df_pred)
         return  df_x, df_y, results_pred, df_pred
-       
+     
     def plot_graph(ranking, shortname):
 
         now_year = (datetime.now().year)+543
@@ -4731,18 +4762,18 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
         for n in range(4):
             try:
                 
-                if n == 0: # poly_regression
-                    df_x, df_y, results_pred, df_y_pre = poly_regression(ranking, shortname)
-                    label = "Polynomial Regression" 
-                    color_dot = "#9B59B6"
-                    color_line = "#D2B4DE"
-                    visible = True
-
-                elif n ==1: # linear_regression
+                if n ==0: # linear_regression
                     df_x, df_y, results_pred, df_y_pre = ARIMA_regression(ranking, shortname)
                     label = "ARIMA Regression"
                     color_dot = "#2ECC71"
                     color_line = "#82E0AA"
+                    visible = True
+
+                elif n == 1: # poly_regression
+                    df_x, df_y, results_pred, df_y_pre = poly_regression(ranking, shortname)
+                    label = "Polynomial Regression" 
+                    color_dot = "#9B59B6"
+                    color_line = "#D2B4DE"
                     visible = "legendonly"  # ไม่ใช้แสดง legend ตอนเริ่มแรก
 
                 elif n == 2: # support_vector_regression
