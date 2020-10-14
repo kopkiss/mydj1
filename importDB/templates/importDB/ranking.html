@@ -15,29 +15,27 @@
       Last updated: {{date}}
     </div>
   </div>
-  <div class="row"  >
-    <div class=" col-xl-7 col-sm-11 ml-4 mb-3 card pretty_container " style="width:100%;">
-      <div class="row mb-2" >
-        <div class = "col">
-          <h5 class = "subtitle mt-3 mb-0"> &nbsp;จำนวนการตีพิมพ์ต่อปี (Scopus, ISI-WoS, TCI)</h5>
-        </div> 
-        <span class ="mt-2 ml-1">
-          <form action="comparing" target="_blank" method=GET>
+  <div class="row "  >
+    <div class=" ranking-col1 ml-4 mb-3 mr-2 card pretty_container">
+      <div class="row" >
+        <span class ="ranking-com_pre-button-col1 mt-2 ml-4">
+          <h5 class = "subtitle mt-3 ml-2" style="display:inline-block"> &nbsp; จำนวนการตีพิมพ์ต่อปี (Scopus, ISI-WoS, TCI)</h5>
+        </span>
+        <span class ="ranking-com_pre-button-col1 mt-3 ml-4" >
+          <form action="comparing" target="_blank" method=GET style="display:inline-block; ">
             <input name = Comparing type="submit" value="Comparison" class="btn-shadow btn btn-info" style="width:auto; "/>
           </form>
-        </span> 
-        <span class ="mt-2 mx-1"> 
-          <form action="prediction" target="_blank" method=GET>
+          <form action="prediction" target="_blank" method=GET style="display:inline-block;  ">
             <input name = Prediction type="submit" value="Prediction" class="btn-shadow btn btn-success" style="width:auto; "/>
           </form>
-        </span>  
+        </span> 
       </div>
-      
+      <span class = "pl-2 pr-5">
         {{ line_chart_publication | safe }}
-      
+      </span>
     </div>
-    <div class=" col-xl-4 col-sm-11 mx-4 mb-3">            
-      <div class="row mb-3" >
+    <div class=" ranking-col2 ">            
+      <div class="row mb-3 ml-4 mr-2" >
         <div class="card pretty_container" style="position: relative;width: 100%;height: 10rem;">
           <div class="row" >
             <div class = "col" >
@@ -49,20 +47,19 @@
           </div>
         </div>
       </div>
-      <div class="row mb-3" >
+      <div class="row mb-3 ml-4 mr-2" >
         <div class="card pretty_container" style="position: relative;width: 100%;height: 10rem;">
           <div class="row" >
             <div class = "col">
               <h5 class = "subtitle mt-3 mb-1 ml-3 " >&nbsp;จำนวนการตีพิมพ์รวมในฐาน ISI-WoS</h5> 
             </div>
-            
           </div>
           <div class="card-body h2 text-primary" style="text-align: center; font-size: 300%" >
             {{ total_publication.isi |intcomma }}
           </div>
         </div>
       </div>
-      <div class="row " >
+      <div class="row mb-3 ml-4 mr-2" >
         <div class="card pretty_container" style="position: relative;width: 100%;height: 10rem;">
           <div class="row" >
             <div class = "col">
@@ -83,12 +80,14 @@
     </div>
   </div>
   <div class="row ">
-    <div class=" col-xl-7 col-sm-11 ml-4 mb-3 card pretty_container " style="width: 100% "> 
-      <h5 class = "subtitle mt-3 mb-0"> &nbsp;Sum of Times Cited per Year (ISI-WoS)</h5>  
+    <div class=" ranking-col1 ml-4 mb-3 mr-2 card pretty_container " > 
+      <h5 class = "subtitle mt-3 mb-0 ml-3"> &nbsp;Sum of Times Cited per Year (ISI-WoS)</h5> 
+      <span class = "pl-2 pr-5" >
         {{ line_chart_cited | safe }}
+      </span> 
     </div>
-    <div class=" col-xl-4 col-sm-11 mx-4 mb-3">            
-      <div class="row mb-3" >
+    <div class=" ranking-col2">         
+      <div class="row mb-3 ml-4 mr-2" >
         <div class="card pretty_container" style="position: relative;width: 100%;height: 8rem;">
           <div class="row" >
             <div class="col-xs-12 col-md-12 col-lg-12 "  >
@@ -115,7 +114,7 @@
           </row>
         </div>
       </div>
-      <div class="row mb-3" >
+      <div class="row mb-3 ml-4 mr-2" >
         <div class="card pretty_container" style="position: relative;width: 100%;height: 8rem;">
           <div class="row" >
             <div class="col-xs-12 col-md-12 col-lg-12 "  >
@@ -136,7 +135,7 @@
           </div>
         </div>
       </div>
-      <div class="row mb-3" >
+      <div class="row mb-3 ml-4 mr-2" >
         <div class="card pretty_container" style="position: relative;width: 100%;height: 8rem;">
           <div class="row" >
             <div class="col-xs-12 col-md-12 col-lg-12 "  >
@@ -156,7 +155,7 @@
           </div>
         </div>
       </div>
-      <div class="row " >
+      <div class="row mb-3 ml-4 mr-2" >
         <div class="card pretty_container" style="position: relative;width: 100%;height: 8rem;">
           <div class="row" >
             <div class="col-xs-12 col-md-12 col-lg-12 "  >
@@ -179,22 +178,22 @@
       
     </div>
   </div>
-  <div class="row"  >
-    <div class=" col-xl-11 col-sm-11 ml-4 mr-2 mb-3 card pretty_container" >
-      <div class ="row ml-1">
-        <h5 class = "subtitle mt-3 mb-0">&nbsp;Web of Science Catagories & Research Areas  </h5>    
+  <div class="row " >
+    <div class=" ml-4 mb-3 mr-3 card pretty_container" style="width:100% ">
+      <div class ="row ml-3">
+        <h5 class = "subtitle mt-3 mb-0 ">&nbsp;Web of Science Catagories & Research Areas  </h5>    
         &nbsp;
         <select id="option" name="option" class="ml-3 mt-2 mb-1 btn ex2 btn-info dropdown-toggle" style=" width:auto; " >
-              <option value="categ" selected>Categories</option>
-              <option value="resea">Research Areas</option>
+          <option value="categ" selected>Categories</option>
+          <option value="resea">Research Areas</option>
         </select>
       </div>
-        <div id="bar1" name = 'bar1'>
-          {{ bar_chart1 | safe }}
-        </div>
-        <div id="bar2" name = 'bar2'>
-          {{ bar_chart2 | safe }}
-        </div>
+      <div id="bar1" name = 'bar1'>
+        {{ bar_chart1 | safe }}
+      </div>
+      <div id="bar2" name = 'bar2'>
+        {{ bar_chart2 | safe }}
+      </div>
     </div>
 
   </div>

@@ -3941,7 +3941,7 @@ def pageRanking(request): # page Ranking ISI/SCOPUS/TCI
 
         fig.update_layout(legend=dict(orientation="h"))
         fig.update_layout(
-            margin=dict(t=55),
+            margin=dict(t=55, ),
         )
 
         plot_div = plot(fig, output_type='div', include_plotlyjs=False,)
