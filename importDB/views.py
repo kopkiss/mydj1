@@ -488,8 +488,8 @@ def rodReport(request):
     return render(request,'importDB/rodreport.html',{'posts':data})
 
 ###################################################################
-#### " DUMP " เพื่อ dump ข้อมูลจาก External Data เช่น Oracle ####
-#### " Query " เพื่อ query ข้อมูลจาก MySQL ####
+#### ฟังก์ชันหลัก " DUMP " เพื่อ dump ข้อมูลจาก External Data เช่น Oracle ####
+#### ฟังก์ชันหลัก " Query " เพื่อ query ข้อมูลจาก MySQL ####
 ###################################################################
 
 @login_required(login_url='login')
@@ -1219,6 +1219,12 @@ def query(request): # Query ฐานข้อมูล Mysql (เป็น .csv
             dt = datetime.now()
             timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
             whichrows = 'row12'
+
+        elif request.POST['row']=='Query13': # หา Parameter ของ ARIMA Model
+            checkpoint = query13() 
+            dt = datetime.now()
+            timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
+            whichrows = 'row13'
 
         
         if checkpoint == 'chk_ranking':
@@ -3072,7 +3078,10 @@ def query12(): # จำนวนผู้วิจัยหลัก
                         importdb_hrmis_v_aw_for_ranking 
                     WHERE
                         end_year = """+str(now_year)+"""
-                        AND ( corresponding = 1 OR corresponding = 2 OR corresponding = 3 ) 
+                        AND (
+                                corresponding = 1 OR corresponding = 2 OR corresponding = 3 OR 
+                                (corresponding is Null and type_id=1)
+                            ) 
                         AND ( pos_name_thai = 'อาจารย์' OR pos_name_thai = 'รองศาสตราจารย์' OR pos_name_thai = 'ผู้ช่วยศาสตราจารย์' OR pos_name_thai = 'ศาสตราจารย์' ) 
                         AND ( JDB_ID = 1 OR JDB_ID = 4 )"""
         
@@ -3082,7 +3091,10 @@ def query12(): # จำนวนผู้วิจัยหลัก
                         importdb_hrmis_v_aw_for_ranking 
                     WHERE
                         end_year = """+str(now_year-1)+"""
-                        AND ( corresponding = 1 OR corresponding = 2 OR corresponding = 3 ) 
+                        AND (
+                                corresponding = 1 OR corresponding = 2 OR corresponding = 3 OR 
+                                (corresponding is Null and type_id=1)
+                            ) 
                         AND ( pos_name_thai = 'อาจารย์' OR pos_name_thai = 'รองศาสตราจารย์' OR pos_name_thai = 'ผู้ช่วยศาสตราจารย์' OR pos_name_thai = 'ศาสตราจารย์' ) 
                         AND ( JDB_ID = 1 OR JDB_ID = 4 )"""
 
@@ -3092,7 +3104,10 @@ def query12(): # จำนวนผู้วิจัยหลัก
                         importdb_hrmis_v_aw_for_ranking 
                     WHERE
                         end_year = """+str(now_year)+"""
-                        AND ( corresponding = 1 OR corresponding = 2 OR corresponding = 3 ) 
+                        AND (
+                                corresponding = 1 OR corresponding = 2 OR corresponding = 3 OR 
+                                (corresponding is Null and type_id=1)
+                            ) 
                         AND ( JDB_ID = 1 OR JDB_ID = 4 )
                         AND pos_name_thai = 'นักวิจัย' """
 
@@ -3102,7 +3117,10 @@ def query12(): # จำนวนผู้วิจัยหลัก
                         importdb_hrmis_v_aw_for_ranking 
                     WHERE
                         end_year = """+str(now_year-1)+"""
-                        AND ( corresponding = 1 OR corresponding = 2 OR corresponding = 3 ) 
+                        AND (
+                                corresponding = 1 OR corresponding = 2 OR corresponding = 3 OR 
+                                (corresponding is Null and type_id=1)
+                            )  
                         AND ( JDB_ID = 1 OR JDB_ID = 4 )
                         AND pos_name_thai = 'นักวิจัย' """          
 
@@ -3112,7 +3130,10 @@ def query12(): # จำนวนผู้วิจัยหลัก
                         importdb_hrmis_v_aw_for_ranking 
                     WHERE
                         end_year = """+str(now_year)+"""
-                        AND ( corresponding = 1 OR corresponding = 2 OR corresponding = 3 ) 
+                        AND (
+                                corresponding = 1 OR corresponding = 2 OR corresponding = 3 OR 
+                                (corresponding is Null and type_id=1)
+                            )  
                         AND ( JDB_ID = 1 OR JDB_ID = 4 )
                         AND pos_name_thai = 'นักวิจัยหลังปริญญาเอก' """
 
@@ -3122,7 +3143,10 @@ def query12(): # จำนวนผู้วิจัยหลัก
                         importdb_hrmis_v_aw_for_ranking 
                     WHERE
                         end_year = """+str(now_year-1)+"""
-                        AND ( corresponding = 1 OR corresponding = 2 OR corresponding = 3 ) 
+                        AND (
+                                corresponding = 1 OR corresponding = 2 OR corresponding = 3 OR 
+                                (corresponding is Null and type_id=1)
+                            ) 
                         AND ( JDB_ID = 1 OR JDB_ID = 4 )
                         AND pos_name_thai = 'นักวิจัยหลังปริญญาเอก' """
 
@@ -3132,7 +3156,10 @@ def query12(): # จำนวนผู้วิจัยหลัก
                         importdb_hrmis_v_aw_for_ranking 
                     WHERE
                         end_year = """+str(now_year)+"""
-                        AND ( corresponding = 1 OR corresponding = 2 OR corresponding = 3 ) 
+                        AND (
+                                corresponding = 1 OR corresponding = 2 OR corresponding = 3 OR 
+                                (corresponding is Null and type_id=1)
+                            ) 
                         AND ( JDB_ID = 1 OR JDB_ID = 4 )
                         AND pos_name_thai = 'ผู้ช่วยวิจัย' """
 
@@ -3142,7 +3169,10 @@ def query12(): # จำนวนผู้วิจัยหลัก
                         importdb_hrmis_v_aw_for_ranking 
                     WHERE
                         end_year = """+str(now_year-1)+"""
-                        AND ( corresponding = 1 OR corresponding = 2 OR corresponding = 3 ) 
+                        AND (
+                                corresponding = 1 OR corresponding = 2 OR corresponding = 3 OR 
+                                (corresponding is Null and type_id=1)
+                            ) 
                         AND ( JDB_ID = 1 OR JDB_ID = 4 )
                         AND pos_name_thai = 'ผู้ช่วยวิจัย' """
 
@@ -3180,8 +3210,7 @@ def query12(): # จำนวนผู้วิจัยหลัก
 
             ########## save df  to csv ##########      
         if not os.path.exists("mydj1/static/csv"):
-                os.mkdir("mydj1/static/csv")
-                
+                os.mkdir("mydj1/static/csv")        
         df.to_csv ("""mydj1/static/csv/main_research.csv""", index = True, header=True)
 
         print ("Data is saved")
@@ -3192,6 +3221,73 @@ def query12(): # จำนวนผู้วิจัยหลัก
     except Exception as e :
         checkpoint = False
         print('At Query#12: Something went wrong :', e)
+        return checkpoint
+
+def query13(): # parameter ของ ARIMA Regression
+    
+    print("-"*20)
+    print("Starting Query#13 ...")
+    checkpoint = True
+    os.environ["NLS_LANG"] = ".UTF8"  # ทำให้แสดงข้อความเป็น ภาษาไทยได้
+    
+    try:
+        rankings = ["ranking_isi", "ranking_scopus", "ranking_tci"]
+        parameters = pd.DataFrame(columns=rankings,index = [0])
+        
+        for ranking in rankings:
+            
+            now_year = (datetime.now().year)+543
+            
+            df = pd.read_csv("""mydj1/static/csv/"""+ranking+""".csv""")
+            
+            df = df[['year', 'PSU']]
+            dataset = df[df['year'] != now_year]
+            
+            df_x = df["year"][:-1:].to_frame().rename(columns={'year': "x"})
+            df_y = df["PSU"][:-1:].to_frame().rename(columns={'PSU': "y"})
+    
+            df_2 = df[['year','PSU']][:-1:]
+            
+            # log test : ทำการ take log ฐาน e ให้กับ ค่าจำนวนการตีพิมพ์ เพื่อ ให้เหมาะสมกับการทำ ARIMA_regression
+            log = np.log(df_2["PSU"])
+            df_log = pd.DataFrame({'year':df.year[:-1],'PSU': log})
+            df_log = df_log.set_index('year')
+            
+            ### สร้าง pdq parameter เพื่อ วน test หา parameter ที่ดีที่สุด
+            p=d=q = range(0,3)
+            pdq = list(itertools.product(p,d,q))
+
+            ###ทำการ วน test หา parameter ที่ดีที่สุด #####
+            warnings.filterwarnings('ignore')
+            aics = []
+            combs = {}
+            for param in pdq:
+                try:
+                    model = ARIMA(df_log, order=param)
+                    model_fit = model.fit(disp=0)
+                    combs.update({model_fit.aic : [param]})
+                    aics.append(model_fit.aic)
+                except:
+                    continue
+
+            ## เมื่อได้ parameter ที่ดีที่สุด ทำการ fit model
+            print(ranking,": ",combs[min(aics)][0])
+            parameters.loc[0][ranking] = combs[min(aics)][0]
+
+
+        if not os.path.exists("mydj1/static/csv"):
+            os.mkdir("mydj1/static/csv") 
+
+        parameters.to_csv ("""mydj1/static/csv/params_arima.csv""", index = True, header=True)
+        
+        print ("Data is saved")
+        print("Ending Query#13 ...")
+
+        return checkpoint
+
+    except Exception as e :
+        checkpoint = False
+        print('At Query#13: Something went wrong :', e)
         return checkpoint
 
 def get_fiscal_year(): # return ปีงบประมาณ
@@ -4636,6 +4732,7 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
         now_year = (datetime.now().year)+543
         
         df = pd.read_csv("""mydj1/static/csv/"""+ranking+""".csv""")
+        params = pd.read_csv("""mydj1/static/csv/params_arima.csv""")  # เปิดไฟล์เก็บ parameter ของ library ARIMA
         
         df = df[['year', 'PSU']]
         dataset = df[df['year'] != now_year]
@@ -4650,30 +4747,40 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
         df_log = pd.DataFrame({'year':df.year[:-1],'PSU': log})
         df_log = df_log.set_index('year')
         
-        ### สร้าง pdq parameter เพื่อ วน test หา parameter ที่ดีที่สุด
-        p=d=q = range(0,3)
-        pdq = list(itertools.product(p,d,q))
+        ## สร้าง pdq parameter เพื่อ วน test หา parameter ที่ดีที่สุด
+        # p=d=q = range(0,3)
+        # pdq = list(itertools.product(p,d,q))
 
-        ###ทำการ วน test หา parameter ที่ดีที่สุด #####
-        warnings.filterwarnings('ignore')
-        aics = []
-        combs = {}
-        for param in pdq:
-            try:
-        #         print(param)
-                model = ARIMA(df_log, order=param)
-                model_fit = model.fit(disp=0)
-        #         results = model_fit.plot_predict(dynamic=False)
-        #         plt.show()
-                print(param,":",model_fit.aic)
-                combs.update({model_fit.aic : [param]})
-                aics.append(model_fit.aic)
-            except:
-                continue
+        # ##ทำการ วน test หา parameter ที่ดีที่สุด #####
+        # warnings.filterwarnings('ignore')
+        # aics = []
+        # combs = {}
+        # for param in pdq:
+        #     try:
+        # #         print(param)
+        #         model = ARIMA(df_log, order=param)
+        #         model_fit = model.fit(disp=0)
+        # #         results = model_fit.plot_predict(dynamic=False)
+        # #         plt.show()
+        #         print(param,":",model_fit.aic)
+        #         combs.update({model_fit.aic : [param]})
+        #         aics.append(model_fit.aic)
+        #     except:
+        #         continue
 
         ## เมื่อได้ parameter ที่ดีที่สุด ทำการ fit model
-        model = ARIMA(df_log, order=combs[min(aics)][0])
+        # model = ARIMA(df_log, order=combs[min(aics)][0])
+        # print(combs[min(aics)][0])
+
+        #### เเปลง parameter ที่ได้ มาเป็น tuple ของ int########
+        tup = tuple(params.loc[0][ranking])
+        parameter = (int(tup[1]),int(tup[4]), int(tup[7]))
+        ####################################################
+
+        ############ เรียกใช้ ARIMA MODEL และ FIT ###########
+        model = ARIMA(df_log, order=parameter)
         model_fit = model.fit() 
+        ###################################################
 
         ## ทำการเตรียม output เพื่อ return ไป plot graph
         now_year = (datetime.now().year)+543
@@ -4792,15 +4899,15 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
                 
                 fig.add_trace(go.Scatter(x=results_pred['year'], y=results_pred['pred'],  # เส้นผลลัพธ์การทำนาย เส้นประ
                                 mode='markers+lines',
-                                line=dict( width=2, dash='dot',color=color_dot),
+                                line=dict( width=3, dash='dot',color=color_dot),
                                 name=label+'| Predicted Line',
                                 legendgroup = label,
                                 visible = visible
                                 ))
                 
-                fig.add_trace(go.Scatter(x=df_x['x'], y=df_y_pre['y_pre'],  # วาด Trend Line สีเทา
+                fig.add_trace(go.Scatter(x=df_x['x'], y=df_y_pre['y_pre'],  # วาด Trend Line 
                                 mode='lines',
-                                line=dict( width=2,color=color_line),
+                                line=dict( width=3,color=color_line),
                                 name=label+'| Trend Line',
                                 legendgroup = label,
                                 visible = visible
@@ -4808,12 +4915,16 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
             except:
                 continue
 
-        fig.add_trace(go.Scatter(x=df_x['x'], y=df_y['y'],  # วาดเส้น Actual line สีฟ้า
-                mode='markers+lines',
-                line=dict( width=2,color='royalblue'),
-                name='Actual Line',
-                visible = True
-                ), row=1, col=1)
+        fig.add_trace(go.Bar(x=df_x['x'], y=df_y['y'],  # วาดเส้น Actual line สีฟ้า
+                                    # mode='markers+lines',
+                                    # line=dict( width=2,color='royalblue'),
+                                    # name='Actual Line',
+                                visible = True,
+                                marker_color='royalblue',
+                                name='Actual Bar Graph',
+
+                                )
+                     , row=1, col=1)
 
           
         # print(dict(color=font_color))
@@ -4979,7 +5090,7 @@ def pageResearchMan(request):
 
         #### Graph
         # 'tree_map' : tree_map(),
-        'year' :(range(2562,(datetime.now().year+1)+543)),
+        'year' :(range((datetime.now().year-9)+543,(datetime.now().year+1)+543)),
         'filter_year' : selected_year,
         'num_main_research' : num_main_research(),
         'graph_revenue_research' : graph_revenue_research(),
