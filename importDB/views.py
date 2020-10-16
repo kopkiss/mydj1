@@ -4631,6 +4631,7 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
         end_row = {'year':now_year-1,'pred':df_y.iloc[-1][0]}
         results_pred = results_pred.append(end_row,ignore_index = True) 
         results_pred = results_pred.sort_values(by=['year'])
+        results_pred = results_pred.reset_index(drop=True)
 
         return df_x, df_y, results_pred, df_y_pre
         
@@ -4681,7 +4682,10 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
         end_row = {'year':now_year-1,'pred':df_y.iloc[-1][0]}
         results_pred = results_pred.append(end_row,ignore_index = True) 
         results_pred = results_pred.sort_values(by=['year'])
-        
+        results_pred = results_pred.reset_index(drop=True)
+ 
+        # print(df_y_pre)
+
         return df_x, df_y, results_pred, df_y_pre
         
     def support_vector_regression(ranking, shortname): # Support vector regression 
@@ -4722,7 +4726,8 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
         end_row = {'year':now_year-1,'pred':df_y.iloc[-1][0]}
         results_pred = results_pred.append(end_row,ignore_index = True) 
         results_pred = results_pred.sort_values(by=['year'])
-    
+        results_pred = results_pred.reset_index(drop=True)
+
         df_y_pre = pd.DataFrame(sc_y.inverse_transform( regressor.predict(X)),
                    columns=['y_pre'])
 
@@ -4787,8 +4792,9 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
         
         index = df[df['year']==now_year].index.values
 
+        # prediction line 3 ปี ล่วงหน้า
         con_df1 = pd.DataFrame({'year':[now_year-1],'pred':df_2.iloc[index[0]-1][1]})
-        con_df2 = pd.DataFrame({'year':[2563,2564,2565],'pred':model_fit.forecast(steps=3)[0]})
+        con_df2 = pd.DataFrame({'year':[now_year,now_year+1,now_year+2],'pred':model_fit.forecast(steps=3)[0]})
         con_df2['pred'] = con_df2['pred'].apply(lambda x : np.e**x )
         results_pred= pd.concat([con_df1,con_df2], ignore_index=True)
 
@@ -4796,20 +4802,19 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
         trend = model_fit.predict(typ='levels')
         results_trend = trend.to_frame()
         results_trend.rename(columns={0: "y_pre"}, inplace=True)
-        results_trend_real= results_trend.apply(lambda x : np.e**x )
+        results_trend_real= results_trend.apply(lambda x : np.e**x )  # แทนค่ากลับ เพราะค่าเดิมถูก logarithm ฐาน e ไว้ 
+        df_pred = results_trend_real.reset_index(drop = True)  
         
-        df_pred = results_trend_real.reset_index()  
-        df_pred = df_pred['y_pre']
-        df_pred = df_pred.to_frame()
+        ### เนื่องจากแต่ละ dataset จะใช้ ARIMA model โดยจะมีพารามิเตอร์ตัวที่ 2 ต่างกัน (จากทั้งหมด 3 ตัว) 
+        ### ดังนั้น ถ้า d = 1 : trend line เริ่มต้นจาก ค่า 0
+        ###      ถ้า d = 2 : trend line จะ เริ่มต้น ด้วย 0 และ 0 
+        ###       ต่อไปเรื่อยๆ จึงต้องวน for ตรวจสอบค่าเริ่มต้น ว่าเป็น 0 กี่ตัว ตามพารามิเตอร์ ที่ 2 (tup[4])
+        first_values = [0 for x in range(0,int(tup[4]))]
+        value0 = pd.DataFrame({'y_pre':first_values})
 
-        y_pre_df1 = pd.DataFrame({'y_pre':[0]})
+        df_pred= pd.concat([value0 ,df_pred], ignore_index=True) ## รวม first value 0 และ trend_line
 
-        df_pred= pd.concat([y_pre_df1,df_pred], ignore_index=True)
-
-        # print(df_x)
-        # print(df_y)
-        # print(results_pred)
-        # print(df_pred)
+ 
         return  df_x, df_y, results_pred, df_pred
      
     def plot_graph(ranking, shortname):
@@ -4869,7 +4874,7 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
         for n in range(4):
             try:
                 
-                if n ==0: # linear_regression
+                if n ==0: # ARIMA_regression
                     df_x, df_y, results_pred, df_y_pre = ARIMA_regression(ranking, shortname)
                     label = "ARIMA Regression"
                     color_dot = "#2ECC71"
@@ -4883,27 +4888,23 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
                     color_line = "#D2B4DE"
                     visible = "legendonly"  # ไม่ใช้แสดง legend ตอนเริ่มแรก
 
-                elif n == 2: # support_vector_regression
+                elif n == 2: # linear_regression
                     df_x, df_y, results_pred, df_y_pre = linear_regression(ranking, shortname)
                     label = "Linear Regression"
                     color_dot = "#E74C3C"   
                     color_line = "#F5B7B1"
                     visible = "legendonly"  # ไม่ใช้แสดง legend ตอนเริ่มแรก
 
-                elif n == 3: # ARIMA_regression
+                elif n == 3: # support_vector_regression
                     df_x, df_y, results_pred, df_y_pre = support_vector_regression(ranking, shortname)
                     label = "Support Vector Regression"
                     color_dot = "#F1C40F"
                     color_line = "#F9E79F"
                     visible = "legendonly"  # ไม่ใช้แสดง legend ตอนเริ่มแรก
                 
-                fig.add_trace(go.Scatter(x=results_pred['year'], y=results_pred['pred'],  # เส้นผลลัพธ์การทำนาย เส้นประ
-                                mode='markers+lines',
-                                line=dict( width=3, dash='dot',color=color_dot),
-                                name=label+'| Predicted Line',
-                                legendgroup = label,
-                                visible = visible
-                                ))
+                # เเก้ไข dataframe ของ prediction line (เส้นประ) นิดหน่อย เพื่อให้ เป็นเส้นต่อเนื่องกันกับ trend line (เส้นทึบ)
+                # if(graph_type == "bar"):
+                results_pred.loc[results_pred['year']==now_year-1,['pred']] = df_y_pre.iloc[-1][0] 
                 
                 fig.add_trace(go.Scatter(x=df_x['x'], y=df_y_pre['y_pre'],  # วาด Trend Line 
                                 mode='lines',
@@ -4912,37 +4913,50 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
                                 legendgroup = label,
                                 visible = visible
                                 ))
+
+                fig.add_trace(go.Scatter(x=results_pred['year'], y=results_pred['pred'],  # เส้นผลลัพธ์การทำนาย เส้นประ
+                                mode='markers+lines',
+                                line=dict( width=3, dash='dot',color=color_dot),
+                                name=label+'| Predicted Line',
+                                legendgroup = label,
+                                visible = visible
+                                ))
             except:
                 continue
-
-        fig.add_trace(go.Bar(x=df_x['x'], y=df_y['y'],  # วาดเส้น Actual line สีฟ้า
-                                    # mode='markers+lines',
-                                    # line=dict( width=2,color='royalblue'),
-                                    # name='Actual Line',
-                                visible = True,
+        
+        # วาด bar Actual line สีฟ้า
+        fig.add_trace(go.Bar(x=df_x['x'], y=df_y['y'],  
+                                visible = 'legendonly',
                                 marker_color='royalblue',
                                 name='Actual Bar Graph',
-
+                                # width=2,
+                                # text=df_y['y'],
+                                # textposition='auto',
+                                marker_line_color='rgb(8,48,107)',
+                                marker_line_width=1.5, opacity=0.6
                                 )
-                     , row=1, col=1)
+                    , row=1, col=1)
+        # วาดเส้น Actual line สีฟ้า
+        fig.add_trace(go.Scatter(x=df_x['x'], y=df_y['y'],  
+            mode='markers+lines',
+            line=dict( width=2,color='royalblue'),
+            name='Actual Line Graph',
+            visible = True
+            ), row=1, col=1)
 
           
-        # print(dict(color=font_color))
         fig.update_layout(autosize=True
-        # ,height=500,width=1100,
+                        # ,height=500,width=1100,
         )
         # fig.update_layout(legend=dict(x=1, y=1))
         fig.update_layout(
-            title_text=f"""<b>ฐานข้อมูล :</b> """+shortname,
-                            
+            title_text=f"""<b>ฐานข้อมูล :</b> """+shortname,        
             plot_bgcolor="#FFF",
-
             xaxis = dict(
                     tickmode = 'linear',
                     dtick = 2,
                     showgrid=False,
                     linecolor="#BCCCDC",
-                    
                 ),
                 yaxis = dict(
                     showgrid=False,
@@ -4950,7 +4964,6 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
                 ),
             xaxis_title="<b>ปี พ.ศ.</b>",
             yaxis_title="<b>จำนวนครั้งของการตีพิมพ์</b>",
-            
         )
 
         fig.update_xaxes( 
@@ -4993,6 +5006,7 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
         'ranking_name'  :ranking_name.keys(),
         'filter_ranking' : selected_ranking,
         'graph' : plot_graph(filter_ranking, selected_ranking),
+        
         
 
     }
@@ -5041,9 +5055,18 @@ def pageResearchMan(request):
         fig = go.Figure(data=[go.Bar(
             x=df_1.index,
             y=df_1['count'],
-            marker_color=colors # marker color can be a single color value or an iterable
-        )])
+            name="",
+            marker_color=colors, # marker color can be a single color value or an iterable
+            textposition="inside",
+            textfont_color="white",
+            textangle=0,
+            texttemplate="%{y}",
+            hovertemplate="<br>".join([
+                "ปี พ.ศ.: %{x}",
+                "จำนวน: %{y}",
 
+            ])
+        )])
 
         fig.update_traces( textposition= 'auto' )
         fig.update_traces( marker_line_color='black',
