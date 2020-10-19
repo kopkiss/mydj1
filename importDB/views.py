@@ -3760,6 +3760,41 @@ def revenues_table(request):  # รับค่า value มาจาก url
     return render(request,'importDB/revenues_table.html', context)
 
 @login_required(login_url='login')
+def revenues_more_info(request):  # แสดงข้อมูลเพิ่มเติม ของ ReachFund
+    
+    for k, v in enumerate(request.POST.keys()):  # รับ key ของตัวแปร dictionary จาก ปุ่ม view มาใส่ในตัวแปร source เช่น source = Goverment
+        if(k==1):   
+            temp = v
+    year = temp # เก็บค่า ปี
+    print(year)
+
+    def query_data():
+        
+        # 1 และ 2 ถูกเลือก 
+        sql_cmd =  """SELECT leader_name_surname_th, project_name_th,fund_type_id, fund_type_th, sum_budget_plan, project_start_date
+                        from importdb_prpm_v_grt_project_eis
+                        where fund_budget_year = """+str(year)+""" and fund_type_id <> 1315 
+                                    and leader_name_surname_th <> ""
+                        order by 1
+                        """
+
+        # print(sql_cmd)
+        con_string = getConstring('sql')
+        df = pm.execute_query(sql_cmd, con_string)
+        
+        df =df.fillna(0)
+        df["project_start_date"] = df["project_start_date"].dt.strftime("%d/%m/%y")
+        
+        return df
+    
+    context={
+        # 'a_table' : get_table(int(year),int(source)) ,  
+        'data' : query_data(),  
+        
+    }  
+    return render(request,'importDB/revenues_more_info.html', context)
+
+@login_required(login_url='login')
 def pageExFund(request): # page รายได้จากทุนภายนอกมหาวิทยาลัย
 
     def get_head_page(): # get จำนวนของนักวิจัย 
