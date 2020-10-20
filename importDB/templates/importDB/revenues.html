@@ -11,146 +11,87 @@
     <div class="container-fluid">
 
         <!-- Page Heading -->
-
+        <div class="row" >
+            <div class="col-xs-12 col-md-12 col-lg-12 "  >
+              <div class="pr-3 mb-1" style=" float: right;">
+                <span class = "px-2" style="font-size:15px; background-color: coral;  border-radius: 30px; "><b>Last updated: </b> {{date}}</span>
+              </div> 
+            </div>
+        </div>
         <div class="row ">
-            <div class="col-md-11 col-lg-11 col-xl-7 mb-3 ml-4  card" >
-                <div class= "row">
-                    <div class="card-header bgcolor-table-head " style="width:100%;" >
-                        <div class= "row">
-                            <div class="col-xs-12 col-md-12 col-lg-12"  >
-                                <form name='filter' method=POST style="display:inline-block;">
-                                    {% csrf_token %}
-                                    <div class="card-header-title font-size-lg text-capitalize font-weight-normal"> <b>ข้อมูลแหล่งงบประมาณงานวิจัย | ปีงบประมาณ : </b>
-                                        <select id="year" name = "year" class=" mb-1 btn ex2 btn-primary dropdown-toggle" onChange="filter.submit();">
-                                            {% for y in year  %}
-                                                {% if y == filter_year%} 
-                                                    <option value="{{ y }}" selected>{{ y }} </option>
-                                                {% else %}
-                                                    <option value="{{ y }}" >{{ y }} </option>
-                                                {%endif%}
-                                            {% endfor %}
-                                        </select>
-                                        <!-- <b> Last updated: {{date}} </b> -->
-                                    </div>  
-                                    
-                                </form>
-                                <span class="pt-2" style="font-size:15px; float: right;">
-                                    Last updated: {{date}}
-                                </span>
+            <div class=" revenues-col1 ml-4 mb-3 mr-2 ">
+                <div class="card pretty_container" style="position: relative;width: 100%;">
+                    <div class="row" >
+                        <div class = "col " style="width: 100%;">
+                            <div class="card-header bgcolor-table-head pt-2 " style="width:100%;" >
+                                <div class= "row pt-1 ">
+                                    <div class="col-xs-12 col-md-12 col-lg-12 "  >
+                                        <form name='filter' method=POST style="display:inline-block;">
+                                            {% csrf_token %}
+                                            <div class="card-header-title font-size-lg text-capitalize font-weight-normal"> <b>ข้อมูลแหล่งงบประมาณงานวิจัย | ปีงบประมาณ : &nbsp;</b>
+                                                <select id="year" name = "year" class=" mb-1 btn ex2 btn-primary dropdown-toggle" onChange="filter.submit();">
+                                                    {% for y in year  %}
+                                                        {% if y == filter_year%} 
+                                                            <option value="{{ y }}" selected>{{ y }} </option>
+                                                        {% else %}
+                                                            <option value="{{ y }}" >{{ y }} </option>
+                                                        {%endif%}
+                                                    {% endfor %}
+                                                </select>
+                                                <!-- <b> Last updated: {{date}} </b> -->
+                                            </div>  
+                                        </form>
+                                        <span  style="float: right;">
+                                            {% if filter_year in year_show_research_funds_button %}
+                                            <div class="col-auto px-0"  style="display: flex; justify-content: center; align-items: center; ">
+                                                <td class="text-center" >
+                                                    <form action="more-info" target="_blank" method=POST>
+                                                        {% csrf_token %}
+                                                        <input  name = {{filter_year}} type="submit" value="Research Funds" class="btn-shadow btn btn-success " style="width:auto;"/>
+                                                    </form>
+                                                </td>
+                                            </div>
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class= "row">
-                    <table id = "table_id1" class = " table mb-0" style="width:100%;">
-                        <thead >
-                            <tr bgcolor="#1E4DC2" class = "reservation_fontcolor ">
-                                <th class="text-center " style="width: 5%; ">#</th>
-                                <th class="text-center " style="width: 30%; ">Budget Groups</th>
-                                <th class="text-center " style="width: 25%; ">Budget Amount</th>
-                                <!-- <th class="text-center ">Percentages</th> -->
-                                <th class="text-center " style="width: 20%; ">Graphs</th>
-                                <th class="text-center " style="width: 10%; ">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <table class = "mt-1 mb-1" style="width:100%; background-color:#D6EAF8;" >
-                                    <td class = "pl-3" >  
-                                        <b>&#10148; เงินทุนภายนอกมหาวิทยาลัย </b>
-                                    </td>
-                                </table> 
-                            </tr>
-                            <table class="table-hover"  align="center" style="width:100%;  border-collapse:separate; border-spacing:0 5px;  ">
+                    <div class= "row mx-0">
+                        <table id = "table_id1" class = " table mb-0 " style="width:100%;">
+                            <thead >
+                                <tr bgcolor="#1E4DC2" class = "reservation_fontcolor ">
+                                    <th class="text-center " style="width: 5%; ">#</th>
+                                    <th class="text-center " style="width: 30%; ">Budget Groups</th>
+                                    <th class="text-center " style="width: 25%; ">Budget Amount</th>
+                                    <!-- <th class="text-center ">Percentages</th> -->
+                                    <th class="text-center " style="width: 20%; ">Graphs **</th>
+                                    <th class="text-center " style="width: 10%; ">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
                                 <tr>
-                                    <td class="text-center text-muted" style="width: 5%;  " id = "vertical-align-center" ><b>1</b></td>
-                                    <td class="text-left pl-3" style="width: 30%;"><b>สกอ-มหาวิทยาลัยวิจัยแห่งชาติ</b></td>
-                                    <td class="text-left" style="width: 25%; ">
-                                        <span class="pl-4 ml-3 pr-2 opacity-6"><i class="fas fa-money-bill-alt fa-1x "></i></span>
-                                        {{budget.col0| floatformat:2|intcomma }}     
-                                    </td>
-                                    <!-- กราฟ1 -->
-                                    <td style="width: 20%;">
-                                        <div class="card border-primary img_center" style="height: 60px; width: 140px;" >
-                                            <div class=" box-hover">
-                                                <a href = '{% url "revenues-graph-page" value="0"%}' target="_blank"> 
-                                                    <img src="{% static 'img/fig_0.png' %}" alt="fig_0" class = "img_center">
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </td>
-
-                                    <td class="text-center" style="width: 10%; ">
-                                        <form action="show_table" target="_blank" method=POST>
-                                            {% csrf_token %}
-                                            <input  name = {{filter_year}}/0 type="submit" value="View" class="btn-shadow btn btn-primary" style="width:70px"/>
-                                        </form>
-                                    </td>
+                                    <table class = "mt-1 mb-1" style="width:100%; background-color:#D6EAF8;" >
+                                        <td class = "pl-3" >  
+                                            <b>&#10148; เงินทุนภายนอกมหาวิทยาลัย </b>
+                                        </td>
+                                    </table> 
                                 </tr>
-                                <tr>
-                                    <td class="text-center text-muted" style="width: 5%;  " id = "vertical-align-center" ><b>2</b></td>
-                                    <td class="text-left pl-3" style="width: 30%;"><b>เงินงบประมาณแผ่นดิน</b></td>
-                                    <td class="text-left" style="width: 25%; ">
-                                        <span class=" pl-4 ml-3 pr-2 opacity-6"><i class="fas fa-money-bill-alt fa-1x "></i></span>
-                                        {{budget.col1| floatformat:2|intcomma }}     
-                                    </td>
-                                    <!-- กราฟ1 -->
-                                    <td style="width: 20%;">
-                                        <div class="card border-primary img_center" style="height: 60px; width: 140px;" >
-                                            <div class=" box-hover">
-                                                <a href = '{% url "revenues-graph-page" value="1"%}' target="_blank"> 
-                                                    <img src="{% static 'img/fig_1.png' %}" alt="fig_1" class = "img_center">
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </td>
-
-                                    <td class="text-center" style="width: 10%; ">
-                                        <form action="show_table" target="_blank" method=POST>
-                                            {% csrf_token %}
-                                            <input  name = {{filter_year}}/1 type="submit" value="View" class="btn-shadow btn btn-primary" style="width:70px"/>
-                                        </form>
-                                    </td>
-                                </tr>
-                                <tr id = "row_national" onClick="toggle();" class="widget-ch2 widget-ch2-hover br-br">
-                                    <td class="text-center text-muted" style="width: 5%;  " id = "vertical-align-center" ><b>3</b></td>
-                                    <td class="text-left pl-3" style="width: 30%;"><b>เงินทุนภายนอก ในประเทศ</b></td>
-                                    <td class="text-left" style="width: 25%; ">
-                                        <span class=" pl-4 ml-3 pr-2 opacity-6"><i class="fas fa-money-bill-alt fa-1x "></i></span>
-                                        {{budget.col3| floatformat:2|intcomma }}     
-                                    </td>
-                                    <!-- กราฟ1 -->
-                                    <td style="width: 20%;">
-                                        <div class="card border-primary img_center" style="height: 60px; width: 140px;" >
-                                            <div class=" box-hover">
-                                                <a href = '{% url "revenues-graph-page" value="3"%}' target="_blank"> 
-                                                    <img src="{% static 'img/fig_3.png' %}" alt="fig_3" class = "img_center">
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </td>
-
-                                    <td class="text-center" style="width: 10%; ">
-                                        <form action="show_table" target="_blank" method=POST>
-                                            {% csrf_token %}
-                                            <input  name = {{filter_year}}/3 type="submit" value="View" class="btn-shadow btn btn-primary" style="width:70px"/>
-                                        </form>
-                                    </td>
-                                </tr>
-                                <span id = "gov_comp" name = "gov_comp">
-                                    <tr id = "gov" class = "gov" style="display:none; background-color: #D4FBFF;">
-                                        <td class="text-center text-muted" style="width: 5%;  " id = "vertical-align-center" ></td>
-                                        <td class="text-left pl-3" style="width: 30%;">&#10625; หน่วยงานภาครัฐ</td>
+                                <table class="table-hover"  align="center" style="width:100%;  border-collapse:separate; border-spacing:0 5px;  ">
+                                    <tr>
+                                        <td class="text-center text-muted" style="width: 5%;  " id = "vertical-align-center" ><b>1</b></td>
+                                        <td class="text-left pl-3" style="width: 30%;"><b>สกอ-มหาวิทยาลัยวิจัยแห่งชาติ</b></td>
                                         <td class="text-left" style="width: 25%; ">
-                                            <span class=" pl-4 ml-3 pr-2 opacity-6"><i class="fas fa-money-bill-alt fa-1x "></i></span>
-                                            {{gov| floatformat:2|intcomma }}     
+                                            <span class="pl-4 ml-3 pr-2 opacity-6"><i class="fas fa-money-bill-alt fa-1x "></i></span>
+                                            {{budget.col0| floatformat:2|intcomma }}     
                                         </td>
                                         <!-- กราฟ1 -->
                                         <td style="width: 20%;">
                                             <div class="card border-primary img_center" style="height: 60px; width: 140px;" >
                                                 <div class=" box-hover">
-                                                    <a href = '{% url "revenues-graph-page" value="11"%}' target="_blank"> 
-                                                        <img src="{% static 'img/fig_11.png' %}" alt="fig_11" class = "img_center">
+                                                    <a href = '{% url "revenues-graph-page" value="0"%}' target="_blank"> 
+                                                        <img src="{% static 'img/fig_0.png' %}" alt="fig_0" class = "img_center">
                                                     </a>
                                                 </div>
                                             </div>
@@ -159,23 +100,23 @@
                                         <td class="text-center" style="width: 10%; ">
                                             <form action="show_table" target="_blank" method=POST>
                                                 {% csrf_token %}
-                                                <input  name = {{filter_year}}/11 type="submit" value="View" class="btn-shadow btn btn-primary" style="width:70px"/>
+                                                <input  name = {{filter_year}}/0 type="submit" value="View" class="btn-shadow btn btn-primary" style="width:70px"/>
                                             </form>
                                         </td>
                                     </tr>
-                                    <tr id = "comp" class = "comp" style="display:none; background-color: #D4FBFF;">
-                                        <td class="text-center text-muted" style="width: 5%;  " id = "vertical-align-center" ><b></b></td>
-                                        <td class="text-left pl-3" style="width: 30%;">&#10625; หน่วยงานภาคเอกชน</td>
+                                    <tr>
+                                        <td class="text-center text-muted" style="width: 5%;  " id = "vertical-align-center" ><b>2</b></td>
+                                        <td class="text-left pl-3" style="width: 30%;"><b>เงินงบประมาณแผ่นดิน</b></td>
                                         <td class="text-left" style="width: 25%; ">
                                             <span class=" pl-4 ml-3 pr-2 opacity-6"><i class="fas fa-money-bill-alt fa-1x "></i></span>
-                                            {{comp| floatformat:2|intcomma }}     
+                                            {{budget.col1| floatformat:2|intcomma }}     
                                         </td>
                                         <!-- กราฟ1 -->
                                         <td style="width: 20%;">
                                             <div class="card border-primary img_center" style="height: 60px; width: 140px;" >
                                                 <div class=" box-hover">
-                                                    <a href = '{% url "revenues-graph-page" value="12"%}' target="_blank"> 
-                                                        <img src="{% static 'img/fig_12.png' %}" alt="fig_12" class = "img_center">
+                                                    <a href = '{% url "revenues-graph-page" value="1"%}' target="_blank"> 
+                                                        <img src="{% static 'img/fig_1.png' %}" alt="fig_1" class = "img_center">
                                                     </a>
                                                 </div>
                                             </div>
@@ -184,405 +125,476 @@
                                         <td class="text-center" style="width: 10%; ">
                                             <form action="show_table" target="_blank" method=POST>
                                                 {% csrf_token %}
-                                                <input  name = {{filter_year}}/12 type="submit" value="View" class="btn-shadow btn btn-primary" style="width:70px"/>
+                                                <input  name = {{filter_year}}/1 type="submit" value="View" class="btn-shadow btn btn-primary" style="width:70px"/>
                                             </form>
                                         </td>
-                                    </tr>  
-                                </span>  
-                                <tr>
-                                    <td class="text-center text-muted" style="width: 5%;  " id = "vertical-align-center" ><b>4</b></td>
-                                    <td class="text-left pl-3" style="width: 30%;"><b>เงินทุนภายนอก ต่างประเทศ</b></td>
-                                    <td class="text-left" style="width: 25%; ">
-                                        <span class=" pl-4 ml-3 pr-2 opacity-6"><i class="fas fa-money-bill-alt fa-1x "></i></span>
-                                        {{budget.col4| floatformat:2|intcomma }}     
-                                    </td>
-                                    <!-- กราฟ1 -->
-                                    <td style="width: 20%;">
-                                        <div class="card border-primary img_center" style="height: 60px; width: 140px;" >
-                                            <div class=" box-hover">
-                                                <a href = '{% url "revenues-graph-page" value="4"%}' target="_blank"> 
-                                                    <img src="{% static 'img/fig_4.png' %}" alt="fig_4" class = "img_center">
-                                                </a>
+                                    </tr>
+                                    <tr id = "row_national" onClick="toggle();" class="widget-ch2 widget-ch2-hover br-br">
+                                        <td class="text-center text-muted" style="width: 5%;  " id = "vertical-align-center" ><b>3</b></td>
+                                        <td class="text-left pl-3" style="width: 30%;"><b>เงินทุนภายนอก ในประเทศ</b></td>
+                                        <td class="text-left" style="width: 25%; ">
+                                            <span class=" pl-4 ml-3 pr-2 opacity-6"><i class="fas fa-money-bill-alt fa-1x "></i></span>
+                                            {{budget.col3| floatformat:2|intcomma }}     
+                                        </td>
+                                        <!-- กราฟ1 -->
+                                        <td style="width: 20%;">
+                                            <div class="card border-primary img_center" style="height: 60px; width: 140px;" >
+                                                <div class=" box-hover">
+                                                    <a href = '{% url "revenues-graph-page" value="3"%}' target="_blank"> 
+                                                        <img src="{% static 'img/fig_3.png' %}" alt="fig_3" class = "img_center">
+                                                    </a>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </td>
+                                        </td>
 
-                                    <td class="text-center" style="width: 10%; ">
-                                        <form action="show_table" target="_blank" method=POST>
-                                            {% csrf_token %}
-                                            <input  name = {{filter_year}}/4 type="submit" value="View" class="btn-shadow btn btn-primary" style="width:70px"/>
-                                        </form>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="text-center text-muted" style="width: 5%;  " id = "vertical-align-center" ><b>5</b></td>
-                                    <td class="text-left pl-3" style="width: 30%;"><b>เงินอุดหนุนโครงการการพัฒนาความปลอดภัยและความมั่นคง</b></td>
-                                    <td class="text-left" style="width: 25%; ">
-                                        <span class=" pl-4 ml-3 pr-2 opacity-6"><i class="fas fa-money-bill-alt fa-1x "></i></span>
-                                        {{budget.col10| floatformat:2|intcomma }}     
-                                    </td>
-                                    <!-- กราฟ1 -->
-                                    <td style="width: 20%;">
-                                        <div class="card border-primary img_center" style="height: 60px; width: 140px;" >
-                                            <div class=" box-hover">
-                                                <a href = '{% url "revenues-graph-page" value="10"%}' target="_blank"> 
-                                                    <img src="{% static 'img/fig_10.png' %}" alt="fig_10" class = "img_center">
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="text-center" style="width: 10%; ">
-                                        <form action="show_table" target="_blank" method=POST>
-                                            {% csrf_token %}
-                                            <input  name = {{filter_year}}/10 type="submit" value="View" class="btn-shadow btn btn-primary" style="width:70px"/>
-                                        </form>
-                                    </td>
-                                </tr>
-                                
-                            </table>
-                            <tr>
-                                <table class = "mt-1 mb-1" style="width:100%; background-color:#D6EAF8;  " >
-                                    <td class = "pl-3" >  
-                                        <b>&#10148; เงินทุนภายในมหาวิทยาลัย </b>
-                                    </td>
-                                </table> 
-                            </tr>
-                            <table class="table-hover"  align="center" style="width:100%;  border-collapse:separate; border-spacing:0 5px;  ">
-                                <tr>
-                                    <td class="text-center text-muted" style="width: 5%;  " id = "vertical-align-center" ><b>6</b></td>
-                                    <td class="text-left pl-3" style="width: 30%;"><b>เงินกองทุนวิจัยมหาวิทยาลัย</b></td>
-                                    <td class="text-left" style="width: 25%; ">
-                                        <span class=" pl-4 ml-3 pr-2 opacity-6"><i class="fas fa-money-bill-alt fa-1x "></i></span>
-                                        {{budget.col2| floatformat:2|intcomma }}     
-                                    </td>
-                                    <!-- กราฟ1 -->
-                                    <td style="width: 20%;">
-                                        <div class="card border-primary img_center" style="height: 60px; width: 140px;" >
-                                            <div class=" box-hover">
-                                                <a href = '{% url "revenues-graph-page" value="2"%}' target="_blank"> 
-                                                    <img src="{% static 'img/fig_2.png' %}" alt="fig_2" class = "img_center">
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </td>
+                                        <td class="text-center" style="width: 10%; ">
+                                            <form action="show_table" target="_blank" method=POST>
+                                                {% csrf_token %}
+                                                <input  name = {{filter_year}}/3 type="submit" value="View" class="btn-shadow btn btn-primary" style="width:70px"/>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    <span id = "gov_comp" name = "gov_comp">
+                                        <tr id = "gov" class = "gov" style="display:none; background-color: #D4FBFF;">
+                                            <td class="text-center text-muted" style="width: 5%;  " id = "vertical-align-center" ></td>
+                                            <td class="text-left pl-3" style="width: 30%;">&#10625; หน่วยงานภาครัฐ</td>
+                                            <td class="text-left" style="width: 25%; ">
+                                                <span class=" pl-4 ml-3 pr-2 opacity-6"><i class="fas fa-money-bill-alt fa-1x "></i></span>
+                                                {{gov| floatformat:2|intcomma }}     
+                                            </td>
+                                            <!-- กราฟ1 -->
+                                            <td style="width: 20%;">
+                                                <div class="card border-primary img_center" style="height: 60px; width: 140px;" >
+                                                    <div class=" box-hover">
+                                                        <a href = '{% url "revenues-graph-page" value="11"%}' target="_blank"> 
+                                                            <img src="{% static 'img/fig_11.png' %}" alt="fig_11" class = "img_center">
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </td>
 
-                                    <td class="text-center" style="width: 10%; ">
-                                        <form action="show_table" target="_blank" method=POST>
-                                            {% csrf_token %}
-                                            <input  name = {{filter_year}}/2 type="submit" value="View" class="btn-shadow btn btn-primary" style="width:70px"/>
-                                        </form>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="text-center text-muted" style="width: 5%;  " id = "vertical-align-center" ><b>7</b></td>
-                                    <td class="text-left pl-3" style="width: 30%;"><b>เงินรายได้มหาวิทยาลัย</b></td>
-                                    <td class="text-left" style="width: 25%; ">
-                                        <span class=" pl-4 ml-3 pr-2 opacity-6"><i class="fas fa-money-bill-alt fa-1x "></i></span>
-                                        {{budget.col5| floatformat:2|intcomma }}     
-                                    </td>
-                                    <!-- กราฟ1 -->
-                                    <td style="width: 20%;">
-                                        <div class="card border-primary img_center" style="height: 60px; width: 140px;" >
-                                            <div class=" box-hover">
-                                                <a href = '{% url "revenues-graph-page" value="5"%}' target="_blank"> 
-                                                    <img src="{% static 'img/fig_5.png' %}" alt="fig_5" class = "img_center">
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </td>
+                                            <td class="text-center" style="width: 10%; ">
+                                                <form action="show_table" target="_blank" method=POST>
+                                                    {% csrf_token %}
+                                                    <input  name = {{filter_year}}/11 type="submit" value="View" class="btn-shadow btn btn-primary" style="width:70px"/>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        <tr id = "comp" class = "comp" style="display:none; background-color: #D4FBFF;">
+                                            <td class="text-center text-muted" style="width: 5%;  " id = "vertical-align-center" ><b></b></td>
+                                            <td class="text-left pl-3" style="width: 30%;">&#10625; หน่วยงานภาคเอกชน</td>
+                                            <td class="text-left" style="width: 25%; ">
+                                                <span class=" pl-4 ml-3 pr-2 opacity-6"><i class="fas fa-money-bill-alt fa-1x "></i></span>
+                                                {{comp| floatformat:2|intcomma }}     
+                                            </td>
+                                            <!-- กราฟ1 -->
+                                            <td style="width: 20%;">
+                                                <div class="card border-primary img_center" style="height: 60px; width: 140px;" >
+                                                    <div class=" box-hover">
+                                                        <a href = '{% url "revenues-graph-page" value="12"%}' target="_blank"> 
+                                                            <img src="{% static 'img/fig_12.png' %}" alt="fig_12" class = "img_center">
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </td>
 
-                                    <td class="text-center" style="width: 10%; ">
-                                        <form action="show_table" target="_blank" method=POST>
-                                            {% csrf_token %}
-                                            <input  name = {{filter_year}}/5 type="submit" value="View" class="btn-shadow btn btn-primary" style="width:70px"/>
-                                        </form>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="text-center text-muted" style="width: 5%;  " id = "vertical-align-center" ><b>8</b></td>
-                                    <td class="text-left pl-3" style="width: 30%;"><b>เงินรายได้คณะ (เงินรายได้)</b></td>
-                                    <td class="text-left" style="width: 25%; ">
-                                        <span class=" pl-4 ml-3 pr-2 opacity-6"><i class="fas fa-money-bill-alt fa-1x "></i></span>
-                                        {{budget.col6| floatformat:2|intcomma }}     
-                                    </td>
-                                    <!-- กราฟ1 -->
-                                    <td style="width: 20%;">
-                                        <div class="card border-primary img_center" style="height: 60px; width: 140px;" >
-                                            <div class=" box-hover">
-                                                <a href = '{% url "revenues-graph-page" value="6"%}' target="_blank"> 
-                                                    <img src="{% static 'img/fig_6.png' %}" alt="fig_6" class = "img_center">
-                                                </a>
+                                            <td class="text-center" style="width: 10%; ">
+                                                <form action="show_table" target="_blank" method=POST>
+                                                    {% csrf_token %}
+                                                    <input  name = {{filter_year}}/12 type="submit" value="View" class="btn-shadow btn btn-primary" style="width:70px"/>
+                                                </form>
+                                            </td>
+                                        </tr>  
+                                    </span>  
+                                    <tr>
+                                        <td class="text-center text-muted" style="width: 5%;  " id = "vertical-align-center" ><b>4</b></td>
+                                        <td class="text-left pl-3" style="width: 30%;"><b>เงินทุนภายนอก ต่างประเทศ</b></td>
+                                        <td class="text-left" style="width: 25%; ">
+                                            <span class=" pl-4 ml-3 pr-2 opacity-6"><i class="fas fa-money-bill-alt fa-1x "></i></span>
+                                            {{budget.col4| floatformat:2|intcomma }}     
+                                        </td>
+                                        <!-- กราฟ1 -->
+                                        <td style="width: 20%;">
+                                            <div class="card border-primary img_center" style="height: 60px; width: 140px;" >
+                                                <div class=" box-hover">
+                                                    <a href = '{% url "revenues-graph-page" value="4"%}' target="_blank"> 
+                                                        <img src="{% static 'img/fig_4.png' %}" alt="fig_4" class = "img_center">
+                                                    </a>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </td>
+                                        </td>
 
-                                    <td class="text-center" style="width: 10%; ">
-                                        <form action="show_table" target="_blank" method=POST>
-                                            {% csrf_token %}
-                                            <input  name = {{filter_year}}/6 type="submit" value="View" class="btn-shadow btn btn-primary" style="width:70px"/>
-                                        </form>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="text-center text-muted" style="width: 5%;  " id = "vertical-align-center" ><b>9</b></td>
-                                    <td class="text-left pl-3" style="width: 30%;"><b>เงินรายได้คณะ (กองทุนวิจัย)</b></td>
-                                    <td class="text-left" style="width: 25%; ">
-                                        <span class=" pl-4 ml-3 pr-2 opacity-6"><i class="fas fa-money-bill-alt fa-1x "></i></span>
-                                        {{budget.col7| floatformat:2|intcomma }}     
-                                    </td>
-                                    <!-- กราฟ1 -->
-                                    <td style="width: 20%;">
-                                        <div class="card border-primary img_center" style="height: 60px; width: 140px;" >
-                                            <div class=" box-hover">
-                                                <a href = '{% url "revenues-graph-page" value="7"%}' target="_blank"> 
-                                                    <img src="{% static 'img/fig_7.png' %}" alt="fig_7" class = "img_center">
-                                                </a>
+                                        <td class="text-center" style="width: 10%; ">
+                                            <form action="show_table" target="_blank" method=POST>
+                                                {% csrf_token %}
+                                                <input  name = {{filter_year}}/4 type="submit" value="View" class="btn-shadow btn btn-primary" style="width:70px"/>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center text-muted" style="width: 5%;  " id = "vertical-align-center" ><b>5</b></td>
+                                        <td class="text-left pl-3" style="width: 30%;"><b>เงินอุดหนุนโครงการการพัฒนาความปลอดภัยและความมั่นคง</b></td>
+                                        <td class="text-left" style="width: 25%; ">
+                                            <span class=" pl-4 ml-3 pr-2 opacity-6"><i class="fas fa-money-bill-alt fa-1x "></i></span>
+                                            {{budget.col10| floatformat:2|intcomma }}     
+                                        </td>
+                                        <!-- กราฟ1 -->
+                                        <td style="width: 20%;">
+                                            <div class="card border-primary img_center" style="height: 60px; width: 140px;" >
+                                                <div class=" box-hover">
+                                                    <a href = '{% url "revenues-graph-page" value="10"%}' target="_blank"> 
+                                                        <img src="{% static 'img/fig_10.png' %}" alt="fig_10" class = "img_center">
+                                                    </a>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </td>
-
-                                    <td class="text-center" style="width: 10%; ">
-                                        <form action="show_table" target="_blank" method=POST>
-                                            {% csrf_token %}
-                                            <input  name = {{filter_year}}/7 type="submit" value="View" class="btn-shadow btn btn-primary" style="width:70px"/>
-                                        </form>
-                                    </td>
-                                </tr>
+                                        </td>
+                                        <td class="text-center" style="width: 10%; ">
+                                            <form action="show_table" target="_blank" method=POST>
+                                                {% csrf_token %}
+                                                <input  name = {{filter_year}}/10 type="submit" value="View" class="btn-shadow btn btn-primary" style="width:70px"/>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    
+                                </table>
                                 <tr>
-                                    <td class="text-center text-muted" style="width: 5%;  " id = "vertical-align-center" ><b>10</b></td>
-                                    <td class="text-left pl-3" style="width: 30%;"><b>เงินกองทุนวิจัยวิทยาเขต</b></td>
-                                    <td class="text-left" style="width: 25%; ">
-                                        <span class=" pl-4 ml-3 pr-2 opacity-6"><i class="fas fa-money-bill-alt fa-1x "></i></span>
-                                        {{budget.col8| floatformat:2|intcomma }}     
-                                    </td>
-                                    <!-- กราฟ1 -->
-                                    <td style="width: 20%;">
-                                        <div class="card border-primary img_center" style="height: 60px; width: 140px;" >
-                                            <div class=" box-hover">
-                                                <a href = '{% url "revenues-graph-page" value="8"%}' target="_blank"> 
-                                                    <img src="{% static 'img/fig_8.png' %}" alt="fig_8" class = "img_center">
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </td>
-
-                                    <td class="text-center" style="width: 10%; ">
-                                        <form action="show_table" target="_blank" method=POST>
-                                            {% csrf_token %}
-                                            <input  name = {{filter_year}}/8 type="submit" value="View" class="btn-shadow btn btn-primary" style="width:70px"/>
-                                        </form>
-                                    </td>
+                                    <table class = "mt-1 mb-1" style="width:100%; background-color:#D6EAF8;  " >
+                                        <td class = "pl-3" >  
+                                            <b>&#10148; เงินทุนภายในมหาวิทยาลัย </b>
+                                        </td>
+                                    </table> 
                                 </tr>
+                                <table class="table-hover"  align="center" style="width:100%;  border-collapse:separate; border-spacing:0 5px;  ">
+                                    <tr>
+                                        <td class="text-center text-muted" style="width: 5%;  " id = "vertical-align-center" ><b>6</b></td>
+                                        <td class="text-left pl-3" style="width: 30%;"><b>เงินกองทุนวิจัยมหาวิทยาลัย</b></td>
+                                        <td class="text-left" style="width: 25%; ">
+                                            <span class=" pl-4 ml-3 pr-2 opacity-6"><i class="fas fa-money-bill-alt fa-1x "></i></span>
+                                            {{budget.col2| floatformat:2|intcomma }}     
+                                        </td>
+                                        <!-- กราฟ1 -->
+                                        <td style="width: 20%;">
+                                            <div class="card border-primary img_center" style="height: 60px; width: 140px;" >
+                                                <div class=" box-hover">
+                                                    <a href = '{% url "revenues-graph-page" value="2"%}' target="_blank"> 
+                                                        <img src="{% static 'img/fig_2.png' %}" alt="fig_2" class = "img_center">
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <td class="text-center" style="width: 10%; ">
+                                            <form action="show_table" target="_blank" method=POST>
+                                                {% csrf_token %}
+                                                <input  name = {{filter_year}}/2 type="submit" value="View" class="btn-shadow btn btn-primary" style="width:70px"/>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center text-muted" style="width: 5%;  " id = "vertical-align-center" ><b>7</b></td>
+                                        <td class="text-left pl-3" style="width: 30%;"><b>เงินรายได้มหาวิทยาลัย</b></td>
+                                        <td class="text-left" style="width: 25%; ">
+                                            <span class=" pl-4 ml-3 pr-2 opacity-6"><i class="fas fa-money-bill-alt fa-1x "></i></span>
+                                            {{budget.col5| floatformat:2|intcomma }}     
+                                        </td>
+                                        <!-- กราฟ1 -->
+                                        <td style="width: 20%;">
+                                            <div class="card border-primary img_center" style="height: 60px; width: 140px;" >
+                                                <div class=" box-hover">
+                                                    <a href = '{% url "revenues-graph-page" value="5"%}' target="_blank"> 
+                                                        <img src="{% static 'img/fig_5.png' %}" alt="fig_5" class = "img_center">
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <td class="text-center" style="width: 10%; ">
+                                            <form action="show_table" target="_blank" method=POST>
+                                                {% csrf_token %}
+                                                <input  name = {{filter_year}}/5 type="submit" value="View" class="btn-shadow btn btn-primary" style="width:70px"/>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center text-muted" style="width: 5%;  " id = "vertical-align-center" ><b>8</b></td>
+                                        <td class="text-left pl-3" style="width: 30%;"><b>เงินรายได้คณะ (เงินรายได้)</b></td>
+                                        <td class="text-left" style="width: 25%; ">
+                                            <span class=" pl-4 ml-3 pr-2 opacity-6"><i class="fas fa-money-bill-alt fa-1x "></i></span>
+                                            {{budget.col6| floatformat:2|intcomma }}     
+                                        </td>
+                                        <!-- กราฟ1 -->
+                                        <td style="width: 20%;">
+                                            <div class="card border-primary img_center" style="height: 60px; width: 140px;" >
+                                                <div class=" box-hover">
+                                                    <a href = '{% url "revenues-graph-page" value="6"%}' target="_blank"> 
+                                                        <img src="{% static 'img/fig_6.png' %}" alt="fig_6" class = "img_center">
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <td class="text-center" style="width: 10%; ">
+                                            <form action="show_table" target="_blank" method=POST>
+                                                {% csrf_token %}
+                                                <input  name = {{filter_year}}/6 type="submit" value="View" class="btn-shadow btn btn-primary" style="width:70px"/>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center text-muted" style="width: 5%;  " id = "vertical-align-center" ><b>9</b></td>
+                                        <td class="text-left pl-3" style="width: 30%;"><b>เงินรายได้คณะ (กองทุนวิจัย)</b></td>
+                                        <td class="text-left" style="width: 25%; ">
+                                            <span class=" pl-4 ml-3 pr-2 opacity-6"><i class="fas fa-money-bill-alt fa-1x "></i></span>
+                                            {{budget.col7| floatformat:2|intcomma }}     
+                                        </td>
+                                        <!-- กราฟ1 -->
+                                        <td style="width: 20%;">
+                                            <div class="card border-primary img_center" style="height: 60px; width: 140px;" >
+                                                <div class=" box-hover">
+                                                    <a href = '{% url "revenues-graph-page" value="7"%}' target="_blank"> 
+                                                        <img src="{% static 'img/fig_7.png' %}" alt="fig_7" class = "img_center">
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <td class="text-center" style="width: 10%; ">
+                                            <form action="show_table" target="_blank" method=POST>
+                                                {% csrf_token %}
+                                                <input  name = {{filter_year}}/7 type="submit" value="View" class="btn-shadow btn btn-primary" style="width:70px"/>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center text-muted" style="width: 5%;  " id = "vertical-align-center" ><b>10</b></td>
+                                        <td class="text-left pl-3" style="width: 30%;"><b>เงินกองทุนวิจัยวิทยาเขต</b></td>
+                                        <td class="text-left" style="width: 25%; ">
+                                            <span class=" pl-4 ml-3 pr-2 opacity-6"><i class="fas fa-money-bill-alt fa-1x "></i></span>
+                                            {{budget.col8| floatformat:2|intcomma }}     
+                                        </td>
+                                        <!-- กราฟ1 -->
+                                        <td style="width: 20%;">
+                                            <div class="card border-primary img_center" style="height: 60px; width: 140px;" >
+                                                <div class=" box-hover">
+                                                    <a href = '{% url "revenues-graph-page" value="8"%}' target="_blank"> 
+                                                        <img src="{% static 'img/fig_8.png' %}" alt="fig_8" class = "img_center">
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <td class="text-center" style="width: 10%; ">
+                                            <form action="show_table" target="_blank" method=POST>
+                                                {% csrf_token %}
+                                                <input  name = {{filter_year}}/8 type="submit" value="View" class="btn-shadow btn btn-primary" style="width:70px"/>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center text-muted" style="width: 5%;  " id = "vertical-align-center" ><b>11</b></td>
+                                        <td class="text-left pl-3" style="width: 30%;"><b>เงินรายได้วิทยาเขต</b></td>
+                                        <td class="text-left" style="width: 25%; ">
+                                            <span class=" pl-4 ml-3 pr-2 opacity-6"><i class="fas fa-money-bill-alt fa-1x "></i></span>
+                                            {{budget.col9| floatformat:2|intcomma }}     
+                                        </td>
+                                        <!-- กราฟ1 -->
+                                        <td style="width: 20%;">
+                                            <div class="card border-primary img_center" style="height: 60px; width: 140px;" >
+                                                <div class=" box-hover">
+                                                    <a href = '{% url "revenues-graph-page" value="9"%}' target="_blank"> 
+                                                        <img src="{% static 'img/fig_9.png' %}" alt="fig_9" class = "img_center">
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <td class="text-center" style="width: 10%; ">
+                                            <form action="show_table" target="_blank" method=POST>
+                                                {% csrf_token %}
+                                                <input  name = {{filter_year}}/9 type="submit" value="View" class="btn-shadow btn btn-primary" style="width:70px"/>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                </table>
                                 <tr>
-                                    <td class="text-center text-muted" style="width: 5%;  " id = "vertical-align-center" ><b>11</b></td>
-                                    <td class="text-left pl-3" style="width: 30%;"><b>เงินรายได้วิทยาเขต</b></td>
-                                    <td class="text-left" style="width: 25%; ">
-                                        <span class=" pl-4 ml-3 pr-2 opacity-6"><i class="fas fa-money-bill-alt fa-1x "></i></span>
-                                        {{budget.col9| floatformat:2|intcomma }}     
-                                    </td>
-                                    <!-- กราฟ1 -->
-                                    <td style="width: 20%;">
-                                        <div class="card border-primary img_center" style="height: 60px; width: 140px;" >
-                                            <div class=" box-hover">
-                                                <a href = '{% url "revenues-graph-page" value="9"%}' target="_blank"> 
-                                                    <img src="{% static 'img/fig_9.png' %}" alt="fig_9" class = "img_center">
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </td>
-
-                                    <td class="text-center" style="width: 10%; ">
-                                        <form action="show_table" target="_blank" method=POST>
-                                            {% csrf_token %}
-                                            <input  name = {{filter_year}}/9 type="submit" value="View" class="btn-shadow btn btn-primary" style="width:70px"/>
-                                        </form>
-                                    </td>
+                                    <table class = "mt-1 mb-1" style="width:100%; background-color:#D6EAF8;  " >
+                                        <td class = "pl-3" >  
+                                            <b>&#10148; อื่นๆ </b>
+                                        </td>
+                                    </table> 
                                 </tr>
-                            </table>
-                            <tr>
-                                <table class = "mt-1 mb-1" style="width:100%; background-color:#D6EAF8;  " >
-                                    <td class = "pl-3" >  
-                                        <b>&#10148; อื่นๆ </b>
-                                    </td>
-                                </table> 
-                            </tr>
-                            <table class="table-hover"  align="center" style="width:100%;  border-collapse:separate; border-spacing:0 5px;">
-                                <tr>
-                                    <td class="text-center text-muted" style="width: 5%;  " id = "vertical-align-center" ><b>12</b></td>
-                                    <td class="text-left pl-3" style="width: 30%;"><b>ไม่ระบุแหล่งงบประมาณ</b></td>
-                                    <td class="text-left" style="width: 25%; ">
-                                        <span class=" pl-4 ml-3 pr-2 opacity-6"><i class="fas fa-money-bill-alt fa-1x "></i></span>
-                                        {{budget.col11| floatformat:2|intcomma }}     
-                                    </td>
-                                    <!-- กราฟ1 -->
-                                    <td style="width: 20%;">
-                                        <div class="card border-primary img_center" style="height: 60px; width: 140px;" >
-                                            <div class=" box-hover">
-                                                <a href = '{% url "revenues-graph-page" value="13"%}' target="_blank"> 
-                                                    <img src="{% static 'img/fig_13.png' %}" alt="fig_13" class = "img_center">
-                                                </a>
+                                <table class="table-hover"  align="center" style="width:100%;  border-collapse:separate; border-spacing:0 5px;">
+                                    <tr>
+                                        <td class="text-center text-muted" style="width: 5%;  " id = "vertical-align-center" ><b>12</b></td>
+                                        <td class="text-left pl-3" style="width: 30%;"><b>ไม่ระบุแหล่งงบประมาณ</b></td>
+                                        <td class="text-left" style="width: 25%; ">
+                                            <span class=" pl-4 ml-3 pr-2 opacity-6"><i class="fas fa-money-bill-alt fa-1x "></i></span>
+                                            {{budget.col11| floatformat:2|intcomma }}     
+                                        </td>
+                                        <!-- กราฟ1 -->
+                                        <td style="width: 20%;">
+                                            <div class="card border-primary img_center" style="height: 60px; width: 140px;" >
+                                                <div class=" box-hover">
+                                                    <a href = '{% url "revenues-graph-page" value="13"%}' target="_blank"> 
+                                                        <img src="{% static 'img/fig_13.png' %}" alt="fig_13" class = "img_center">
+                                                    </a>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </td>
+                                        </td>
 
-                                    <td class="text-center" style="width: 10%; ">
-                                        <form action="show_table" target="_blank" method=POST>
-                                            {% csrf_token %}
-                                            <input  name = {{filter_year}}/13 type="submit" value="View" class="btn-shadow btn btn-primary" style="width:70px"/>
-                                        </form>
-                                    </td>
-                                </tr>
-                            </table>
-                        </tbody>
-                    </table>
-                    </div>
-                    <div class= "row">
-                        <div class="col-auto">
-                            <div><p style="color:royalblue;font-size:15px; display: inline-block; ">&#9679;&#11835;&#9679;</p><p style="display: inline-block; ">&nbsp;&nbsp;หมายถึง เงินในหัวข้อที่ระบุ</p></div>
-                            <div><p style="color:#D5DBDB;font-size:15px; display: inline-block;">&#9679;&#11835;&#9679;</p><p style="display: inline-block; ">&nbsp;&nbsp;หมายถึง เงินที่ไม่ระบุแหล่งงบประมาณ</p></div>
-                        </div>
-                        <div class="col-auto mt-3"  display: flex; justify-content: center; align-items: center;">
-                            <td class="text-center" >
-                                <form action="more-info" target="_blank" method=POST>
-                                    {% csrf_token %}
-                                    <input  name = {{filter_year}} type="submit" value="Research Funds" class="btn-shadow btn btn-success" style="width:200px;"/>
-                                </form>
-                            </td>
-                        </div>
-                    </div>
-                </div>    
-            <div class="col-md-11 col-lg-11 col-xl-4 mb-3 ml-4  card" >
-                <div class= "row">
-                    <div class="card-header bgcolor-table-head pt-3 pb-4" style="width:100%;" >
-                        <b>งบประมาณรวม | ปี : {{filter_year}} </b>
-                    </div>
-                </div>
-                <div class= "row" >
-                    <div class="bg-primary" style="width:100%; height:100%;" > 
-                        {{ graph1 | safe }}
-                        </div> 
-                </div>
-               
-                <div class= "row mb-2 mt-4 mb-0"  >
-                    <div class="card col-xs-12 mx-3 widget-content shadow bgcolor-blueshade1" style="width:100%;">
-                        <div class="card-body py-1">
-                            <div class= "row  " >
-                                <div class="col " >
-                                    <div class="h6 mb-0  widget-content-left font-weight-bold text-gray-800">&#149; วิทยาเขตหาดใหญ่</div>   
-                                </div>
-                                <div class="col " >
-                                    <div class="h6 mb-0  widget-content-right font-weight-bold text-gray-800 " align="right" >&#3647; {{campus.col0| floatformat:2|intcomma }}</div>
-                                </div>
+                                        <td class="text-center" style="width: 10%; ">
+                                            <form action="show_table" target="_blank" method=POST>
+                                                {% csrf_token %}
+                                                <input  name = {{filter_year}}/13 type="submit" value="View" class="btn-shadow btn btn-primary" style="width:70px"/>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </tbody>
+                        </table>
+                        <div class= "row ml-5">
+                            <div class="col-auto">
+                                <div><p style="color:royalblue;font-size:15px; display: inline-block; ">&#9679;&#11835;&#9679;</p><p style="display: inline-block; ">&nbsp;&nbsp;หมายถึง เงินในหัวข้อที่ระบุ</p></div>
+                                <div><p style="color:#D5DBDB;font-size:15px; display: inline-block;">&#9679;&#11835;&#9679;</p><p style="display: inline-block; ">&nbsp;&nbsp;หมายถึง เงินที่ไม่ระบุแหล่งงบประมาณ</p></div>
                             </div>
                         </div>
-                    </div>
+                    </div> 
                 </div>
-                <div class= "row mb-2"  >
-                    <div class="card col-xs-12 mx-3 widget-content shadow bgcolor-blueshade2" style="width:100%;">
-                        <div class="card-body py-1">
-                            <div class= "row  " >
-                                <div class="col ">
-                                    <div class="h6 mb-0 widget-content-left font-weight-bold text-gray-800">&#149; วิทยาเขตปัตตานี</div>   
-                                </div>
-                                <div class="col ">
-                                    <div class="h6 mb-0 widget-content-right font-weight-bold text-gray-800" align="right" >&#3647; {{campus.col1| floatformat:2|intcomma }}</div>
-                                </div>
+            </div>   
+            <div class=" revenues-col2 ">            
+                <div class="row mb-3 ml-3 mr-2" >
+                    <div class="card pretty_container" style="width: 100%;">
+                        <div class= "row">
+                            <div class="card-header bgcolor-table-head pt-3 pb-4 mx-3" style="width:100%;" >
+                                <b>งบประมาณรวม | ปี : {{filter_year}} </b>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div class= "row mb-2"  >
-                    <div class="card col-xs-12 mx-3 widget-content shadow bgcolor-blueshade3" style="width:100%;">
-                        <div class="card-body py-1">
-                            <div class= "row  " >
-                                <div class="col ">
-                                    <div class="h6 mb-0 widget-content-left font-weight-bold text-gray-800">&#149; วิทยาเขตภูเก็ต</div>   
-                                </div>
-                                <div class="col ">
-                                    <div class="h6 mb-0 widget-content-right font-weight-bold text-gray-800" align="right" >&#3647; {{campus.col2| floatformat:2|intcomma }}</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class= "row mb-2"  >
-                    <div class="card col-xs-12 mx-3 widget-content shadow bgcolor-blueshade4" style="width:100%;">
-                        <div class="card-body py-1">
-                            <div class= "row  " >
-                                <div class="col ">
-                                    <div class="h6 mb-0 widget-content-left font-weight-bold text-gray-800">&#149; วิทยาเขตสุราษฎร์ฯ</div>   
-                                </div>
-                                <div class="col ">
-                                    <div class="h6 mb-0 widget-content-right font-weight-bold text-gray-800" align="right" >&#3647; {{campus.col3| floatformat:2|intcomma }}</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class= "row mb-0"  >
-                    <div class="card col-xs-12 mx-3 widget-content shadow bgcolor-blueshade5" style="width:100%;">
-                        <div class="card-body py-1">
-                            <div class= "row  " >
-                                <div class="col ">
-                                    <div class="h6 mb-0 widget-content-left font-weight-bold text-gray-800">&#149; วิทยาเขตตรัง</div>   
-                                </div>
-                                <div class="col ">
-                                    <div class="h6 mb-0 widget-content-right font-weight-bold text-gray-800" align="right" >&#3647; {{campus.col4| floatformat:2|intcomma }}</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class= "row mx-0 mt-3">
-                    <div class=" card mb-2 widget-chart widget-chart2 text-left card-btm-border card-shadow-success border-success" style="width:100%;">
-                        <div class="col-lg-5 pl-0" style =" width:100%;">
-                            <h6 class="widget-subheading  opacity-5">รวมเงินทุนภายนอก</h6>
-                            <div class ="widget-numbers">
-                                <div class="fsize-1">
-                                    <small class="opacity-5">&#3647;</small>
-                                    <span>{{sum.in| floatformat:2|intcomma}}</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg px-0 mx-0">
-                            <div class=" graph-hover border-primary" style ="border-style: double; ">
-                                <a href = '{% url "revenues-graph-page" value="14"%}' target="_blank">
-                                    <img src="{% static 'img/fig_sum_national.png' %}" alt="fig_sum_international" class = "img_center" >
-                                </a>
-                            </div>
-                        </div>
-                        <div class="col-lg ml-0 pl-0" style =" text-align: right; ">
-                            <form action="show_table" target="_blank" method=POST class='mr-0'>
-                                {% csrf_token %}
-                                <input  name = {{filter_year}}/14 type="submit" value="View" class="btn-shadow btn btn-primary " />
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                <div class= "row mx-0">
-                    <div class=" card mb-2 widget-chart widget-chart2 text-left card-btm-border card-shadow-info border-info" style="width:100%;">
-                        <div class="col-lg-5 pl-0" style =" width:100%;">
-                            <h6 class="widget-subheading  opacity-5">รวมเงินทุนภายใน</h6>
-                            <div class ="widget-numbers">
-                                <div class="fsize-1">
-                                    <small class="opacity-5">&#3647;</small>
-                                    <span>{{sum.out| floatformat:2|intcomma}}</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg px-0 mx-0">
-                            <div class=" graph-hover border-primary" style ="border-style: double; ">
-                                <a href = '{% url "revenues-graph-page" value="15"%}' target="_blank">
-                                    <img src="{% static 'img/fig_sum_international.png' %}" alt="fig_sum_international" class = "img_center" >
-                                </a>
+                        <div class= "row" >
+                            <div class="mx-3" style="width:100%; height:100%;" > 
+                                {{ graph1 | safe }}
                             </div> 
                         </div>
-                        <div class="col-lg ml-0 pl-0" style =" text-align: right; ">
-                            <form action="show_table" target="_blank" method=POST class='mr-0'>
-                                {% csrf_token %}
-                                <input  name = {{filter_year}}/15 type="submit" value="View" class="btn-shadow btn btn-primary " />
-                            </form>
+                        <div class= "row mb-2 mt-4 mb-0 mx-2"  >
+                            <div class="card col-xs-12 mx-3 widget-content shadow bgcolor-blueshade1" style="width:100%;">
+                                <div class="card-body py-1">
+                                    <div class= "row  " >
+                                        <div class="col " >
+                                            <div class="h6 mb-0  widget-content-left font-weight-bold text-gray-800">&#149; วิทยาเขตหาดใหญ่</div>   
+                                        </div>
+                                        <div class="col " >
+                                            <div class="h6 mb-0  widget-content-right font-weight-bold text-gray-800 " align="right" >&#3647; {{campus.col0| floatformat:2|intcomma }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class= "row mb-2 mx-2"  >
+                            <div class="card col-xs-12 mx-3 widget-content shadow bgcolor-blueshade2" style="width:100%;">
+                                <div class="card-body py-1">
+                                    <div class= "row  " >
+                                        <div class="col ">
+                                            <div class="h6 mb-0 widget-content-left font-weight-bold text-gray-800">&#149; วิทยาเขตปัตตานี</div>   
+                                        </div>
+                                        <div class="col ">
+                                            <div class="h6 mb-0 widget-content-right font-weight-bold text-gray-800" align="right" >&#3647; {{campus.col1| floatformat:2|intcomma }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class= "row mb-2 mx-2"  >
+                            <div class="card col-xs-12 mx-3 widget-content shadow bgcolor-blueshade3" style="width:100%;">
+                                <div class="card-body py-1">
+                                    <div class= "row  " >
+                                        <div class="col ">
+                                            <div class="h6 mb-0 widget-content-left font-weight-bold text-gray-800">&#149; วิทยาเขตภูเก็ต</div>   
+                                        </div>
+                                        <div class="col ">
+                                            <div class="h6 mb-0 widget-content-right font-weight-bold text-gray-800" align="right" >&#3647; {{campus.col2| floatformat:2|intcomma }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class= "row mb-2 mx-2"  >
+                            <div class="card col-xs-12 mx-3 widget-content shadow bgcolor-blueshade4" style="width:100%;">
+                                <div class="card-body py-1">
+                                    <div class= "row  " >
+                                        <div class="col " >
+                                            <div class="h6 mb-0 widget-content-left font-weight-bold text-gray-800">&#149; วิทยาเขตสุราษฎร์ฯ</div>   
+                                        </div>
+                                        <div class="col ">
+                                            <div class="h6 mb-0 widget-content-right font-weight-bold text-gray-800" align="right" >&#3647; {{campus.col3| floatformat:2|intcomma }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class= "row mb-2 mx-2"  >
+                            <div class="card col-xs-12 mx-3 widget-content shadow bgcolor-blueshade5" style="width:100%;">
+                                <div class="card-body py-1">
+                                    <div class= "row  " >
+                                        <div class="col ">
+                                            <div class="h6 mb-0 widget-content-left font-weight-bold text-gray-800">&#149; วิทยาเขตตรัง</div>   
+                                        </div>
+                                        <div class="col ">
+                                            <div class="h6 mb-0 widget-content-right font-weight-bold text-gray-800" align="right" >&#3647; {{campus.col4| floatformat:2|intcomma }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class= "row mt-3 mx-2">
+                            <div class=" card mb-2 widget-chart widget-chart2 text-left card-btm-border card-shadow-success border-success" style="width:100%;">
+                                <div class="col-lg-5 pl-0" style =" width:100%;">
+                                    <h6 class="widget-subheading  opacity-5">รวมเงินทุนภายนอก</h6>
+                                    <div class ="widget-numbers">
+                                        <div class="fsize-1">
+                                            <small class="opacity-5">&#3647;</small>
+                                            <span>{{sum.in| floatformat:2|intcomma}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg px-0 mx-0">
+                                    <div class=" graph-hover border-primary" style ="border-style: double; ">
+                                        <a href = '{% url "revenues-graph-page" value="14"%}' target="_blank">
+                                            <img src="{% static 'img/fig_sum_national.png' %}" alt="fig_sum_international" class = "img_center" >
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="col-lg ml-0 pl-0" style =" text-align: right; ">
+                                    <form action="show_table" target="_blank" method=POST class='mr-0'>
+                                        {% csrf_token %}
+                                        <input  name = {{filter_year}}/14 type="submit" value="View" class="btn-shadow btn btn-primary " />
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class= "row mx-2 mb-3">
+                            <div class=" card mb-2 widget-chart widget-chart2 text-left card-btm-border card-shadow-info border-info" style="width:100%;">
+                                <div class="col-lg-5 pl-0" style =" width:100%;">
+                                    <h6 class="widget-subheading  opacity-5">รวมเงินทุนภายใน</h6>
+                                    <div class ="widget-numbers">
+                                        <div class="fsize-1">
+                                            <small class="opacity-5">&#3647;</small>
+                                            <span>{{sum.out| floatformat:2|intcomma}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg px-0 mx-0">
+                                    <div class=" graph-hover border-primary" style ="border-style: double; ">
+                                        <a href = '{% url "revenues-graph-page" value="15"%}' target="_blank">
+                                            <img src="{% static 'img/fig_sum_international.png' %}" alt="fig_sum_international" class = "img_center" >
+                                        </a>
+                                    </div> 
+                                </div>
+                                <div class="col-lg ml-0 pl-0" style =" text-align: right; ">
+                                    <form action="show_table" target="_blank" method=POST class='mr-0'>
+                                        {% csrf_token %}
+                                        <input  name = {{filter_year}}/15 type="submit" value="View" class="btn-shadow btn btn-primary " />
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

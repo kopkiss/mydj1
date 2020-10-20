@@ -3478,6 +3478,7 @@ def pageRevenues(request): # page รายได้งานวิจัย
         'comp': get_budget_comp(),
         # 'year' :range((datetime.now().year+1)+533,(datetime.now().year+1)+543),
         'year' :range(get_fiscal_year()-9 ,get_fiscal_year()+1),
+        'year_show_research_funds_button' :range(get_fiscal_year()-9 ,get_fiscal_year()),
         'filter_year': selected_year,
         'campus' : get_budget_campas(),
         'graph1' :graph1(),
@@ -3761,35 +3762,38 @@ def revenues_table(request):  # รับค่า value มาจาก url
 
 @login_required(login_url='login')
 def revenues_more_info(request):  # แสดงข้อมูลเพิ่มเติม ของ ReachFund
-    
+
     for k, v in enumerate(request.POST.keys()):  # รับ key ของตัวแปร dictionary จาก ปุ่ม view มาใส่ในตัวแปร source เช่น source = Goverment
         if(k==1):   
             temp = v
     year = temp # เก็บค่า ปี
-    print(year)
+    print("ปีงบประมาณ :",year)
 
     def query_data():
-        
-        # 1 และ 2 ถูกเลือก 
-        sql_cmd =  """SELECT leader_name_surname_th, project_name_th,fund_type_id, fund_type_th, sum_budget_plan, project_start_date
-                        from importdb_prpm_v_grt_project_eis
-                        where fund_budget_year = """+str(year)+""" and fund_type_id <> 1315 
-                                    and leader_name_surname_th <> ""
-                        order by 1
-                        """
+        try:
+            sql_cmd =  """SELECT leader_name_surname_th, project_name_th,fund_type_id, fund_type_th, sum_budget_plan, project_start_date
+                            from importdb_prpm_v_grt_project_eis
+                            where fund_budget_year = """+str(year)+""" and fund_type_id <> 1315 
+                                        and leader_name_surname_th <> ""
+                            order by 1
+                            """
 
-        # print(sql_cmd)
-        con_string = getConstring('sql')
-        df = pm.execute_query(sql_cmd, con_string)
-        
-        df =df.fillna(0)
-        df["project_start_date"] = df["project_start_date"].dt.strftime("%d/%m/%y")
-        
-        return df
-    
+            # print(sql_cmd)
+            con_string = getConstring('sql')
+            df = pm.execute_query(sql_cmd, con_string)
+            
+            df =df.fillna(0)
+            df["project_start_date"] = df["project_start_date"].dt.strftime("%d/%m/%y")
+            
+            return df
+
+        except:
+            return None
+
     context={
         # 'a_table' : get_table(int(year),int(source)) ,  
-        'data' : query_data(),  
+        'data' : query_data(),
+        'year' : year 
         
     }  
     return render(request,'importDB/revenues_more_info.html', context)
@@ -3844,7 +3848,6 @@ def pageExFund(request): # page รายได้จากทุนภายน
         # print(df)
         return df
 
-      
     def getInterNationalEXFUND():
         
         sql_cmd =  """select * from q_ex_fund
@@ -3856,10 +3859,18 @@ def pageExFund(request): # page รายได้จากทุนภายน
         df = pm.execute_query(sql_cmd, con_string)
         return df
 
+    def get_date_file():
+        file_path = """mydj1/static/csv/ranking_isi.csv"""
+        t = time.strftime('%m/%d/%Y', time.gmtime(os.path.getmtime(file_path)))
+        d = datetime.strptime(t,"%m/%d/%Y").date() 
+
+        return str(d.day)+'/'+str(d.month)+'/'+str(d.year+543)
+
     context={
         ###### Head_page ########################    
         'head_page': get_head_page(),
         'now_year' : (datetime.now().year)+543,
+        'date' : get_date_file(),
         #########################################
         #### tables1 
          'choices' : choices,
@@ -3868,6 +3879,7 @@ def pageExFund(request): # page รายได้จากทุนภายน
         #### tables1 
         'df_Inter_Fx_fund':getInterNationalEXFUND(),
         'top_bar_title': "แหล่งทุนภายนอก"
+
     }
 
     # return render(request, 'importDB/exFund.html', context)

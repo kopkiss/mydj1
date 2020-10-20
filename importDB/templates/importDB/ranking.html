@@ -8,20 +8,20 @@
 
 
 <div class="container-fluid">
-  <div class="row"  >
-    <div class="col-lg-7 col-sm-11 ml-5 mb-1  "  >
-    </div>
-    <div class="col-lg-4 col-sm-11 ml-4 mb-1  "  style="font-size:15px;" align="right">
-      Last updated: {{date}}
+  <div class="row" >
+    <div class="col-xs-12 col-md-12 col-lg-12 "  >
+      <div class="pr-3 mb-1" style=" float: right;">
+        <span class = "px-2" style="font-size:15px; background-color: coral;  border-radius: 30px; "><b>Last updated: </b> {{date}}</span>
+      </div> 
     </div>
   </div>
   <div class="row "  >
     <div class=" ranking-col1 ml-4 mb-3 mr-2 card pretty_container">
       <div class="row" >
-        <span class ="ranking-com_pre-button-col1 mt-2 ml-4">
-          <h5 class = "subtitle mt-3 ml-2" style="display:inline-block"> &nbsp; จำนวนการตีพิมพ์ต่อปี (Scopus, ISI-WoS, TCI)</h5>
+        <span class ="ranking-com_pre-button-col1 mt-1 ml-4">
+          <h5 class = "subtitle mt-2 ml-2" style="display:inline-block"> &nbsp; จำนวนการตีพิมพ์ต่อปี (Scopus, ISI-WoS, TCI)</h5>
         </span>
-        <span class ="ranking-com_pre-button-col1 mt-3 ml-4" >
+        <span class ="ranking-com_pre-button-col1 mt-2 ml-4" >
           <form action="comparing" target="_blank" method=GET style="display:inline-block; ">
             <input name = Comparing type="submit" value="Comparison" class="btn-shadow btn btn-info" style="width:auto; "/>
           </form>
@@ -47,7 +47,7 @@
           </div>
         </div>
       </div>
-      <div class="row mb-3 ml-4 mr-2" >
+      <div class="row mb-3 ml-4 mr-2">
         <div class="card pretty_container" style="position: relative;width: 100%;height: 10rem;">
           <div class="row" >
             <div class = "col">
@@ -179,7 +179,7 @@
     </div>
   </div>
   <div class="row " >
-    <div class=" ml-4 mb-3 mr-3 card pretty_container" style="width:100% ">
+    <div class=" ml-4 mb-3 mr-3 mr-4 card pretty_container" style="width:100% ">
       <div class ="row ml-3">
         <h5 class = "subtitle mt-3 mb-0 ">&nbsp;Web of Science Catagories & Research Areas  </h5>    
         &nbsp;
@@ -195,7 +195,6 @@
         {{ bar_chart2 | safe }}
       </div>
     </div>
-
   </div>
 </div>
 

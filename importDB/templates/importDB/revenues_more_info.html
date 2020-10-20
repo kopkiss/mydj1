@@ -5,43 +5,44 @@
 {% load humanize %}
 
 
-<div class="container-fluid ">
-  <div class="row ">
-    <div class="main-card card-hover-shadow-2x mb-4 mx-3 card" style="width: 100%;"> 
-      <div class="card-header mt-3">
-        <span id = "span1">
-          <table id="table_id1" class="display table table-responsive responsive" style="width:100%">
-            <!-- class = " table table-responsive bgcolor-table-head table-borderless display responsive nowrap table-hover align-middle mb-0" -->
-            <thead>
-              <tr bgcolor="#1E4DC2" class = "reservation_fontcolor ">
-                  <th scope="col" >#</th>
-                  <th scope="col" style="width:15%;">Faculty Investigator</th>
-                  <th scope="col" style="width:40%;">Project Title</th>
-                  <th scope="col" >Funding Agency</th>
-                  <th scope="col" >Amount</th>
-                  <th scope="col" >Date</th>
-                  <!-- <th scope="col" style="width:7%;">Financial Info</th> -->
-              </tr>
-            </thead>
-            <tbody>
-              {% for row in data.itertuples %}
-                <tr>
-                    <TD class ="c3" align="center">{{forloop.counter}}</TD>
-                    <TD class ="c3" align="left">{{row.leader_name_surname_th}}</TD>
-                    <TD class ="c3" align="left">{{row.project_name_th}}</TD>
-                    <TD class ="c3" align="left">{{row.fund_type_th}}</TD>
-                    <TD class ="c3" align="left">{{row.sum_budget_plan}}</TD>
-                    <TD class ="c3" align="left">{{row.project_start_date}}</TD>
-                    <!-- <TD class ="c3" align="center" style="color: blue;" ><b>{{row.marker}}</b></TD> -->
-                </tr>  
-              {% endfor %} 
-            </tbody>
-          </table>
-        </span>
-        
-      </div>
+<div class="container-fluid mx-3 pt-3 pb-3 card pretty_container">
+  <div class = "row">
+    <div class="col " > 
+        <h4 class="subtitle">&nbsp; รายละเอียด Research Funds ในปีงบประมาณ {{year}}</u></h4><br> 
     </div>
-  </div> 
+  </div>
+  <div class = "row">
+    <div class = "col-sm-12 px-3">
+        <table id="table_id1" class="display table table-responsive responsive" style="width:100%">
+          <!-- class = " table table-responsive bgcolor-table-head table-borderless display responsive nowrap table-hover align-middle mb-0" -->
+          <thead>
+            <tr bgcolor="#1E4DC2" class = "reservation_fontcolor ">
+                <th scope="col" >#</th>
+                <th scope="col" style="width:15%;">Faculty Investigator</th>
+                <th scope="col" style="width:40%;">Project Title</th>
+                <th scope="col" >Funding Agency</th>
+                <th scope="col" >Amount</th>
+                <th scope="col" >Date</th>
+                <!-- <th scope="col" style="width:7%;">Financial Info</th> -->
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in data.itertuples %}
+              <tr>
+                  <TD class ="c3" align="center">{{forloop.counter}}</TD>
+                  <TD class ="c3" align="left">{{row.leader_name_surname_th}}</TD>
+                  <TD class ="c3" align="left">{{row.project_name_th}}</TD>
+                  <TD class ="c3" align="left">{{row.fund_type_th}}</TD>
+                  <TD class ="c3" align="left">{{row.sum_budget_plan}}</TD>
+                  <TD class ="c3" align="left">{{row.project_start_date}}</TD>
+                  <!-- <TD class ="c3" align="center" style="color: blue;" ><b>{{row.marker}}</b></TD> -->
+              </tr>  
+            {% endfor %} 
+          </tbody>
+        </table>
+      </span>
+    </div>
+  </div>
 </div>
 
 
