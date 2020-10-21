@@ -1546,33 +1546,61 @@ def cited_isi():
         driver.find_element_by_xpath("//span[@class='select2-results']").click() 
         driver.find_element_by_xpath("//span[@class='searchButton']").click()
 
-        WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, 'summary_CitLink')))   # hold by class_name
-        driver.find_element_by_class_name('summary_CitLink').click()
+        WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, 'link-style1')))  # hold by id
+        driver.find_element_by_xpath("//a[@class='link-style1']").click()
 
-        WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, 'select2-selection.select2-selection--single')))
-        driver.find_element_by_xpath("//a[@class='snowplow-citation-report']").click() 
-        element = wait.until(EC.element_to_be_clickable((By.NAME, 'cr_timespan_submission')))  # hold by name
+        # ติ๊ก เลือก 10 ปี 
+        WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.CLASS_NAME, 'more_title')))
+        driver.find_element_by_xpath("//input[@id='PY_1']").click()
+        driver.find_element_by_xpath("//input[@id='PY_2']").click()
+        driver.find_element_by_xpath("//input[@id='PY_3']").click()
+        driver.find_element_by_xpath("//input[@id='PY_4']").click()
+        driver.find_element_by_xpath("//input[@id='PY_5']").click()
+        driver.find_element_by_xpath("//input[@id='PY_6']").click()
+        driver.find_element_by_xpath("//input[@id='PY_7']").click()
+        driver.find_element_by_xpath("//input[@id='PY_8']").click()
+        driver.find_element_by_xpath("//input[@id='PY_9']").click()
+        driver.find_element_by_xpath("//input[@id='PY_10']").click()
 
-        # หาค่า citation ของปีปัจจุบันd
+        # กดปุ่ม Refine
+        WebDriverWait(driver, 15)
+        driver.find_element_by_xpath("//button[@title='Refine' and contains(text(), 'Refine') ]").click()
+
+        # กดปุ่ม Create Citation Report
+        WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.CLASS_NAME, 'snowplow-citation-report.citation-report-summary-link')))
+        driver.find_element_by_xpath("//span[contains(text(), 'Create Citation Report')]").click()
+
+        # หาค่า citation ของปีล่าสุด และ ปี ล่าสุด - 1 
+        WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.CLASS_NAME, 'select2-selection__rendered')))
         cited1 = driver.find_element_by_id("CR_HEADER_4" ).text
         cited2 = driver.find_element_by_id("CR_HEADER_3" ).text
-        h_index = driver.find_element_by_id("H_INDEX" ).text
         
         # หาค่า h_index ของปีปัจจุบัน
-        
-        cited1 =  cited1.replace(",","")  # ตัด , ในตัวเลขที่ได้มา เช่น 1,000 เป็น 1000
-        cited2 =  cited2.replace(",","")
+        h_index = driver.find_element_by_id("H_INDEX" ).text
 
+        # หา avg cite per item ของปีปัจจุบัน
+        avg_per_item = driver.find_element_by_class_name("minor.commafy.last" ).text
+
+        # ตัด , ในตัวเลขที่ได้มา เช่น 1,000 เป็น 1000
+        cited1 =  cited1.replace(",","")  
+        cited2 =  cited2.replace(",","")
+        h_index =  h_index.replace(",","")
+        
+        # หาปี ล่าสุด และ ล่าสุด-1
+        tag_years = driver.find_element_by_xpath("//div[@class='CitReportTotalRow1']")
+        years = tag_years.text.split("\n")[1].split(" ")
+        year = int(years[-1])+543
+        previous_year = int(years[-2])+543
         
         # ใส่ ตัวเลขที่ได้ ลง dataframe
-        df1=pd.DataFrame({'year':datetime.now().year+543 , 'cited':cited1}, index=[0])
-        df2=pd.DataFrame({'year':datetime.now().year+543-1 , 'cited':cited2}, index=[1])
-        df_records = pd.concat([df1,df2],axis = 0) # ต่อ dataframe
+        df1=pd.DataFrame({'year':year , 'cited':cited1}, index=[0])
+        df2=pd.DataFrame({'year':previous_year , 'cited':cited2}, index=[1])
+        df_records = pd.concat([df1,df2],axis = 0)
         df_records['cited'] = df_records['cited'].astype('int') # เปลี่ยนตัวเลขเป็น int    
 
         print(df_records)
 
-        return df_records, h_index
+        return df_records, h_index, avg_per_item
 
     except Exception as e:
         print("Error")
@@ -2945,7 +2973,7 @@ def query9(): # web of science catagories
         print('At Query#9: Something went wrong :', e)
         return checkpoint
 
-def query10(): # Citation ISI and H-index
+def query10(): # Citation ISI and H-index and avg_per_item
     print("-"*20)
     print("Starting Query#10 ...")
     checkpoint = True
@@ -2953,11 +2981,11 @@ def query10(): # Citation ISI and H-index
     dt = datetime.now()
     now_year = dt.year+543
         
-    cited, h_index = cited_isi()
+    cited, h_index, avg = cited_isi()
     
     if(cited is None): 
             print("Get Citation ERROR 1 time, call cited_isi() again....")
-            cited, h_index = cited_isi()
+            cited, h_index, avg = cited_isi()
             if(cited is None): 
                 print("Get Citation ERROR 2 times, break....")
             else:
@@ -2970,13 +2998,13 @@ def query10(): # Citation ISI and H-index
         
         df = pd.read_csv("""mydj1/static/csv/ranking_cited_score.csv""", index_col=0)
 
-        if df[-1:].index.values != now_year: # เช่น ถ้า เป็นปีใหม่ (ไม่อยู่ใน df มาก่อน) จะต้องใส่ index ปีใหม่ โดยการ append
-            df.loc[now_year-1:now_year-1].update(cited.loc[now_year-1:now_year-1])  #ปีใหม่ - 1
-            df =  df.append(cited.loc[now_year:now_year])  # ปีใหม่
+        if df[-1:].index.values != cited[0:1].index.values : # เช่น ถ้า เป็นปีใหม่ (ไม่อยู่ใน df มาก่อน) จะต้องใส่ index ปีใหม่ โดยการ append
+            df.iloc[-1].update(cited.iloc[1])
+            df = df.append(cited.iloc[0])
             
         else :  
-            df.loc[now_year:now_year].update(cited.loc[now_year:now_year])  # ปีปัจจุบัน 
-            df.loc[now_year-1:now_year-1].update(cited.loc[ now_year-1:now_year-1]) # ปีปัจจุบัน - 1
+            df.iloc[-1].update(cited.iloc[0])  # ปีปัจจุบัน 
+            df.iloc[-2].update(cited.iloc[1]) # ปีปัจจุบัน - 1
             
         ########## save df scopus to csv ##########      
         if not os.path.exists("mydj1/static/csv"):
@@ -2992,6 +3020,13 @@ def query10(): # Citation ISI and H-index
                 os.mkdir("mydj1/static/csv")
                 
         df.to_csv ("""mydj1/static/csv/ranking_h_index.csv""", index = False, header=True)
+
+        ###### save avg_cite_per_item to csv ######
+        df=pd.DataFrame({'avg':avg }, index=[0])
+        if not os.path.exists("mydj1/static/csv"):
+                os.mkdir("mydj1/static/csv")
+                
+        df.to_csv ("""mydj1/static/csv/ranking_avg_cite_per_item.csv""", index = False, header=True)
 
         print ("Data is saved")
         print("Ending Query#10 ...")
@@ -4095,7 +4130,7 @@ def pageRanking(request): # page Ranking ISI/SCOPUS/TCI
         score = pd.read_csv("""mydj1/static/csv/ranking_cited_score.csv""")
         score = score.set_index('year')
         
-        score_line = score[-20:-1]['cited'].to_frame()
+        score_line = score[-10:-1]['cited'].to_frame()
         
         fig = go.Figure(data = go.Scatter(x=score_line.index, y=score_line["cited"],
                     mode='lines+markers',
@@ -4117,7 +4152,7 @@ def pageRanking(request): # page Ranking ISI/SCOPUS/TCI
             # hovermode="x",
             xaxis = dict(
                 tickmode = 'linear',
-                dtick = 2,
+                dtick = 1,
                 showgrid=False,
                 linecolor="#BCCCDC",
                 
@@ -4154,23 +4189,19 @@ def pageRanking(request): # page Ranking ISI/SCOPUS/TCI
         score = pd.read_csv("""mydj1/static/csv/ranking_cited_score.csv""")
         score = score.set_index('year')
         
-        return score["cited"].sum()
+        return score[-1:-11:-1].sum()
 
     def avg_per_items():
 
-        cited_score = pd.read_csv("""mydj1/static/csv/ranking_cited_score.csv""")
-        df_isi = pd.read_csv("""mydj1/static/csv/ranking_isi.csv""", index_col=0)
-
-        cited_score["cited"] =  cited_score["cited"].astype('int')
-        df_isi["PSU"] = df_isi["PSU"].astype('int')
-        avg = (cited_score["cited"].sum())/(df_isi["PSU"].sum())
-        return avg
+        df = pd.read_csv("""mydj1/static/csv/ranking_avg_cite_per_item.csv""")
+        
+        return df["avg"]
     
     def avg_per_year():
         
         cited_score = pd.read_csv("""mydj1/static/csv/ranking_cited_score.csv""")
-
-        mean = np.mean(cited_score["cited"])
+        cited_score = cited_score.set_index('year')
+        mean = np.mean(cited_score[-1:-11:-1])[0]
         return mean
     
     def total_publications():
