@@ -9,7 +9,6 @@
 
 <div class="container-fluid">
   <div class="row" >
-    
     <div class="col-xs-12 col-md-12 col-lg-12 "  >
       <div class="pr-3 mb-1" style=" float: right;">
         <span class = "px-2" style="font-size:15px; background-color: coral;  border-radius: 30px; "><b>Last updated: </b> {{date}}</span>
@@ -83,6 +82,7 @@
   <div class="row ">
     <div class=" ranking-col1 ml-4 mb-3 mr-2 card pretty_container " > 
       <h5 class = "subtitle mt-3 mb-0 ml-3"> &nbsp;Sum of Times Cited per Year (ISI-WoS)</h5> 
+      <!-- <h5 class = "subtitle mt-3 mb-0 ml-3"> &nbsp;จำนวนการถูกอ้างอิงต่อปี 10ปีย้อนหลัง (ISI-WoS) </h5> -->
       <span class = "pl-2 pr-5" >
         {{ line_chart_cited | safe }}
       </span> 
@@ -120,6 +120,7 @@
           <div class="row" >
             <div class="col-xs-12 col-md-12 col-lg-12 "  >
               <h5 class = "subtitle mt-3 mb-3 ml-3" style="display:inline-block;">&nbsp; Sum of Times Cited (ISI-WoS) </h5> 
+              <!-- <h5 class = "subtitle mt-3 mb-3 ml-3" style="display:inline-block;">&nbsp; จำนวนการถูกอ้างอิงทั้งหมด (ISI-WoS) </h5> -->
               <div class="pt-3 pr-3" style=" float: right;">
                 <img src="{% static 'img/bulb_2251110.png' %}" 
                   title="Sum of Times Cited: This is the total number of citations to all

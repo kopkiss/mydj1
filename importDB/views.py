@@ -52,7 +52,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
 from statsmodels.tsa.arima_model import ARIMA
 from statsmodels.tsa.statespace.sarimax import SARIMAX
-
+from sklearn.metrics import r2_score
 # ดึง script PHP
 import subprocess
 from subprocess import check_output
@@ -1529,7 +1529,14 @@ def moneyformat(x):  # เอาไว้เปลี่ยน format เป็�
 
 def cited_isi():
     path = """importDB"""
-    driver = webdriver.Chrome(path+'/chromedriver.exe')  # เปิด chromedriver
+
+    try:
+        driver = webdriver.Chrome(path+'/chromedriver.exe')  # เปิด chromedriver
+    except Exception as e:
+        print(e,"โปรดทำการ update เวอร์ชั่นใหม่ของ File chromedriver.exe")
+        print("https://chromedriver.chromium.org/downloads")
+        return None
+
     WebDriverWait(driver, 10)
     
     try: 
@@ -1675,7 +1682,13 @@ def isi():
     col_used = df.columns.tolist()  # เก็บชื่อย่อมหาลัย ที่อยู่ใน ranking_isi.csv ตอนนี้
    
     # print(path+'/chromedriver.exe')
-    driver = webdriver.Chrome(path+'/chromedriver.exe')  # เปิด chromedriver
+    try:
+        driver = webdriver.Chrome(path+'/chromedriver.exe')  # เปิด chromedriver
+    except Exception as e:
+        print(e,"โปรดทำการ update เวอร์ชั่นใหม่ของ File chromedriver.exe")
+        print("https://chromedriver.chromium.org/downloads")
+        return None
+
     # os.chdir(path)  # setpath
     WebDriverWait(driver, 10)
     try:
@@ -1846,9 +1859,15 @@ def tci():
     df = pd.read_csv("""mydj1/static/csv/ranking_tci.csv""", index_col=0)
     flag = False
     col_used = df.columns.tolist()  # เก็บชื่อย่อมหาลัย ที่อยู่ใน ranking_isi.csv ตอนนี้
-    try : 
-        driver = webdriver.Chrome(path+'/chromedriver.exe')
 
+    try:
+        driver = webdriver.Chrome(path+'/chromedriver.exe')  # เปิด chromedriver
+    except Exception as e:
+        print(e,"โปรดทำการ update เวอร์ชั่นใหม่ของ File chromedriver.exe")
+        print("https://chromedriver.chromium.org/downloads")
+        return None
+
+    try : 
         data = master_ranking_university_name.objects.all() # ดึงรายละเอียดมหาลัยที่จะค้นหา จากฐานข้อมูล Master
         
         for item in data.values('short_name','name_eng','name_th','flag_used'): # วน for เพื่อตรวจสอบ ว่า มี มหาวิทยาลัยใหม่ ถูกเพิ่ม/หรือ ไม่ได้ใช้ (flag_used = false )มาในฐานข้อมูลหรือไม่
@@ -2909,7 +2928,14 @@ def query8(): # web of science Research Areas
     checkpoint = True
     os.environ["NLS_LANG"] = ".UTF8"  # ทำให้แสดงข้อความเป็น ภาษาไทยได้
     path = """importDB"""
-    driver = webdriver.Chrome(path+'/chromedriver.exe')  # เปิด chromedriver
+
+    try:
+        driver = webdriver.Chrome(path+'/chromedriver.exe')  # เปิด chromedriver
+    except Exception as e:
+        print(e,"โปรดทำการ update เวอร์ชั่นใหม่ของ File chromedriver.exe")
+        print("https://chromedriver.chromium.org/downloads")
+        return None
+
     WebDriverWait(driver, 10)
     try:
         df = chrome_driver_get_research_areas_ISI(driver)
@@ -2943,7 +2969,14 @@ def query9(): # web of science catagories
     checkpoint = True
     os.environ["NLS_LANG"] = ".UTF8"  # ทำให้แสดงข้อความเป็น ภาษาไทยได้
     path = """importDB"""
-    driver = webdriver.Chrome(path+'/chromedriver.exe')  # เปิด chromedriver
+
+    try:
+        driver = webdriver.Chrome(path+'/chromedriver.exe')  # เปิด chromedriver
+    except Exception as e:
+        print(e,"โปรดทำการ update เวอร์ชั่นใหม่ของ File chromedriver.exe")
+        print("https://chromedriver.chromium.org/downloads")
+        return None
+
     WebDriverWait(driver, 10)
     
     try: 
@@ -3370,7 +3403,12 @@ def pageRevenues(request): # page รายได้งานวิจัย
         for n in range(0,12):   # สร้างใส่ค่าใน column ใหม่
             newdf.budget[n] = re_df[str(n)]
 
-        fig = px.pie(newdf, values='budget', names='BUDGET_TYPE' ,color_discrete_sequence=px.colors.sequential.haline, hole=0.5 ,)
+        fig = px.pie(newdf, values='budget', names='BUDGET_TYPE' 
+                ,color_discrete_sequence=px.colors.sequential.haline
+                , hole=0.5 ,
+        )
+            
+
         fig.update_traces(textposition='inside', textfont_size=14)
         # fig.update_traces(hoverinfo="label+percent+name",
         #           marker=dict(line=dict(color='#000000', width=2)))
@@ -4711,6 +4749,13 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
         results_pred = results_pred.sort_values(by=['year'])
         results_pred = results_pred.reset_index(drop=True)
 
+
+        ### หาค่า R-Square
+        r2 = r2_score(df_y,df_y_pre)
+        print("Linear: R-Square : ",r2)
+        # print(df_y_pre)
+        # print(df_y)
+
         return df_x, df_y, results_pred, df_y_pre
         
         # return  plot_div
@@ -4733,7 +4778,7 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
         y = y.reshape(-1, 1)
 
         # Traning the poly regression model on  the whole dataset
-        poly_features = PolynomialFeatures(degree=4, include_bias=False)  # y = b0 + b1x1 + b2x1^2 ... + b4x1^4
+        poly_features = PolynomialFeatures(degree=4, include_bias=True)  # y = b0 + b1x1 + b2x1^2 ... + b4x1^4
         X=poly_features.fit_transform(x) 
         poly_reg = LinearRegression()
         poly_reg.fit(X, y)
@@ -4762,7 +4807,9 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
         results_pred = results_pred.sort_values(by=['year'])
         results_pred = results_pred.reset_index(drop=True)
  
-        # print(df_y_pre)
+        ### หาค่า R-Square
+        r2 = r2_score(df_y,df_y_pre)
+        print("Poly: R-Square : ",r2)
 
         return df_x, df_y, results_pred, df_y_pre
         
@@ -4808,6 +4855,10 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
 
         df_y_pre = pd.DataFrame(sc_y.inverse_transform( regressor.predict(X)),
                    columns=['y_pre'])
+
+        ### หาค่า R-Square
+        r2 = r2_score(df_y,df_y_pre)
+        print("Support Vector: R-Square : ",r2)
 
         return  df_x, df_y, results_pred, df_y_pre 
 
@@ -4892,7 +4943,10 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
 
         df_pred= pd.concat([value0 ,df_pred], ignore_index=True) ## รวม first value 0 และ trend_line
 
- 
+        ### หาค่า R-Square
+        r2 = r2_score(df_y,df_pred)
+        print("ARIMA: R-Square : ",r2)
+
         return  df_x, df_y, results_pred, df_pred
      
     def plot_graph(ranking, shortname):
@@ -5207,8 +5261,57 @@ def pageResearchMan(request):
 ##################################################################
 ##### " function Login ##############
 ##################################################################
-
 def login_(request):
+    print("---login---")
+    username = ""
+    passowrd = ""
+    default_pass = 'pass11111' #รหัสหลอก เพื่อให้ เข้า auth ของ Django ได้
+    
+    if request.method == "POST":
+        username = request.POST.get('username') # RO ใช้ username = request.POST['username']
+        password = request.POST.get('password')
+
+        # password = "\""+password+"\""  # ทำการ ใส่ "  " ให้กับ password เพราะ อาจจะมี charactor พิเศษ ที่ทำให้เกิด error เช่น มี & | not ใน password
+        
+        # ทำการ ตรวจสอบ user และ pass จาก index.php และ ldappsu.php โดย ถ้ามี user ใน psupassport จะ Return เป็น "1,รหัสพนักงาน" ถ้าไม่มีจะ return 0 
+        # print("user = ",username)
+        # print("pass = ",password)
+        
+        #####################################
+        ############## PSU Ldap.php##########
+        #####################################
+        # proc = subprocess.Popen("""php importDB/index.php """+username+""" """+password , shell=True, stdout=subprocess.PIPE) #Call function authentication from PHP
+        # script_response = proc.stdout.read()
+
+        # decode = script_response.decode("utf-8")  # ทำการ decode จาก bit เป็น string
+
+        # user_list = decode.split(",") # split ข้อมูล ด้วย , 
+        # # print(script_response)
+        # # print("list --> ",decode)
+        # # print(user_list[0])
+        # # print(user_list[1])
+        
+        # #Call function authentication from django
+        # # user_list[1]
+        # user = authenticate(request, username = '0111111' , password = default_pass) # นำ รหัสพนักงาน (user_list[1]) มาตรวจสอบว่าอยู่ใน ฐานข้อมูล django หรือไม่ โดยใช้รหัส default
+        user = authenticate(request, username = username , password = password)
+
+        # if ((user_list[0] == "1") & (user is not None)):  # ถ้า เจอ user ใน ระบบ psupassport และ เจอ user ใน ฐานข้อมูล django ให้ทำการเข้าสู่ระบบได้
+        if (user is not None):
+            login(request, user)  # ทำการเข้าสู่ระบบ
+            return redirect('home-page')  # เมื่อเข้าสู่ระบบเเล้ว ทำการเปิดหน้าแรกของ page
+            
+        else:
+            # print("ไม่พบ user")
+            messages.info(request, 'Username หรือ password ไม่ถูกต้อง')
+
+
+    context={
+        
+    }
+    return render(request,'importDB/login.html',context)
+
+def login_2(request):
     print("---login---")
     username = ""
     passowrd = ""
