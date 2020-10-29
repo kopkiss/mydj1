@@ -3848,6 +3848,9 @@ def revenues_more_info(request):  # แสดงข้อมูลเพิ่�
                             from importdb_prpm_v_grt_project_eis
                             where fund_budget_year = """+str(year)+""" and fund_type_id <> 1315 
                                         and leader_name_surname_th <> ""
+                                        and PJ_STATUS_ID <> 12
+                                        and PJ_STATUS_ID <> 0
+                                        and sum_budget_plan is not null 		
                             order by 1
                             """
 
