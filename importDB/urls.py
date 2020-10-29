@@ -22,6 +22,7 @@ urlpatterns = [
     path('revenues/graph/<str:value>/', views.revenues_graph, name = 'revenues-graph-page'),
     path('revenues/show_table', views.revenues_table, name = 'revenues-show-table-page'),
     path('revenues/more-info', views.revenues_more_info, name = 'revenues-more-info'),
+    path('test-page', views.test_page, name = 'test-page'),
     
     
     

@@ -47,6 +47,12 @@ INSTALLED_APPS = [  # เป็นการบอกว่า ในชั้น
     'corsheaders',
     #---------- celery
     'django_celery_beat',
+
+    #----------- https runserver
+    # runserver_plus
+    # 'werkzeug_debugger_runserver',
+    # 'django_extensions',
+    # 'sslserver',
 ]
 
 MIDDLEWARE = [
@@ -89,7 +95,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'mydj1.wsgi.application'
 
 CORS_ORIGIN_ALLOW_ALL = False
-CORS_ORIGIN_WHITELIST = ('http://127.0.0.1:8000',)
+CORS_ORIGIN_WHITELIST = ('http://127.0.0.1:8000','https://ess.psu.ac.th:8081',)
 
 # CORS_ALLOW_METHODS = [
 #     'DELETE',
@@ -113,6 +119,19 @@ DATABASES = {
         'HOST':'localhost',
         'PORT':''
     }
+    
+    # MySql เครื่อง server
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.mysql', #เปลี่ยนจาก sqlite3 เป็น mysql
+    #     'NAME': 'mydj2', #ชื่อฐานข้อมูล
+    #     'USER': 'root',
+    #     'PASSWORD':'esspsu63**',
+    #     'HOST':'localhost',
+    #     # 'HOST':'ess.psu.ac.th',
+    #     'PORT':''
+    # }
+
+
     # 'default': {
     #     'ENGINE': 'django.db.backends.oracle', #เปลี่ยนจาก sqlite3 เป็น mysql
     #     'NAME': 'oraldb1', #ชื่อฐานข้อมูล

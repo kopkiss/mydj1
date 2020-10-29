@@ -1267,7 +1267,7 @@ def dump1():
         SERVICE = 'delita.psu.ac.th' # enter the oracle db service name
         ENGINE_PATH_WIN_AUTH = DIALECT + '+' + SQL_DRIVER + '://' + USERNAME + ':' + PASSWORD +'@' + HOST + ':' + str(PORT) + '/?service_name=' + SERVICE
 
-        engine = create_engine(ENGINE_PATH_WIN_AUTH, encoding="latin1" )
+        engine = create_engine(ENGINE_PATH_WIN_AUTH, encoding="latin1" ,max_identifier_length=128)
         df = pd.read_sql_query(sql_cmd, engine)
         # df = pm.execute_query(sql_cmd, con_string)
         
@@ -1308,7 +1308,7 @@ def dump2():
         SERVICE = 'delita.psu.ac.th' # enter the oracle db service name
         ENGINE_PATH_WIN_AUTH = DIALECT + '+' + SQL_DRIVER + '://' + USERNAME + ':' + PASSWORD +'@' + HOST + ':' + str(PORT) + '/?service_name=' + SERVICE
 
-        engine = create_engine(ENGINE_PATH_WIN_AUTH, encoding="latin1" )
+        engine = create_engine(ENGINE_PATH_WIN_AUTH, encoding="latin1" ,max_identifier_length=128 )
         df = pd.read_sql_query(sql_cmd, engine)
         
         ###########################################################
@@ -1361,7 +1361,7 @@ def dump3():
         SERVICE = 'delita.psu.ac.th' # enter the oracle db service name
         ENGINE_PATH_WIN_AUTH = DIALECT + '+' + SQL_DRIVER + '://' + USERNAME + ':' + PASSWORD +'@' + HOST + ':' + str(PORT) + '/?service_name=' + SERVICE
 
-        engine = create_engine(ENGINE_PATH_WIN_AUTH, encoding="latin1" )
+        engine = create_engine(ENGINE_PATH_WIN_AUTH, encoding="latin1" ,max_identifier_length=128)
         df = pd.read_sql_query(sql_cmd, engine)
         # df = pm.execute_query(sql_cmd, con_string)
         
@@ -1404,7 +1404,7 @@ def dump4():
                 """
 
         con_string = getConstring('oracle')
-        engine = create_engine(con_string, encoding="latin1" )
+        engine = create_engine(con_string, encoding="latin1" ,max_identifier_length=128)
         df = pd.read_sql_query(sql_cmd, engine)
         # df = pm.execute_query(sql_cmd, con_string)
         
@@ -1437,7 +1437,7 @@ def dump5():
                 """
 
         con_string = getConstring('oracle')
-        engine = create_engine(con_string, encoding="latin1" )
+        engine = create_engine(con_string, encoding="latin1" ,max_identifier_length=128)
         df = pd.read_sql_query(sql_cmd, engine)
         # df = pm.execute_query(sql_cmd, con_string)
         
@@ -1492,7 +1492,7 @@ def dump6():
                                             """
 
         con_string = getConstring('oracle')
-        engine = create_engine(con_string, encoding="latin1" )
+        engine = create_engine(con_string, encoding="latin1" ,max_identifier_length=128)
         df = pd.read_sql_query(sql_cmd, engine)
         # print(df.head())
         # df = pm.execute_query(sql_cmd, con_string)
@@ -5258,6 +5258,16 @@ def pageResearchMan(request):
     
     return render(request,'importDB/research_man.html',context)  
 
+
+@login_required(login_url='login')
+def test_page(request):
+    context={
+        
+       
+    }
+
+
+    return render(request,'importDB/test-page.html',context) 
 ##################################################################
 ##### " function Login ##############
 ##################################################################
