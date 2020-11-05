@@ -20,10 +20,10 @@
                 <th scope="col" >#</th>
                 <th scope="col" style="width:15%;">Leader</th>
                 <th scope="col" style="width:40%;">Project Title</th>
-                <th scope="col" >Funding Agency</th>
+                <th scope="col" style="width:18%;">Funding Agency</th>
                 <th scope="col" >Amount</th>
                 <th scope="col" >Date</th>
-                <!-- <th scope="col" style="width:7%;">Financial Info</th> -->
+                <th scope="col" >Financial Info.</th>
             </tr>
           </thead>
           <tbody>
@@ -35,7 +35,7 @@
                   <TD class ="c3" align="left">{{row.fund_type_th}}</TD>
                   <TD class ="c3" align="left">{{row.sum_budget_plan}}</TD>
                   <TD class ="c3" align="left">{{row.project_start_date}}</TD>
-                  <!-- <TD class ="c3" align="center" style="color: blue;" ><b>{{row.marker}}</b></TD> -->
+                  <TD class ="c3" align="left">{{row.RDO_PROJECT_ID}}</b></TD>
               </tr>  
             {% endfor %} 
           </tbody>

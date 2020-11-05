@@ -3844,13 +3844,14 @@ def revenues_more_info(request):  # แสดงข้อมูลเพิ่�
 
     def query_data():
         try:
-            sql_cmd =  """SELECT leader_name_surname_th, project_name_th,fund_type_id, fund_type_th, sum_budget_plan, project_start_date
+            sql_cmd =  """SELECT leader_name_surname_th, project_name_th,fund_type_id, fund_type_th, sum_budget_plan, project_start_date , RDO_PROJECT_ID
                             from importdb_prpm_v_grt_project_eis
                             where fund_budget_year = """+str(year)+""" and fund_type_id <> 1315 
                                         and leader_name_surname_th <> ""
                                         and PJ_STATUS_ID <> 12
                                         and PJ_STATUS_ID <> 0
-                                        and sum_budget_plan is not null 		
+                                        and sum_budget_plan is not null
+                                        and sum_budget_plan <> 0 		
                             order by 1
                             """
 
