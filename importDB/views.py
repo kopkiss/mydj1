@@ -3860,6 +3860,7 @@ def revenues_more_info(request):  # แสดงข้อมูลเพิ่�
             df = pm.execute_query(sql_cmd, con_string)
             
             df =df.fillna(0)
+            df["sum_budget_plan"] = df["sum_budget_plan"].apply(moneyformat) 
             df["project_start_date"] = df["project_start_date"].dt.strftime("%d/%m/%y")
             
             return df
