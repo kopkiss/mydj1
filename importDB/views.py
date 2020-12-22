@@ -1675,7 +1675,7 @@ def get_new_uni_isi(item, driver, df): # ทำการ ดึงคะเเ�
 
     return df    
 
-def isi(): 
+def isi_backup(): 
     path = """importDB"""
     df = pd.read_csv("""mydj1/static/csv/ranking_isi.csv""", index_col=0)
     flag = False
@@ -1784,6 +1784,153 @@ def isi():
             df1=pd.DataFrame({'year':result_row_1[0] , key:result_row_1[1]}, index=[0])
             df2=pd.DataFrame({'year':result_row_2[0] , key:result_row_2[1]}, index=[1])
             df_records = pd.concat([df1,df2],axis = 0) # ต่อ dataframe
+            
+            df_records[key] = df_records[key].astype('int') # เปลี่ยนตัวเลขเป็น int
+            df_records = df_records.sort_values(by=['year'], ascending=False).reset_index(drop=True) # sort ให้ ปี ปัจจุบัน อยู่บน
+            print(df_records)
+            if(key=='PSU'):
+                last_df = pd.concat([last_df,df_records], axis= 1)
+            else:
+                last_df = pd.concat([last_df,df_records[key]], axis= 1)
+
+            print(last_df)
+
+        last_df['year'] = last_df['year'].astype('int')
+        last_df['year'] = last_df['year'] + 543
+        print("-------isi-------")
+        print(last_df)
+        print("-----------------")
+        return last_df
+
+    except Exception as e:
+        print(e)
+        return None
+
+    finally:
+        driver.quit()
+
+def isi(): 
+    path = """importDB"""
+    df = pd.read_csv("""mydj1/static/csv/ranking_isi.csv""", index_col=0)
+    flag = False
+    col_used = df.columns.tolist()  # เก็บชื่อย่อมหาลัย ที่อยู่ใน ranking_isi.csv ตอนนี้
+   
+    # print(path+'/chromedriver.exe')
+    try:
+        driver = webdriver.Chrome(path+'/chromedriver.exe')  # เปิด chromedriver
+    except Exception as e:
+        print(e,"โปรดทำการ update เวอร์ชั่นใหม่ของ File chromedriver.exe")
+        print("https://chromedriver.chromium.org/downloads")
+        return None
+
+    # os.chdir(path)  # setpath
+    WebDriverWait(driver, 10)
+    try:
+        data = master_ranking_university_name.objects.all() # ดึงรายละเอียดมหาลัยที่จะค้นหา จากฐานข้อมูล Master
+        
+        # new_df = pd.DataFrame()
+        for item in data.values('short_name','name_eng','flag_used'): # วน for เพื่อตรวจสอบ ว่า มี มหาวิทยาลัยใหม่ ถูกเพิ่ม/หรือ ไม่ได้ใช้ (flag_used = false )มาในฐานข้อมูลหรือไม่
+            if ((item['flag_used'] == True) | (item['flag_used'] == '1')) & (item['short_name'] not in col_used) :
+                flag = True  # ธง ตั้งไว้เพื่อ จะตรวจสอบว่าต้อง save csv ตอนท้าย
+                print(f"""There is a new university "{item['name_eng']}", saving isi value of the university to csv.....""")
+                df = get_new_uni_isi(item, driver, df)
+
+            if ((item['flag_used'] == False) | (item['flag_used'] == '0')) & (item['short_name'] in col_used):  # ถ้า มีมหาลัย flag_used == False ทำการลบออกจาก df เดิม
+                flag = True 
+                print(f"""ไม่ได้ใช้เเล้ว คือ :{item['name_eng']} ..... """)
+                df = df.drop([item['short_name']], axis = 1)
+                print(f"""{item['name_eng']} ถูกลบเเล้ว .... .""")
+
+        if flag:  # ทำการบันทึกเข้า csv ถ้าเกิด มี column ใหม่ หรือ ถูกลบ column
+            print("--df--")
+            print(df)
+            ########## save df ISI  to csv ##########      
+            if not os.path.exists("mydj1/static/csv"):
+                    os.mkdir("mydj1/static/csv")
+                    
+            df.to_csv ("""mydj1/static/csv/ranking_isi.csv""", index = True, header=True)
+            print("ranking_isi is updated")
+
+        searches = {}
+        for item in data.values('short_name','name_eng','flag_used'):
+            if ((item['flag_used'] == True) | (item['flag_used'] == '1')):
+                searches.update( {item['short_name'] : item['name_eng']} )
+        
+        last_df =pd.DataFrame()    
+        
+        for key, value in searches.items():
+            # key = "CU" 
+            # value = "Chulalongkorn University"
+            print(key)
+            driver.get('http://apps.webofknowledge.com/WOS_GeneralSearch_input.do?product=WOS&SID=D2Ji7v7CLPlJipz1Cc4&search_mode=GeneralSearch')
+            # กำหนด URL ของ ISI
+            wait = WebDriverWait(driver, 10)
+            element = wait.until(EC.element_to_be_clickable((By.ID, 'container(input1)')))
+
+            btn1 =driver.find_element_by_id('value(input1)')  # เลือกกล่อง input
+            btn1.clear() # ลบ ค่าที่อยู่ในกล่องเดิม ที่อาจจะมีอยู่
+            btn1.send_keys(value)   # ใส่ค่าเพื่อค้นหาข้อมูล
+            driver.find_element_by_xpath("//span[@id='select2-select1-container']").click() # กดปุ่ม
+            driver.find_element_by_xpath("//input[@class='select2-search__field']").send_keys("Organization-Enhanced")
+            driver.find_element_by_xpath("//span[@class='select2-results']").click()
+            driver.find_element_by_xpath("//span[@class='searchButton']").click()
+
+            # กดปุ่ม Analyze Results
+            WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, 'summary_CitLink')))
+            # driver.find_element_by_class_name('summary_CitLink').click()
+            # WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.CLASS_NAME, 'd-flex.align-items-center')))
+            driver.find_element_by_class_name('summary_CitLink').click()
+
+            # กดปุ่ม Publication Years
+            WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, 'select2-selection.select2-selection--single')))
+            driver.find_element_by_xpath('//*[contains(text(),"Publication Years")]').click()  # กดจากการค้าหา  ด้วย text
+
+            # ดึงข้อมูล ในปีปัจุบัน ใส่ใน row1 และ ปัจุบัน -1 ใส่ใน row2
+            WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.CLASS_NAME, 'd-flex.align-items-center')))
+            all_even_rows = driver.find_elements_by_class_name("RA-NEWRAresultsEvenRow" )
+            WebDriverWait(driver, 15)  
+            all_odd_rows = driver.find_elements_by_class_name("RA-NEWRAresultsOddRow" )
+            WebDriverWait(driver, 15)  
+
+            # กำหนดตัวแปรปีปัจจุบัน
+            now_year = int(datetime.now().year)
+            result_row_2 = []
+            result_row_1 = []
+            result_row_3 = []
+
+            # ดึง isi value ใน ปีปัจจุบัน และ ปีปัจจุบัน - 1 
+            for i in  range(len(all_even_rows)):
+                if( (now_year == int(all_even_rows[i].text[:4])) | (now_year-1 == int(all_even_rows[i].text[:4]))):
+                    result_row_1 = all_even_rows[i].text.split()[:2]
+                    break
+
+
+            for i in  range(len(all_odd_rows)):
+                if( (now_year == int(all_odd_rows[i].text[:4])) | (now_year-1 == int(all_odd_rows[i].text[:4]))):
+                    result_row_2 = all_odd_rows[i].text.split()[:2]
+                    break
+            
+            # ดึง isi value ใน ปีปัจจุบัน-2
+            for i in  range(len(all_even_rows)):
+                if( (now_year-2 == int(all_even_rows[i].text[:4])) ):
+                    result_row_3 = all_even_rows[i].text.split()[:2]
+                    break
+            for i in  range(len(all_odd_rows)):
+                if( (now_year-2 == int(all_odd_rows[i].text[:4])) ):
+                    result_row_3 = all_odd_rows[i].text.split()[:2]
+                    break
+
+            # ตัด , ในตัวเลขที่ได้มา เช่น 1,000 เป็น 1000
+            for i in range(len(result_row_2)):
+                result_row_2[i] =  result_row_2[i].replace(",","")  # ตัด , ในตัวเลขที่ได้มา เช่น 1,000 เป็น 1000
+                result_row_1[i] =  result_row_1[i].replace(",","")
+                result_row_3[i] =  result_row_3[i].replace(",","")
+
+            # ใส่ ตัวเลขที่ได้ ลง dataframe
+            df3=pd.DataFrame({'year':result_row_3[0] , key:result_row_3[1]}, index=[0])
+            df1=pd.DataFrame({'year':result_row_1[0] , key:result_row_1[1]}, index=[1])
+            df2=pd.DataFrame({'year':result_row_2[0] , key:result_row_2[1]}, index=[2])
+            df_records = pd.concat([df3,df1,df2],axis = 0) # ต่อ dataframe
             
             df_records[key] = df_records[key].astype('int') # เปลี่ยนตัวเลขเป็น int
             df_records = df_records.sort_values(by=['year'], ascending=False).reset_index(drop=True) # sort ให้ ปี ปัจจุบัน อยู่บน
@@ -1920,8 +2067,12 @@ def tci():
             driver.find_element_by_xpath("//button[@id='searchBtn']").click()
             WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID,'export_excel_btn')))
             data2 = driver.find_element_by_class_name("col-md-3" ).text 
-            df = pd.DataFrame({"year" : [data2[14:].split('\n')[1:3][0], data2[14:].split('\n')[3:5][0] ]
-                                        , key : [data2[14:].split('\n')[1:3][1][1:][:-1], data2[14:].split('\n')[3:5][1][1:][:-1]]} )
+            df = pd.DataFrame({"year" : [data2[14:].split('\n')[1:3][0], 
+                                        data2[14:].split('\n')[3:5][0],
+                                        data2[14:].split('\n')[5:7][0]]
+                               , key :  [data2[14:].split('\n')[1:3][1][1:][:-1], 
+                                        data2[14:].split('\n')[3:5][1][1:][:-1],
+                                        data2[14:].split('\n')[5:7][1][1:][:-1]]} )
             if(key=='PSU'): # ถ้า key = psu ต้องเก็บอีกแแบบ เพราะ เป้นมหาลัยแรก ใน dataframe : final_df
                 final_df = pd.concat([final_df,df], axis= 1)
             else:
@@ -1984,6 +2135,7 @@ def sco(year):
     config = json.load(con_file)
     con_file.close()
     year2 = year-1
+    year3 = year-2
     
     apiKey = config['apikey']
 
@@ -2022,31 +2174,40 @@ def sco(year):
     last_df =pd.DataFrame()
 
     try:
-        for key, value in searches.items():  
+        for key, value in searches.items():
+
+            ##### ปีปัจุบัน  #########
             query = f"{value} and PUBYEAR IS {year}"
             # defining a params dict for the parameters to be sent to the API 
             PARAMS = {'query':query,'apiKey':apiKey}  
-
             # sending get request and saving the response as response object 
             r = requests.get(url = URL, params = PARAMS) 
-
             # extracting data in json format 
             data1= r.json() 
 
+            ##### ปีปัจุบัน-1  #########
             query = f"{value} and PUBYEAR IS {year2}"
-                
             # defining a params dict for the parameters to be sent to the API 
             PARAMS = {'query':query,'apiKey':apiKey}  
-
             # sending get request and saving the response as response object 
             r = requests.get(url = URL, params = PARAMS) 
-
             # extracting data in json format 
             data2 = r.json() 
+
+            ##### ปีปัจุบัน-2  #########
+            query = f"{value} and PUBYEAR IS {year3}"
+            # defining a params dict for the parameters to be sent to the API 
+            PARAMS = {'query':query,'apiKey':apiKey}  
+            # sending get request and saving the response as response object 
+            r = requests.get(url = URL, params = PARAMS) 
+            # extracting data in json format 
+            data3 = r.json() 
+
             # convert the datas to dataframe
             df1=pd.DataFrame({'year':year+543, key:data1['search-results']['opensearch:totalResults']}, index=[0])
             df2=pd.DataFrame({'year':year2+543 , key:data2['search-results']['opensearch:totalResults']}, index=[1])
-            df_records = pd.concat([df1,df2],axis = 0)
+            df3=pd.DataFrame({'year':year3+543 , key:data3['search-results']['opensearch:totalResults']}, index=[2])
+            df_records = pd.concat([df1,df2,df3],axis = 0)
             df_records[key]= df_records[key].astype('int')
             
             if(key=='PSU'):  # ถ้าใส่ข้อมูลใน last_df ครั้งแรก ต้องใส่ df_records แบบไม่ใส่ key
@@ -2741,7 +2902,7 @@ def query5(): # ตาราง marker * และ ** ของแหล่ง�
         print('At Query#5: Something went wrong :', e)
         return checkpoint
 
-def query6(): # ISI SCOPUS TCI
+def query6(): # ISI SCOPUS TCI  3 ปีย้อนหลัง
     print("-"*20)
     print("Starting Query#6 ...")
     checkpoint = True
@@ -2770,11 +2931,13 @@ def query6(): # ISI SCOPUS TCI
         df = pd.read_csv("""mydj1/static/csv/ranking_isi.csv""", index_col=0)
         
         if df[-1:].index.values != now_year: # เช่น ถ้า เป็นปีใหม่ (ไม่อยู่ใน df มาก่อน) จะต้องใส่ index ปีใหม่ โดยการ append
+            df.loc[now_year-2:now_year-2].update(isi_df.loc[now_year-2:now_year-2])  #ปีใหม่ - 2
             df.loc[now_year-1:now_year-1].update(isi_df.loc[now_year-1:now_year-1])  #ปีใหม่ - 1
             df =  df.append(isi_df.loc[now_year:now_year])  # ปีใหม่ 
         else :  
             df.loc[now_year:now_year].update(isi_df.loc[now_year:now_year])  # ปีปัจจุบัน 
             df.loc[now_year-1:now_year-1].update(isi_df.loc[ now_year-1:now_year-1]) # ปีปัจจุบัน - 1
+            df.loc[now_year-2:now_year-2].update(isi_df.loc[ now_year-2:now_year-2]) # ปีปัจจุบัน - 2
         
         ########## save df ISI  to csv ##########      
         if not os.path.exists("mydj1/static/csv"):
@@ -2804,12 +2967,14 @@ def query6(): # ISI SCOPUS TCI
         df = pd.read_csv("""mydj1/static/csv/ranking_scopus.csv""", index_col=0)
         
         if df[-1:].index.values != now_year: # เช่น ถ้า เป็นปีใหม่ (ไม่อยู่ใน df มาก่อน) จะต้องใส่ index ปีใหม่ โดยการ append
+            df.loc[now_year-2:now_year-2].update(sco_df.loc[now_year-2:now_year-2])  #ปีใหม่ - 2
             df.loc[now_year-1:now_year-1].update(sco_df.loc[now_year-1:now_year-1])  #ปีใหม่ - 1
             df =  df.append(sco_df.loc[now_year:now_year])  # ปีใหม่
             
         else :  
             df.loc[now_year:now_year].update(sco_df.loc[now_year:now_year])  # ปีปัจจุบัน 
             df.loc[now_year-1:now_year-1].update(sco_df.loc[ now_year-1:now_year-1]) # ปีปัจจุบัน - 1
+            df.loc[now_year-2:now_year-2].update(sco_df.loc[ now_year-2:now_year-2]) # ปีปัจจุบัน - 2
             
         ########## save df scopus to csv ##########      
         if not os.path.exists("mydj1/static/csv"):
@@ -2843,11 +3008,12 @@ def query6(): # ISI SCOPUS TCI
     
         if df[-1:].index.values != now_year: # เช่น ถ้า เป็นปีใหม่ (ไม่อยู่ใน df มาก่อน) จะต้องใส่ index ปีใหม่ โดยการ append
             df.loc[now_year-1:now_year-1].update(tci_df.loc[now_year-1:now_year-1])  #ปีใหม่ - 1
+            df.loc[now_year-2:now_year-2].update(tci_df.loc[now_year-2:now_year-2])  #ปีใหม่ - 2
             df =  df.append(tci_df.loc[now_year:now_year])  # ปีใหม่
         else :  
             df.loc[now_year:now_year].update(tci_df.loc[now_year:now_year])  # ปีปัจจุบัน 
             df.loc[now_year-1:now_year-1].update(tci_df.loc[ now_year-1:now_year-1]) # ปีปัจจุบัน - 1
-        
+            df.loc[now_year-2:now_year-2].update(tci_df.loc[ now_year-2:now_year-2]) # ปีปัจจุบัน - 2
         ########## save df TCI  to csv ##########      
         if not os.path.exists("mydj1/static/csv"):
                 os.mkdir("mydj1/static/csv")
