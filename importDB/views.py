@@ -1266,7 +1266,7 @@ def dump1():
         PORT = 1521 # enter the oracle port number
         SERVICE = 'delita.psu.ac.th' # enter the oracle db service name
         ENGINE_PATH_WIN_AUTH = DIALECT + '+' + SQL_DRIVER + '://' + USERNAME + ':' + PASSWORD +'@' + HOST + ':' + str(PORT) + '/?service_name=' + SERVICE
-
+        
         engine = create_engine(ENGINE_PATH_WIN_AUTH, encoding="latin1" ,max_identifier_length=128)
         df = pd.read_sql_query(sql_cmd, engine)
         # df = pm.execute_query(sql_cmd, con_string)
@@ -4473,252 +4473,259 @@ def compare_ranking(request): #page เพื่อเปรียบเที�
         columns = df_isi.columns.tolist()  # เก็บ ชื่อ columns (ชื่อย่อมหาลัย) ที่อยุ่ใน ranking_isi  
         # print(columns)
 
-        data = master_ranking_university_name.objects.all() # ดึงรายละเอียดมหาลัยที่จะค้นหา จากฐานข้อมูล Master
-        df_names = {}    # ตัวแปร สร้างไว้เก็บ ชื่อย่อ/ชื่อeng/สี ใน dict pattern {short_name : [name_eng, color]}
-        df_line = pd.DataFrame()  # ตัวแปร line เก็บ ค่าคะเเนน isi ในแต่ละปี ของแต่ละมหาลัย เพื่อวาดกราฟเส้นทึบ
-        df_dot = pd.DataFrame()  # ตัวแปร dot เก็บ ค่าคะเเนน isi ในแต่ละปี ของแต่ละมหาลัย เพื่อวาดกราฟเส้นประ
-        for item in data.values('short_name','name_eng','flag_used','color'): # วน for เพื่อตรวจสอบ ว่า มี มหาวิทยาลัยใหม่ ถูกเพิ่ม/หรือ ไม่ได้ใช้ (flag_used = false )มาในฐานข้อมูลหรือไม่
-            print(item['flag_used'],' and ',item['short_name'])
-            if ((item['flag_used'] == True) | (item['flag_used'] == '1')) & (item['short_name'] in columns) :
-                df_line[item['short_name']] = df_isi[-20:-1][item['short_name']]
-                df_names[item['short_name']] = [item['name_eng'],item['color']]
+        try:
+            data = master_ranking_university_name.objects.all() # ดึงรายละเอียดมหาลัยที่จะค้นหา จากฐานข้อมูล Master
+            df_names = {}    # ตัวแปร สร้างไว้เก็บ ชื่อย่อ/ชื่อeng/สี ใน dict pattern {short_name : [name_eng, color]}
+            df_line = pd.DataFrame()  # ตัวแปร line เก็บ ค่าคะเเนน isi ในแต่ละปี ของแต่ละมหาลัย เพื่อวาดกราฟเส้นทึบ
+            df_dot = pd.DataFrame()  # ตัวแปร dot เก็บ ค่าคะเเนน isi ในแต่ละปี ของแต่ละมหาลัย เพื่อวาดกราฟเส้นประ
+            for item in data.values('short_name','name_eng','flag_used','color'): # วน for เพื่อตรวจสอบ ว่า มี มหาวิทยาลัยใหม่ ถูกเพิ่ม/หรือ ไม่ได้ใช้ (flag_used = false )มาในฐานข้อมูลหรือไม่
+                print(item['flag_used'],' and ',item['short_name'])
+                if ((item['flag_used'] == True) | (item['flag_used'] == '1')) & (item['short_name'] in columns) :
+                    df_line[item['short_name']] = df_isi[-20:-1][item['short_name']]
+                    df_names[item['short_name']] = [item['name_eng'],item['color']]
+                        
+            ####  กราฟเส้นทึบ #########
+            fig = go.Figure( )
+            print(data)
+            for item in columns:  # วนวาดกราฟเส้นทึบ ที่ไม่ใช้ PSU เพราะ อยากให้ PSU วาดกราฟอยุ่บนกราฟอื่นๆ ต้องว่างสุดท้าย
+                if item != "PSU":
+                    visible = True if (item == 'CMU') | (item == 'KKU') else "legendonly"  # ทำให้ CMU และ KKU แสดงอยู่บนกราฟ ส่วน ม. อื่น ให้ legendonly ( legendonly หมายความว่า ต้องกด เเล้วจะเเสดงให้เห็นในกราฟ )
+                    fig.add_trace(go.Scatter(x=df_line.index, y=df_line[item],
+                            mode='lines+markers', # กำหนดว่า เป็นเส้นและมีจุด
+                            name=item+": "+df_names[item][0] , # กำหนด ชื่อเวลา hover เอา mouse ชี้บนเส้น
+                            line=dict( width=2,color=df_names[item][1]), # กำหนดสี และความหนาของเส้น
+                            legendgroup = item, # กำหนดกลุ่ม ของเส้น เพื่อ สามารถกด show หรือ ไม่ show กราฟได้
+                            visible = visible, # กำหนดว่าให้ เส้นใดๆ แสดงตอนเริ่มกราฟ หรือไม่
+                            # hoverinfo='skip',  # กำหนดว่า ไม่มีการแสดงอะไรเมื่อเอาเมาส์ ไปชี้ 
+                            # showlegend=False, # กำหนดว่าจะ show legend หรือไม่
+                            ))                      
+
+            fig.add_trace(go.Scatter(x=df_line.index, y=df_line['PSU'],  # วาดกราฟ PSU
+                            mode='lines+markers',
+                            name="PSU: Prince of Songkla University" ,
+                            line=dict( width=2,color='royalblue' ),
+                            # marker={'size':10},
+                            legendgroup = 'PSU'
+                            ))
+            
+            
+            
+            ######  กราฟเส้นประ  #########
+            for item in data.values('short_name','name_eng','flag_used','color'): # วน for เพื่อตรวจสอบ ว่า มี มหาวิทยาลัยใหม่ ถูกเพิ่ม/หรือ ไม่ได้ใช้ (flag_used = false )มาในฐานข้อมูลหรือไม่
+                if ((item['flag_used'] == True) | (item['flag_used'] == '1')) & (item['short_name'] in columns) :
+                    df_dot[item['short_name']] = df_isi[-2:][item['short_name']]
                     
-        ####  กราฟเส้นทึบ #########
-        fig = go.Figure( )
-        print(data)
-        for item in columns:  # วนวาดกราฟเส้นทึบ ที่ไม่ใช้ PSU เพราะ อยากให้ PSU วาดกราฟอยุ่บนกราฟอื่นๆ ต้องว่างสุดท้าย
-            if item != "PSU":
-                visible = True if (item == 'CMU') | (item == 'KKU') else "legendonly"  # ทำให้ CMU และ KKU แสดงอยู่บนกราฟ ส่วน ม. อื่น ให้ legendonly ( legendonly หมายความว่า ต้องกด เเล้วจะเเสดงให้เห็นในกราฟ )
-                fig.add_trace(go.Scatter(x=df_line.index, y=df_line[item],
-                        mode='lines+markers', # กำหนดว่า เป็นเส้นและมีจุด
-                        name=item+": "+df_names[item][0] , # กำหนด ชื่อเวลา hover เอา mouse ชี้บนเส้น
-                        line=dict( width=2,color=df_names[item][1]), # กำหนดสี และความหนาของเส้น
-                        legendgroup = item, # กำหนดกลุ่ม ของเส้น เพื่อ สามารถกด show หรือ ไม่ show กราฟได้
-                        visible = visible, # กำหนดว่าให้ เส้นใดๆ แสดงตอนเริ่มกราฟ หรือไม่
-                        # hoverinfo='skip',  # กำหนดว่า ไม่มีการแสดงอะไรเมื่อเอาเมาส์ ไปชี้ 
-                        # showlegend=False, # กำหนดว่าจะ show legend หรือไม่
-                        ))                      
 
-        fig.add_trace(go.Scatter(x=df_line.index, y=df_line['PSU'],  # วาดกราฟ PSU
-                        mode='lines+markers',
-                        name="PSU: Prince of Songkla University" ,
-                        line=dict( width=2,color='royalblue' ),
-                        # marker={'size':10},
-                        legendgroup = 'PSU'
-                        ))
-        
-        
-        
-        ######  กราฟเส้นประ  #########
-        for item in data.values('short_name','name_eng','flag_used','color'): # วน for เพื่อตรวจสอบ ว่า มี มหาวิทยาลัยใหม่ ถูกเพิ่ม/หรือ ไม่ได้ใช้ (flag_used = false )มาในฐานข้อมูลหรือไม่
-            if ((item['flag_used'] == True) | (item['flag_used'] == '1')) & (item['short_name'] in columns) :
-                df_dot[item['short_name']] = df_isi[-2:][item['short_name']]
-                
+            for item in columns:  # วนวาดกราฟเส้นประ ที่ไม่ใช้ PSU เพราะ อยากให้ PSU วาดกราฟอยุ่บนกราฟอื่นๆ ต้องว่างสุดท้าย
+                if item != "PSU":
+                    visible = True if (item == 'CMU') | (item == 'KKU') else "legendonly"  # ทำให้ CMU และ KKU แสดงอยู่บนกราฟ ส่วน ม. อื่น ให้ legendonly ( legendonly หมายความว่า ต้องกด เเล้วจะเเสดงให้เห็นในกราฟ )
+                    
+                    fig.add_trace(go.Scatter(x=df_dot.index, y=df_dot[item],
+                            mode='lines',
+                            # name=item+": "+df_names[item][0] ,
+                            line=dict( width=2, dash='dot',color=df_names[item][1]),
+                            showlegend=False,
+                            hoverinfo='skip', 
+                            legendgroup = item,
+                            visible = visible
+                            ))
 
-        for item in columns:  # วนวาดกราฟเส้นประ ที่ไม่ใช้ PSU เพราะ อยากให้ PSU วาดกราฟอยุ่บนกราฟอื่นๆ ต้องว่างสุดท้าย
-            if item != "PSU":
-                visible = True if (item == 'CMU') | (item == 'KKU') else "legendonly"  # ทำให้ CMU และ KKU แสดงอยู่บนกราฟ ส่วน ม. อื่น ให้ legendonly ( legendonly หมายความว่า ต้องกด เเล้วจะเเสดงให้เห็นในกราฟ )
-                
-                fig.add_trace(go.Scatter(x=df_dot.index, y=df_dot[item],
-                        mode='lines',
-                        # name=item+": "+df_names[item][0] ,
-                        line=dict( width=2, dash='dot',color=df_names[item][1]),
-                        showlegend=False,
-                        hoverinfo='skip', 
-                        legendgroup = item,
-                        visible = visible
-                         ))
+                    fig.add_trace(go.Scatter(x=df_dot.index[-1::], y=df_dot[item][-1::],
+                            mode='markers',
+                            name=item+": "+df_names[item][0] ,
+                            line=dict(color=df_names[item][1]),
+                            showlegend=False,
+                            visible = visible,
+                            legendgroup = item))
 
-                fig.add_trace(go.Scatter(x=df_dot.index[-1::], y=df_dot[item][-1::],
-                        mode='markers',
-                        name=item+": "+df_names[item][0] ,
-                        line=dict(color=df_names[item][1]),
-                        showlegend=False,
-                        visible = visible,
-                        legendgroup = item))
-
-        fig.add_trace(go.Scatter(x=df_dot.index, y=df_dot['PSU'],  # วาดกราฟ เส้นประ PSU
-                        mode='lines',
-                        name="PSU: Prince of Songkla University" ,
-                        line=dict( width=2, dash='dot',color='royalblue'),
-                        showlegend=False,
-                        hoverinfo='skip',
-                        # marker={'size':10},
-                        legendgroup = 'PSU'
-                        ))
-        
-        fig.add_trace(go.Scatter(x=df_dot.index[-1::], y=df_dot['PSU'][-1::],
-                        mode='markers',
-                        name='PSU'+": "+df_names['PSU'][0] ,
-                        line=dict(color='royalblue'),
-                        showlegend=False,
-                        legendgroup = 'PSU'))
-         
-        fig.update_traces(hovertemplate=None,)
-        fig.update_layout(hovermode="x")    
-        fig.update_layout(
-            xaxis_title="<b>Year</b>",
-            yaxis_title="<b>Number of Publications</b>",
-        )
-        # fig.update_layout(legend=dict(x=0, y=1.1))
-
-        fig.update_layout(
-            xaxis = dict(
-                tickmode = 'linear',
-                # tick0 = 2554,
-                dtick = 2,
-                showgrid=False,
-                linecolor="#BCCCDC",
-                showspikes=True, # Show spike line for X-axis
-                # Format spike
-                spikethickness=2,
-                spikedash="dot",
-                spikecolor="#999999",
-                spikemode="across",
-            ),
-            yaxis = dict(
-              
-                showgrid=False,
-                linecolor="#BCCCDC",
-
+            fig.add_trace(go.Scatter(x=df_dot.index, y=df_dot['PSU'],  # วาดกราฟ เส้นประ PSU
+                            mode='lines',
+                            name="PSU: Prince of Songkla University" ,
+                            line=dict( width=2, dash='dot',color='royalblue'),
+                            showlegend=False,
+                            hoverinfo='skip',
+                            # marker={'size':10},
+                            legendgroup = 'PSU'
+                            ))
+            
+            fig.add_trace(go.Scatter(x=df_dot.index[-1::], y=df_dot['PSU'][-1::],
+                            mode='markers',
+                            name='PSU'+": "+df_names['PSU'][0] ,
+                            line=dict(color='royalblue'),
+                            showlegend=False,
+                            legendgroup = 'PSU'))
+            
+            fig.update_traces(hovertemplate=None,)
+            fig.update_layout(hovermode="x")    
+            fig.update_layout(
+                xaxis_title="<b>Year</b>",
+                yaxis_title="<b>Number of Publications</b>",
             )
-        )
+            # fig.update_layout(legend=dict(x=0, y=1.1))
 
-        fig.update_xaxes(ticks="outside")
-        fig.update_yaxes(ticks="outside")
+            fig.update_layout(
+                xaxis = dict(
+                    tickmode = 'linear',
+                    # tick0 = 2554,
+                    dtick = 2,
+                    showgrid=False,
+                    linecolor="#BCCCDC",
+                    showspikes=True, # Show spike line for X-axis
+                    # Format spike
+                    spikethickness=2,
+                    spikedash="dot",
+                    spikecolor="#999999",
+                    spikemode="across",
+                ),
+                yaxis = dict(
+                
+                    showgrid=False,
+                    linecolor="#BCCCDC",
 
-        # fig.update_layout(legend=dict(orientation="h"))
-        fig.update_layout(
-            margin=dict(t=55),
-            plot_bgcolor="#FFF",
-        )
+                )
+            )
 
-        plot_div = plot(fig, output_type='div', include_plotlyjs=False,)
-        return  plot_div
+            fig.update_xaxes(ticks="outside")
+            fig.update_yaxes(ticks="outside")
+
+            # fig.update_layout(legend=dict(orientation="h"))
+            fig.update_layout(
+                margin=dict(t=55),
+                plot_bgcolor="#FFF",
+            )
+
+            plot_div = plot(fig, output_type='div', include_plotlyjs=False,)
+            return  plot_div
+        
+        except Exception as e:
+            print("Error : ",e )
     
     def line_chart_sco():
         df_sco = pd.read_csv("""mydj1/static/csv/ranking_scopus.csv""", index_col=0)
         
         columns = df_sco.columns.tolist()  # เก็บ ชื่อ columns (ชื่อย่อมหาลัย) ที่อยุ่ใน ranking_scopus  
         # print(columns)
+        try: 
+            data = master_ranking_university_name.objects.all() # ดึงรายละเอียดมหาลัยที่จะค้นหา จากฐานข้อมูล Master
+            df_names = {}    # ตัวแปร สร้างไว้เก็บ ชื่อย่อ/ชื่อeng/สี ใน dict pattern {short_name : [name_eng, color]}
+            df_line = pd.DataFrame()  # ตัวแปร line เก็บ ค่าคะเเนน scopus ในแต่ละปี ของแต่ละมหาลัย เพื่อวาดกราฟเส้นทึบ
+            df_dot = pd.DataFrame()  # ตัวแปร dot เก็บ ค่าคะเเนน scopus ในแต่ละปี ของแต่ละมหาลัย เพื่อวาดกราฟเส้นประ
+            for item in data.values('short_name','name_eng','flag_used','color'): # วน for เพื่อตรวจสอบ ว่า มี มหาวิทยาลัยใหม่ ถูกเพิ่ม/หรือ ไม่ได้ใช้ (flag_used = false )มาในฐานข้อมูลหรือไม่
+                if ((item['flag_used'] == True) | (item['flag_used'] == '1')) & (item['short_name'] in columns) :
+                    df_line[item['short_name']] = df_sco[-20:-1][item['short_name']]
+                    df_names[item['short_name']] = [item['name_eng'],item['color']]
+            
+            fig = go.Figure( )
 
-        data = master_ranking_university_name.objects.all() # ดึงรายละเอียดมหาลัยที่จะค้นหา จากฐานข้อมูล Master
-        df_names = {}    # ตัวแปร สร้างไว้เก็บ ชื่อย่อ/ชื่อeng/สี ใน dict pattern {short_name : [name_eng, color]}
-        df_line = pd.DataFrame()  # ตัวแปร line เก็บ ค่าคะเเนน scopus ในแต่ละปี ของแต่ละมหาลัย เพื่อวาดกราฟเส้นทึบ
-        df_dot = pd.DataFrame()  # ตัวแปร dot เก็บ ค่าคะเเนน scopus ในแต่ละปี ของแต่ละมหาลัย เพื่อวาดกราฟเส้นประ
-        for item in data.values('short_name','name_eng','flag_used','color'): # วน for เพื่อตรวจสอบ ว่า มี มหาวิทยาลัยใหม่ ถูกเพิ่ม/หรือ ไม่ได้ใช้ (flag_used = false )มาในฐานข้อมูลหรือไม่
-            if ((item['flag_used'] == True) | (item['flag_used'] == '1')) & (item['short_name'] in columns) :
-                df_line[item['short_name']] = df_sco[-20:-1][item['short_name']]
-                df_names[item['short_name']] = [item['name_eng'],item['color']]
-          
-        fig = go.Figure( )
+            ####  กราฟเส้นทึบ     
+            for item in columns:  # วนวาดกราฟเส้นทึบ ที่ไม่ใช้ PSU เพราะ อยากให้ PSU วาดกราฟอยุ่บนกราฟอื่นๆ ต้องว่างสุดท้าย
+                if item != "PSU":
+                    visible = True if (item == 'CMU') | (item == 'KKU') else "legendonly"  # ทำให้ CMU และ KKU แสดงอยู่บนกราฟ ส่วน ม. อื่น ให้ legendonly ( legendonly หมายความว่า ต้องกด เเล้วจะเเสดงให้เห็นในกราฟ )
+                    fig.add_trace(go.Scatter(x=df_line.index, y=df_line[item],
+                            mode='lines+markers',
+                            name=item+": "+df_names[item][0] ,
+                            line=dict( width=2,color=df_names[item][1]),
+                            legendgroup = item,
+                            visible = visible,
+                            ))
 
-        ####  กราฟเส้นทึบ     
-        for item in columns:  # วนวาดกราฟเส้นทึบ ที่ไม่ใช้ PSU เพราะ อยากให้ PSU วาดกราฟอยุ่บนกราฟอื่นๆ ต้องว่างสุดท้าย
-            if item != "PSU":
-                visible = True if (item == 'CMU') | (item == 'KKU') else "legendonly"  # ทำให้ CMU และ KKU แสดงอยู่บนกราฟ ส่วน ม. อื่น ให้ legendonly ( legendonly หมายความว่า ต้องกด เเล้วจะเเสดงให้เห็นในกราฟ )
-                fig.add_trace(go.Scatter(x=df_line.index, y=df_line[item],
-                        mode='lines+markers',
-                        name=item+": "+df_names[item][0] ,
-                        line=dict( width=2,color=df_names[item][1]),
-                        legendgroup = item,
-                        visible = visible,
-                        ))
+            fig.add_trace(go.Scatter(x=df_line.index, y=df_line['PSU'],  # วาดกราฟ PSU
+                            mode='lines+markers',
+                            name="PSU: Prince of Songkla University" ,
+                            line=dict( width=2,color='royalblue' ),
+                            # marker={'size':10},
+                            legendgroup = 'PSU'
+                            # visible = False
+                            ))
+            
+            # # ####  กราฟเส้นประ
+            for item in data.values('short_name','name_eng','flag_used','color'): # วน for เพื่อตรวจสอบ ว่า มี มหาวิทยาลัยใหม่ ถูกเพิ่ม/หรือ ไม่ได้ใช้ (flag_used = false )มาในฐานข้อมูลหรือไม่
+                if ((item['flag_used'] == True) | (item['flag_used'] == '1')) & (item['short_name'] in columns) :
+                    df_dot[item['short_name']] = df_sco[-2:][item['short_name']]
+                    
 
-        fig.add_trace(go.Scatter(x=df_line.index, y=df_line['PSU'],  # วาดกราฟ PSU
-                        mode='lines+markers',
-                        name="PSU: Prince of Songkla University" ,
-                        line=dict( width=2,color='royalblue' ),
-                        # marker={'size':10},
-                        legendgroup = 'PSU'
-                        # visible = False
-                        ))
-        
-        # # ####  กราฟเส้นประ
-        for item in data.values('short_name','name_eng','flag_used','color'): # วน for เพื่อตรวจสอบ ว่า มี มหาวิทยาลัยใหม่ ถูกเพิ่ม/หรือ ไม่ได้ใช้ (flag_used = false )มาในฐานข้อมูลหรือไม่
-            if ((item['flag_used'] == True) | (item['flag_used'] == '1')) & (item['short_name'] in columns) :
-                df_dot[item['short_name']] = df_sco[-2:][item['short_name']]
+            for item in columns:  # วนวาดกราฟเส้นประ ที่ไม่ใช้ PSU เพราะ อยากให้ PSU วาดกราฟอยุ่บนกราฟอื่นๆ ต้องว่างสุดท้าย
+                if item != "PSU":
+                    visible = True if (item == 'CMU') | (item == 'KKU') else "legendonly"  # ทำให้ CMU และ KKU แสดงอยู่บนกราฟ ส่วน ม. อื่น ให้ legendonly ( legendonly หมายความว่า ต้องกด เเล้วจะเเสดงให้เห็นในกราฟ )
+                    fig.add_trace(go.Scatter(x=df_dot.index, y=df_dot[item],
+                            mode='lines',
+                            name=item+": "+df_names[item][0] ,
+                            line=dict( width=2, dash='dot',color=df_names[item][1]),
+                            showlegend=False,
+                            hoverinfo='skip',
+                            legendgroup = item,
+                            visible = visible,
+                            ))
+                            
+                    fig.add_trace(go.Scatter(x=df_dot.index[-1::], y=df_dot[item][-1::],
+                            mode='markers',
+                            name=item+": "+df_names[item][0] ,
+                            line=dict(color=df_names[item][1]),
+                            showlegend=False,
+                            visible = visible,
+                            legendgroup = item))
+
+            fig.add_trace(go.Scatter(x=df_dot.index, y=df_dot['PSU'],  # วาดกราฟ เส้นประ PSU
+                            mode='lines',
+                            name="PSU: Prince of Songkla University" ,
+                            line=dict( width=2, dash='dot',color='royalblue'),
+                            showlegend=False,
+                            hoverinfo='skip',
+                            # marker={'size':10},
+                            legendgroup = 'PSU'
+                            ))
+            
+            fig.add_trace(go.Scatter(x=df_dot.index[-1::], y=df_dot['PSU'][-1::],
+                            mode='markers',
+                            name='PSU'+": "+df_names['PSU'][0] ,
+                            line=dict(color='royalblue'),
+                            showlegend=False,
+                            legendgroup = 'PSU'))
+            
+            fig.update_traces(hovertemplate=None)
+            fig.update_layout(hovermode="x")    
+            fig.update_layout(
+                xaxis_title="<b>Year</b>",
+                yaxis_title="<b>Number of Publications</b>",
+            )
+            # fig.update_layout(legend=dict(x=0, y=1.1))
+
+            fig.update_layout(
+                xaxis = dict(
+                    tickmode = 'linear',
+                    # tick0 = 2554,
+                    dtick = 2,
+                    showgrid=False,
+                    linecolor="#BCCCDC",
+                    showspikes=True, # Show spike line for X-axis
+                    # Format spike
+                    spikethickness=2,
+                    spikedash="dot",
+                    spikecolor="#999999",
+                    spikemode="across",
+                ),
+                yaxis = dict(
                 
+                    showgrid=False,
+                    linecolor="#BCCCDC",
 
-        for item in columns:  # วนวาดกราฟเส้นประ ที่ไม่ใช้ PSU เพราะ อยากให้ PSU วาดกราฟอยุ่บนกราฟอื่นๆ ต้องว่างสุดท้าย
-            if item != "PSU":
-                visible = True if (item == 'CMU') | (item == 'KKU') else "legendonly"  # ทำให้ CMU และ KKU แสดงอยู่บนกราฟ ส่วน ม. อื่น ให้ legendonly ( legendonly หมายความว่า ต้องกด เเล้วจะเเสดงให้เห็นในกราฟ )
-                fig.add_trace(go.Scatter(x=df_dot.index, y=df_dot[item],
-                        mode='lines',
-                        name=item+": "+df_names[item][0] ,
-                        line=dict( width=2, dash='dot',color=df_names[item][1]),
-                        showlegend=False,
-                        hoverinfo='skip',
-                        legendgroup = item,
-                        visible = visible,
-                         ))
-                         
-                fig.add_trace(go.Scatter(x=df_dot.index[-1::], y=df_dot[item][-1::],
-                        mode='markers',
-                        name=item+": "+df_names[item][0] ,
-                        line=dict(color=df_names[item][1]),
-                        showlegend=False,
-                        visible = visible,
-                        legendgroup = item))
+                ),
+                plot_bgcolor="#FFF",
+            )
 
-        fig.add_trace(go.Scatter(x=df_dot.index, y=df_dot['PSU'],  # วาดกราฟ เส้นประ PSU
-                        mode='lines',
-                        name="PSU: Prince of Songkla University" ,
-                        line=dict( width=2, dash='dot',color='royalblue'),
-                        showlegend=False,
-                        hoverinfo='skip',
-                        # marker={'size':10},
-                        legendgroup = 'PSU'
-                        ))
+            fig.update_xaxes(ticks="outside")
+            fig.update_yaxes(ticks="outside")
+
+            # fig.update_layout(legend=dict(orientation="h"))
+            fig.update_layout(
+                margin=dict(t=55),
+            )
+
+            plot_div = plot(fig, output_type='div', include_plotlyjs=False,)
+            return  plot_div
         
-        fig.add_trace(go.Scatter(x=df_dot.index[-1::], y=df_dot['PSU'][-1::],
-                        mode='markers',
-                        name='PSU'+": "+df_names['PSU'][0] ,
-                        line=dict(color='royalblue'),
-                        showlegend=False,
-                        legendgroup = 'PSU'))
-        
-        fig.update_traces(hovertemplate=None)
-        fig.update_layout(hovermode="x")    
-        fig.update_layout(
-            xaxis_title="<b>Year</b>",
-            yaxis_title="<b>Number of Publications</b>",
-        )
-        # fig.update_layout(legend=dict(x=0, y=1.1))
-
-        fig.update_layout(
-            xaxis = dict(
-                tickmode = 'linear',
-                # tick0 = 2554,
-                dtick = 2,
-                showgrid=False,
-                linecolor="#BCCCDC",
-                showspikes=True, # Show spike line for X-axis
-                # Format spike
-                spikethickness=2,
-                spikedash="dot",
-                spikecolor="#999999",
-                spikemode="across",
-            ),
-            yaxis = dict(
-              
-                showgrid=False,
-                linecolor="#BCCCDC",
-
-            ),
-            plot_bgcolor="#FFF",
-        )
-
-        fig.update_xaxes(ticks="outside")
-        fig.update_yaxes(ticks="outside")
-
-        # fig.update_layout(legend=dict(orientation="h"))
-        fig.update_layout(
-            margin=dict(t=55),
-        )
-
-        plot_div = plot(fig, output_type='div', include_plotlyjs=False,)
-        return  plot_div
+        except Exception as e:
+            print("Error: ",e)
     
     def line_chart_tci():
         df_tci = pd.read_csv("""mydj1/static/csv/ranking_tci.csv""", index_col=0)
@@ -4726,125 +4733,129 @@ def compare_ranking(request): #page เพื่อเปรียบเที�
         columns = df_tci.columns.tolist()  # เก็บ ชื่อ columns (ชื่อย่อมหาลัย) ที่อยุ่ใน ranking_isi  
         # print(columns)
 
-        data = master_ranking_university_name.objects.all() # ดึงรายละเอียดมหาลัยที่จะค้นหา จากฐานข้อมูล Master
-        df_names = {}    # ตัวแปร สร้างไว้เก็บ ชื่อย่อ/ชื่อeng/สี ใน dict pattern {short_name : [name_eng, color]}
-        df_line = pd.DataFrame()  # ตัวแปร line เก็บ ค่าคะเเนน tci ในแต่ละปี ของแต่ละมหาลัย เพื่อวาดกราฟเส้นทึบ
-        df_dot = pd.DataFrame()  # ตัวแปร dot เก็บ ค่าคะเเนน tci ในแต่ละปี ของแต่ละมหาลัย เพื่อวาดกราฟเส้นประ
-        for item in data.values('short_name','name_eng','flag_used','color'): # วน for เพื่อตรวจสอบ ว่า มี มหาวิทยาลัยใหม่ ถูกเพิ่ม/หรือ ไม่ได้ใช้ (flag_used = false )มาในฐานข้อมูลหรือไม่
-            if ((item['flag_used'] == True) | (item['flag_used'] == '1')) & (item['short_name'] in columns) :
-                df_line[item['short_name']] = df_tci[-20:-1][item['short_name']]
-                df_names[item['short_name']] = [item['name_eng'],item['color']]
-                        
-        ####  กราฟเส้นทึบ #########
-        fig = go.Figure( )
+        try: 
+            data = master_ranking_university_name.objects.all() # ดึงรายละเอียดมหาลัยที่จะค้นหา จากฐานข้อมูล Master
+            df_names = {}    # ตัวแปร สร้างไว้เก็บ ชื่อย่อ/ชื่อeng/สี ใน dict pattern {short_name : [name_eng, color]}
+            df_line = pd.DataFrame()  # ตัวแปร line เก็บ ค่าคะเเนน tci ในแต่ละปี ของแต่ละมหาลัย เพื่อวาดกราฟเส้นทึบ
+            df_dot = pd.DataFrame()  # ตัวแปร dot เก็บ ค่าคะเเนน tci ในแต่ละปี ของแต่ละมหาลัย เพื่อวาดกราฟเส้นประ
+            for item in data.values('short_name','name_eng','flag_used','color'): # วน for เพื่อตรวจสอบ ว่า มี มหาวิทยาลัยใหม่ ถูกเพิ่ม/หรือ ไม่ได้ใช้ (flag_used = false )มาในฐานข้อมูลหรือไม่
+                if ((item['flag_used'] == True) | (item['flag_used'] == '1')) & (item['short_name'] in columns) :
+                    df_line[item['short_name']] = df_tci[-20:-1][item['short_name']]
+                    df_names[item['short_name']] = [item['name_eng'],item['color']]
+                            
+            ####  กราฟเส้นทึบ #########
+            fig = go.Figure( )
 
-        for item in columns:  # วนวาดกราฟเส้นทึบ ที่ไม่ใช้ PSU เพราะ อยากให้ PSU วาดกราฟอยุ่บนกราฟอื่นๆ ต้องว่างสุดท้าย
-            if item != "PSU":
-                visible = True if (item == 'CMU') | (item == 'KKU') else "legendonly"  # ทำให้ CMU และ KKU แสดงอยู่บนกราฟ ส่วน ม. อื่น ให้ legendonly ( legendonly หมายความว่า ต้องกด เเล้วจะเเสดงให้เห็นในกราฟ )
-                fig.add_trace(go.Scatter(x=df_line.index, y=df_line[item],
-                        mode='lines+markers',
-                        name=item+": "+df_names[item][0] ,
-                        line=dict( width=2,color=df_names[item][1]),
-                        legendgroup = item,
-                        visible = visible,
-                        ))
+            for item in columns:  # วนวาดกราฟเส้นทึบ ที่ไม่ใช้ PSU เพราะ อยากให้ PSU วาดกราฟอยุ่บนกราฟอื่นๆ ต้องว่างสุดท้าย
+                if item != "PSU":
+                    visible = True if (item == 'CMU') | (item == 'KKU') else "legendonly"  # ทำให้ CMU และ KKU แสดงอยู่บนกราฟ ส่วน ม. อื่น ให้ legendonly ( legendonly หมายความว่า ต้องกด เเล้วจะเเสดงให้เห็นในกราฟ )
+                    fig.add_trace(go.Scatter(x=df_line.index, y=df_line[item],
+                            mode='lines+markers',
+                            name=item+": "+df_names[item][0] ,
+                            line=dict( width=2,color=df_names[item][1]),
+                            legendgroup = item,
+                            visible = visible,
+                            ))
 
-        fig.add_trace(go.Scatter(x=df_line.index, y=df_line['PSU'],  # วาดกราฟ PSU
-                        mode='lines+markers',
-                        name="PSU: Prince of Songkla University" ,
-                        line=dict( width=2,color='royalblue' ),
-                        # marker={'size':10},
-                        legendgroup = 'PSU'
-                        # visible = False
-                        ))
-        
-        
-        
-        ######  กราฟเส้นประ  #########
-        for item in data.values('short_name','name_eng','flag_used','color'): # วน for เพื่อตรวจสอบ ว่า มี มหาวิทยาลัยใหม่ ถูกเพิ่ม/หรือ ไม่ได้ใช้ (flag_used = false )มาในฐานข้อมูลหรือไม่
-            if ((item['flag_used'] == True) | (item['flag_used'] == '1')) & (item['short_name'] in columns) :
-                df_dot[item['short_name']] = df_tci[-2:][item['short_name']]
+            fig.add_trace(go.Scatter(x=df_line.index, y=df_line['PSU'],  # วาดกราฟ PSU
+                            mode='lines+markers',
+                            name="PSU: Prince of Songkla University" ,
+                            line=dict( width=2,color='royalblue' ),
+                            # marker={'size':10},
+                            legendgroup = 'PSU'
+                            # visible = False
+                            ))
+            
+            
+            
+            ######  กราฟเส้นประ  #########
+            for item in data.values('short_name','name_eng','flag_used','color'): # วน for เพื่อตรวจสอบ ว่า มี มหาวิทยาลัยใหม่ ถูกเพิ่ม/หรือ ไม่ได้ใช้ (flag_used = false )มาในฐานข้อมูลหรือไม่
+                if ((item['flag_used'] == True) | (item['flag_used'] == '1')) & (item['short_name'] in columns) :
+                    df_dot[item['short_name']] = df_tci[-2:][item['short_name']]
+                    
+
+            for item in columns:  # วนวาดกราฟเส้นประ ที่ไม่ใช้ PSU เพราะ อยากให้ PSU วาดกราฟอยุ่บนกราฟอื่นๆ ต้องว่างสุดท้าย
+                if item != "PSU":
+                    visible = True if (item == 'CMU') | (item == 'KKU') else "legendonly"  # ทำให้ CMU และ KKU แสดงอยู่บนกราฟ ส่วน ม. อื่น ให้ legendonly ( legendonly หมายความว่า ต้องกด เเล้วจะเเสดงให้เห็นในกราฟ )
+                    fig.add_trace(go.Scatter(x=df_dot.index, y=df_dot[item],
+                            mode='lines',
+                            name=item+": "+df_names[item][0] ,
+                            line=dict( width=2, dash='dot',color=df_names[item][1]),
+                            hoverinfo='skip',
+                            showlegend=False,
+                            legendgroup = item,
+                            visible = visible,
+                            ))
+                            
+                    fig.add_trace(go.Scatter(x=df_dot.index[-1::], y=df_dot[item][-1::],
+                            mode='markers',
+                            name=item+": "+df_names[item][0] ,
+                            line=dict(color=df_names[item][1]),
+                            showlegend=False,
+                            visible = visible,
+                            legendgroup = item))
+
+            fig.add_trace(go.Scatter(x=df_dot.index, y=df_dot['PSU'],  # วาดกราฟ เส้นประ PSU
+                            mode='lines',
+                            name="PSU: Prince of Songkla University" ,
+                            line=dict( width=2, dash='dot',color='royalblue'),
+                            showlegend=False,
+                            hoverinfo='skip',
+                            # marker={'size':10},
+                            legendgroup = 'PSU'
+                            ))
+            
+            fig.add_trace(go.Scatter(x=df_dot.index[-1::], y=df_dot['PSU'][-1::],
+                            mode='markers',
+                            name='PSU'+": "+df_names['PSU'][0] ,
+                            line=dict(color='royalblue'),
+                            showlegend=False,
+                            legendgroup = 'PSU'))
+            
+            fig.update_traces(hovertemplate=None)
+            fig.update_layout(hovermode="x")    
+            fig.update_layout(
+                xaxis_title="<b>Year</b>",
+                yaxis_title="<b>Number of Publications</b>",
+            )
+            # fig.update_layout(legend=dict(x=0, y=1.1))
+
+            fig.update_layout(
+                xaxis = dict(
+                    tickmode = 'linear',
+                    # tick0 = 2554,
+                    dtick = 2,
+                    showgrid=False,
+                    linecolor="#BCCCDC",
+                    showspikes=True, # Show spike line for X-axis
+                    # Format spike
+                    spikethickness=2,
+                    spikedash="dot",
+                    spikecolor="#999999",
+                    spikemode="across",
+                ),
+                yaxis = dict(
                 
+                    showgrid=False,
+                    linecolor="#BCCCDC",
 
-        for item in columns:  # วนวาดกราฟเส้นประ ที่ไม่ใช้ PSU เพราะ อยากให้ PSU วาดกราฟอยุ่บนกราฟอื่นๆ ต้องว่างสุดท้าย
-            if item != "PSU":
-                visible = True if (item == 'CMU') | (item == 'KKU') else "legendonly"  # ทำให้ CMU และ KKU แสดงอยู่บนกราฟ ส่วน ม. อื่น ให้ legendonly ( legendonly หมายความว่า ต้องกด เเล้วจะเเสดงให้เห็นในกราฟ )
-                fig.add_trace(go.Scatter(x=df_dot.index, y=df_dot[item],
-                        mode='lines',
-                        name=item+": "+df_names[item][0] ,
-                        line=dict( width=2, dash='dot',color=df_names[item][1]),
-                        hoverinfo='skip',
-                        showlegend=False,
-                        legendgroup = item,
-                        visible = visible,
-                         ))
-                         
-                fig.add_trace(go.Scatter(x=df_dot.index[-1::], y=df_dot[item][-1::],
-                        mode='markers',
-                        name=item+": "+df_names[item][0] ,
-                        line=dict(color=df_names[item][1]),
-                        showlegend=False,
-                        visible = visible,
-                        legendgroup = item))
+                ),
+                plot_bgcolor="#FFF",
+            )
 
-        fig.add_trace(go.Scatter(x=df_dot.index, y=df_dot['PSU'],  # วาดกราฟ เส้นประ PSU
-                        mode='lines',
-                        name="PSU: Prince of Songkla University" ,
-                        line=dict( width=2, dash='dot',color='royalblue'),
-                        showlegend=False,
-                        hoverinfo='skip',
-                        # marker={'size':10},
-                        legendgroup = 'PSU'
-                        ))
+            fig.update_xaxes(ticks="outside")
+            fig.update_yaxes(ticks="outside")
+
+            # fig.update_layout(legend=dict(orientation="h"))
+            fig.update_layout(
+                margin=dict(t=55),
+            )
+
+            plot_div = plot(fig, output_type='div', include_plotlyjs=False,)
+            return  plot_div
         
-        fig.add_trace(go.Scatter(x=df_dot.index[-1::], y=df_dot['PSU'][-1::],
-                        mode='markers',
-                        name='PSU'+": "+df_names['PSU'][0] ,
-                        line=dict(color='royalblue'),
-                        showlegend=False,
-                        legendgroup = 'PSU'))
-         
-        fig.update_traces(hovertemplate=None)
-        fig.update_layout(hovermode="x")    
-        fig.update_layout(
-            xaxis_title="<b>Year</b>",
-            yaxis_title="<b>Number of Publications</b>",
-        )
-        # fig.update_layout(legend=dict(x=0, y=1.1))
-
-        fig.update_layout(
-            xaxis = dict(
-                tickmode = 'linear',
-                # tick0 = 2554,
-                dtick = 2,
-                showgrid=False,
-                linecolor="#BCCCDC",
-                showspikes=True, # Show spike line for X-axis
-                # Format spike
-                spikethickness=2,
-                spikedash="dot",
-                spikecolor="#999999",
-                spikemode="across",
-            ),
-            yaxis = dict(
-              
-                showgrid=False,
-                linecolor="#BCCCDC",
-
-            ),
-            plot_bgcolor="#FFF",
-        )
-
-        fig.update_xaxes(ticks="outside")
-        fig.update_yaxes(ticks="outside")
-
-        # fig.update_layout(legend=dict(orientation="h"))
-        fig.update_layout(
-            margin=dict(t=55),
-        )
-
-        plot_div = plot(fig, output_type='div', include_plotlyjs=False,)
-        return  plot_div
+        except Exception as e:
+            print("Error: ",e)
     
     def get_date_file():
         file_path = """mydj1/static/csv/ranking_isi.csv"""
