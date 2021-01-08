@@ -19,7 +19,8 @@ from .models import PRPM_v_grt_pj_team_eis
 from .models import PRPM_v_grt_pj_budget_eis
 from .models import Prpm_v_grt_project_eis
 from .models import master_ranking_university_name
-
+import plotly.io as pio #add 29-12-2563
+# pio.orca.config.use_xvfb = True #add 29-12-2563
 import pymysql
 import cx_Oracle
 from sqlalchemy.engine import create_engine
@@ -115,7 +116,7 @@ def showdbsql(request):
 
     df = pm.execute_query(sql_cmd, con_string)
     
-    pm.save_to_db('importDB/importdb_get_db', con_string2, df)
+    pm.save_to_db('importDB/importDB_get_db', con_string2, df)
     #############################
     ################################################
     ##############Oracle #######################
@@ -1281,7 +1282,7 @@ def dump1():
         db = 'mydj2'
         con_string = f'mysql+pymysql://{uid}:{pwd}@{host}:{port}/{db}'
 
-        pm.save_to_db('importdb_prpm_v_grt_project_eis', con_string, df)
+        pm.save_to_db('importDB_prpm_v_grt_project_eis', con_string, df)
         
         print("Ending DUMP#1 ...")
         return checkpoint
@@ -1321,7 +1322,7 @@ def dump2():
         db2 = 'mydj2'
         con_string = f'mysql+pymysql://{uid2}:{pwd2}@{host2}:{port2}/{db2}'
 
-        pm.save_to_db('importdb_prpm_v_grt_pj_team_eis', con_string, df)
+        pm.save_to_db('importDB_prpm_v_grt_pj_team_eis', con_string, df)
 
         ###########################################################
         ##### clean data ที่ sum(lu_percent) = 0 ให้ เก็บค่าเฉลี่ยแทน ####
@@ -1374,7 +1375,7 @@ def dump3():
         db2 = 'mydj2'
         con_string2 = f'mysql+pymysql://{uid2}:{pwd2}@{host2}:{port2}/{db2}'
 
-        pm.save_to_db('importdb_prpm_v_grt_pj_budget_eis', con_string2, df)
+        pm.save_to_db('importDB_prpm_v_grt_pj_budget_eis', con_string2, df)
 
         ###########################################################
         ##### clean data ที่ budget_source_group_id = Null ให้ เก็บค่า 11 ####
@@ -1412,7 +1413,7 @@ def dump4():
         ###################################################
         # save path
         con_string2 = getConstring('sql')
-        pm.save_to_db('importdb_prpm_r_fund_type', con_string2, df)
+        pm.save_to_db('importDB_prpm_r_fund_type', con_string2, df)
 
         #############################################################   
         print("Ending DUMP#4 ...")
@@ -1445,7 +1446,7 @@ def dump5():
         ###################################################
         # save path
         con_string2 = getConstring('sql')
-        pm.save_to_db('importdb_prpm_v_grt_pj_assistant_eis', con_string2, df)
+        pm.save_to_db('importDB_prpm_v_grt_pj_assistant_eis', con_string2, df)
 
         ########################################################
         print("Ending DUMP#5 ...")
@@ -1509,7 +1510,7 @@ def dump6():
         ###################################################
         # save path
         con_string2 = getConstring('sql')
-        pm.save_to_db('importdb_hrmis_v_aw_for_ranking', con_string2, df)
+        pm.save_to_db('importDB_hrmis_v_aw_for_ranking', con_string2, df)
 
         ########################################################
         print("Ending DUMP#6 ...")
@@ -2355,7 +2356,7 @@ def query1(): # 12 types of budget, budget_of_fac
                     
                     temp3 as (
                         select psu_project_id, fund_budget_year as submit_year
-                        from importdb_prpm_v_grt_project_eis
+                        from importDB_prpm_v_grt_project_eis
                     ),
                     
                     temp4 as (
@@ -2374,7 +2375,7 @@ def query1(): # 12 types of budget, budget_of_fac
                                             
                             select  sg1.budget_source_group_id,sg1.budget_source_group_th, budget_year,camp_name_thai, fac_name_thai, sum(final_budget) as sum_final_budget
                             from temp4 
-                            join importdb_budget_source_group as sg1 on temp4.budget_source_group_id = sg1.budget_source_group_id
+                            join importDB_budget_source_group as sg1 on temp4.budget_source_group_id = sg1.budget_source_group_id
                             group by 1,2,3,4,5
                             order by 1
                     )
@@ -2423,7 +2424,7 @@ def query1(): # 12 types of budget, budget_of_fac
                             ORDER BY 1 
                                 ),
                                 temp2 AS ( SELECT psu_project_id, user_full_name_th, camp_name_thai, fac_name_thai, research_position_id, research_position_th, lu_percent FROM cleaned_prpm_team_eis WHERE psu_staff = "Y" ORDER BY 1 ),
-                                temp3 AS ( SELECT psu_project_id, fund_budget_year AS submit_year FROM importdb_prpm_v_grt_project_eis ),
+                                temp3 AS ( SELECT psu_project_id, fund_budget_year AS submit_year FROM importDB_prpm_v_grt_project_eis ),
                                 temp4 AS (
                             SELECT
                                 t1.psu_project_id,
@@ -2456,7 +2457,7 @@ def query1(): # 12 types of budget, budget_of_fac
                                 sum( final_budget ) AS sum_final_budget 
                             FROM
                                 temp4
-                                JOIN importdb_budget_source_group AS sg1 ON temp4.budget_source_group_id = sg1.budget_source_group_id 
+                                JOIN importDB_budget_source_group AS sg1 ON temp4.budget_source_group_id = sg1.budget_source_group_id 
                             GROUP BY 1, 2, 3, 4, 5 
                             ORDER BY
                                 1 
@@ -2470,7 +2471,7 @@ def query1(): # 12 types of budget, budget_of_fac
                                 sum( sum_final_budget ) AS sum_final_budget 
                             FROM
                                 temp5 AS A
-                                JOIN importdb_budget_source_group AS B ON A.budget_source_group_id = B.budget_source_group_id 
+                                JOIN importDB_budget_source_group AS B ON A.budget_source_group_id = B.budget_source_group_id 
                             where budget_year between """+str(fiscal_year-9)+""" and """+str(fiscal_year)+"""
                             GROUP BY 1, 2, 3, 4, 5, 6
                                 """
@@ -2515,8 +2516,8 @@ def query2(): # รายได้ในประเทศ รัฐ/เอก�
                     
                     temp3 as (
                         select A.psu_project_id, A.fund_budget_year as submit_year, A.fund_type_id, A.fund_type_th, B.fund_type_group, C.fund_type_group_th
-                                                    from importdb_prpm_v_grt_project_eis as A
-                                                    left join importdb_prpm_r_fund_type as B on A.fund_type_id = B.fund_type_id
+                                                    from importDB_prpm_v_grt_project_eis as A
+                                                    left join importDB_prpm_r_fund_type as B on A.fund_type_id = B.fund_type_id
                                                     left join fund_type_group as C on B.fund_type_group = C.fund_type_group_id
                     )
                                         
@@ -2625,8 +2626,8 @@ def query3(): # Query รูปกราฟ ที่จะแสดงใน �
             # write an img
             if not os.path.exists("mydj1/static/img"):
                 os.mkdir("mydj1/static/img")
-            fig.write_image("""mydj1/static/img/fig_"""+FUND_SOURCE+""".png""")
-
+            # fig.write_image("""mydj1/static/img/fig_"""+FUND_SOURCE+""".png""")
+            pio.write_image(fig = fig,file = """mydj1\\static\\img\\fig_"""+FUND_SOURCE+""".png""") #แก้จาก fig เป็น pio 29-12-2563
             
 
         ##########################################
@@ -2812,7 +2813,7 @@ def query4(): # ตารางแหล่งทุนภายนอก exFund
                                 ,A.FUND_TYPE_GROUP
                                 ,B.fund_type_group_th
                                 ,A.fund_source_id
-                    from importdb_prpm_r_fund_type as A
+                    from importDB_prpm_r_fund_type as A
                     left join fund_type_group as B on A.FUND_TYPE_GROUP = B.FUND_TYPE_GROUP_ID
                     where flag_used = 1 and (fund_source_id = 05 or fund_source_id = 06 )
                     order by 1 )
@@ -2845,28 +2846,35 @@ def query5(): # ตาราง marker * และ ** ของแหล่ง�
     
     try:
         ################### แหล่งทุนใหม่ #######################
-        sql_cmd =  """with temp as  (SELECT A.FUND_TYPE_ID, A.FUND_TYPE_TH,A.FUND_SOURCE_TH, C.Fund_type_group, count(A.fund_type_id) as count, A.fund_budget_year
-                                    from importdb_prpm_v_grt_project_eis as A 
-                                    join importdb_prpm_r_fund_type as C on A.FUND_TYPE_ID = C.FUND_TYPE_ID
-                                    where  (A.FUND_SOURCE_ID = 05 or A.FUND_SOURCE_ID = 06 )
-                                    group by 1, 2 ,3 ,4 
-                                    ORDER BY 5 desc)
+        # sql_cmd =  """with temp as  (SELECT A.FUND_TYPE_ID, A.FUND_TYPE_TH,A.FUND_SOURCE_TH, C.Fund_type_group, count(A.fund_type_id) as count, A.fund_budget_year
+        #                             from importdb_prpm_v_grt_project_eis as A 
+        #                             join importdb_prpm_r_fund_type as C on A.FUND_TYPE_ID = C.FUND_TYPE_ID
+        #                             where  (A.FUND_SOURCE_ID = 05 or A.FUND_SOURCE_ID = 06 )
+        #                             group by 1, 2 ,3 ,4 
+        #                             ORDER BY 5 desc)
                                                             
-                    select FUND_TYPE_ID from temp where count = 1 and (fund_budget_year >= YEAR(date_add(NOW(), INTERVAL 543 YEAR))-1)
-                    order by 1"""
+        #             select FUND_TYPE_ID from temp where count = 1 and (fund_budget_year >= YEAR(date_add(NOW(), INTERVAL 543 YEAR))-1)
+        #             order by 1"""
+        
+        sql_cmd =  """SELECT DISTINCT A.FUND_TYPE_ID
+                from importDB_prpm_v_grt_project_eis as A 
+                join (SELECT fund_type_id, count(DISTINCT fund_budget_year) AS c FROM importDB_prpm_v_grt_project_eis GROUP BY 1 HAVING c =1) AS D ON A.FUND_TYPE_ID = D.FUND_TYPE_ID
+                where  (A.FUND_SOURCE_ID = 05 or A.FUND_SOURCE_ID = 06 )  
+                            and (fund_budget_year >= YEAR(date_add(NOW(), INTERVAL 543 YEAR))-1)  
+                ORDER BY A.`FUND_TYPE_ID` ASC"""
 
         con_string = getConstring('sql')
         df1 = pm.execute_query(sql_cmd, con_string)
         df1['marker'] = '*'
         
         ################## แหล่งทุน ให้ทุนซ้ำ>=3ครั้ง  #####################
-        sql_cmd2 =  """with temp as  (SELECT A.FUND_TYPE_ID, 
+        sql_cmd2_old =  """with temp as  (SELECT A.FUND_TYPE_ID, 
                                             A.FUND_TYPE_TH,
                                             A.FUND_SOURCE_TH, 
                                             C.Fund_type_group, 
                                             A.fund_budget_year
-                                        from importdb_prpm_v_grt_project_eis as A 
-                                        join importdb_prpm_r_fund_type as C on A.FUND_TYPE_ID = C.FUND_TYPE_ID
+                                        from importDB_prpm_v_grt_project_eis as A 
+                                        join importDB_prpm_r_fund_type as C on A.FUND_TYPE_ID = C.FUND_TYPE_ID
                                         where  (A.FUND_SOURCE_ID = 05 or A.FUND_SOURCE_ID = 06 )
                                         ORDER BY 1 desc
                                         ),
@@ -2882,7 +2890,20 @@ def query5(): # ตาราง marker * และ ** ของแหล่ง�
                                     )
                         
                             select FUND_TYPE_ID from temp3 where count >= 3"""
+        
+        sql_cmd2 = """with temp as  (SELECT fund_type_id, fund_budget_year ,count( fund_budget_year) AS c
+                                    FROM importDB_prpm_v_grt_project_eis
+                                    where FUND_SOURCE_ID = 05 or FUND_SOURCE_ID = 06 
+                                    GROUP BY 1 ,2
+                                    having (fund_budget_year  BETWEEN YEAR(date_add(NOW(), INTERVAL 543 YEAR))-5 AND YEAR(date_add(NOW(), INTERVAL 543 YEAR))-1) 
+                                    order by 1),
+                           temp2 as (select fund_type_id , SUM(c) as s
+                                    from temp
+                                    GROUP BY 1
+                                    HAVING s >= 3
+                                    order by 1)
 
+                          select FUND_TYPE_ID from temp2"""
         con_string2 = getConstring('sql')
         df2 = pm.execute_query(sql_cmd2, con_string2)
         df2['marker'] = '**'
@@ -3066,7 +3087,7 @@ def query7(): # Head Page
 
         ### หน่วยงานภายนอกที่เข้าร่วม 
         sql_cmd =  """SELECT count(*) as count 
-                        from importdb_prpm_r_fund_type 
+                        from importDB_prpm_r_fund_type 
                         where flag_used = "1" and (fund_source_id = 05 or fund_source_id = 06) """
 
         df = pm.execute_query(sql_cmd, con_string)
@@ -3245,11 +3266,11 @@ def query11(): # จำนวนผู้วิจัยที่ได้รั
     try:    
         now_year = (datetime.now().year)+543
         sql_cmd = """WITH temp1 AS ( SELECT psu_project_id, staff_id, research_position_id
-                                FROM importdb_prpm_v_grt_pj_team_eis 
+                                FROM importDB_prpm_v_grt_pj_team_eis 
                                 where research_position_id = 5),
                                 
                     temp2 AS( SELECT distinct(psu_project_id), budget_group,budget_year
-                                FROM importdb_prpm_v_grt_pj_budget_eis
+                                FROM importDB_prpm_v_grt_pj_budget_eis
                                 where budget_group = 4
                                 and (budget_source_group_id = 0 
                                     OR budget_source_group_id = 1 
@@ -3309,7 +3330,7 @@ def query12(): # จำนวนผู้วิจัยหลัก
         sql_cmd_1_1 = """
                     SELECT count(DISTINCT( staff_id )) as count
                     FROM
-                        importdb_hrmis_v_aw_for_ranking 
+                        importDB_hrmis_v_aw_for_ranking 
                     WHERE
                         end_year = """+str(now_year)+"""
                         AND (
@@ -3322,7 +3343,7 @@ def query12(): # จำนวนผู้วิจัยหลัก
         sql_cmd_1_2 = """
                     SELECT count(DISTINCT( staff_id )) as count
                     FROM
-                        importdb_hrmis_v_aw_for_ranking 
+                        importDB_hrmis_v_aw_for_ranking 
                     WHERE
                         end_year = """+str(now_year-1)+"""
                         AND (
@@ -3335,7 +3356,7 @@ def query12(): # จำนวนผู้วิจัยหลัก
         sql_cmd_2_1 = """
                     SELECT count(DISTINCT( staff_id )) as count
                     FROM
-                        importdb_hrmis_v_aw_for_ranking 
+                        importDB_hrmis_v_aw_for_ranking 
                     WHERE
                         end_year = """+str(now_year)+"""
                         AND (
@@ -3348,7 +3369,7 @@ def query12(): # จำนวนผู้วิจัยหลัก
         sql_cmd_2_2 = """
                     SELECT count(DISTINCT( staff_id )) as count
                     FROM
-                        importdb_hrmis_v_aw_for_ranking 
+                        importDB_hrmis_v_aw_for_ranking 
                     WHERE
                         end_year = """+str(now_year-1)+"""
                         AND (
@@ -3361,7 +3382,7 @@ def query12(): # จำนวนผู้วิจัยหลัก
         sql_cmd_3_1 = """
                         SELECT count(DISTINCT( staff_id )) as count
                     FROM
-                        importdb_hrmis_v_aw_for_ranking 
+                        importDB_hrmis_v_aw_for_ranking 
                     WHERE
                         end_year = """+str(now_year)+"""
                         AND (
@@ -3374,7 +3395,7 @@ def query12(): # จำนวนผู้วิจัยหลัก
         sql_cmd_3_2 = """
                         SELECT count(DISTINCT( staff_id )) as count
                     FROM
-                        importdb_hrmis_v_aw_for_ranking 
+                        importDB_hrmis_v_aw_for_ranking 
                     WHERE
                         end_year = """+str(now_year-1)+"""
                         AND (
@@ -3387,7 +3408,7 @@ def query12(): # จำนวนผู้วิจัยหลัก
         sql_cmd_4_1 = """
                     SELECT count(DISTINCT( staff_id )) as count
                     FROM
-                        importdb_hrmis_v_aw_for_ranking 
+                        importDB_hrmis_v_aw_for_ranking 
                     WHERE
                         end_year = """+str(now_year)+"""
                         AND (
@@ -3400,7 +3421,7 @@ def query12(): # จำนวนผู้วิจัยหลัก
         sql_cmd_4_2 = """
                     SELECT count(DISTINCT( staff_id )) as count
                     FROM
-                        importdb_hrmis_v_aw_for_ranking 
+                        importDB_hrmis_v_aw_for_ranking 
                     WHERE
                         end_year = """+str(now_year-1)+"""
                         AND (
@@ -4011,7 +4032,7 @@ def revenues_more_info(request):  # แสดงข้อมูลเพิ่�
     def query_data():
         try:
             sql_cmd =  """SELECT leader_name_surname_th, project_name_th,fund_type_id, fund_type_th, sum_budget_plan, project_start_date , RDO_PROJECT_ID
-                            from importdb_prpm_v_grt_project_eis
+                            from importDB_prpm_v_grt_project_eis
                             where fund_budget_year = """+str(year)+""" and fund_type_id <> 1315 
                                         and leader_name_surname_th <> ""
                                         and PJ_STATUS_ID <> 12
