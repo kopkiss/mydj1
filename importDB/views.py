@@ -1282,9 +1282,13 @@ def dump1():
         db = 'mydj2'
         con_string = f'mysql+pymysql://{uid}:{pwd}@{host}:{port}/{db}'
 
-        pm.save_to_db('importDB_prpm_v_grt_project_eis', con_string, df)
+        result  =  pm.save_to_db('importdb_prpm_v_grt_project_eis', con_string, df)
+        if result:
+            print("Ending DUMP#1...")
+        else:
+            print("Ending DUMP#1 ... with ERROR!")
+            checkpoint = False
         
-        print("Ending DUMP#1 ...")
         return checkpoint
 
     except Exception as e :
@@ -1322,19 +1326,23 @@ def dump2():
         db2 = 'mydj2'
         con_string = f'mysql+pymysql://{uid2}:{pwd2}@{host2}:{port2}/{db2}'
 
-        pm.save_to_db('importDB_prpm_v_grt_pj_team_eis', con_string, df)
-
         ###########################################################
         ##### clean data ที่ sum(lu_percent) = 0 ให้ เก็บค่าเฉลี่ยแทน ####
         ############################################################
-        
         for i in range(1,14):
             df2 = pd.read_csv(r"""mydj1/static/csv/clean_lu/edit_lu_percet_"""+str(i)+""".csv""")
             df.loc[df['psu_project_id'].isin(df2['psu_project_id']), ['lu_percent']] = 100/i
-        
-        pm.save_to_db('cleaned_prpm_team_eis', con_string, df)
+
         #############################################################
-        print("Ending DUMP#2 ...")
+        result= pm.save_to_db('importdb_prpm_v_grt_pj_team_eis', con_string, df)
+        if result:
+            print("Ending DUMP#2...")
+        else:
+            print("Ending DUMP#2... with ERROR!")
+            checkpoint = False
+
+        #############################################################
+        
         return checkpoint
 
     except Exception as e :
@@ -1375,16 +1383,19 @@ def dump3():
         db2 = 'mydj2'
         con_string2 = f'mysql+pymysql://{uid2}:{pwd2}@{host2}:{port2}/{db2}'
 
-        pm.save_to_db('importDB_prpm_v_grt_pj_budget_eis', con_string2, df)
-
         ###########################################################
         ##### clean data ที่ budget_source_group_id = Null ให้ เก็บค่า 11 ####
         ############################################################
         df.loc[df['budget_source_group_id'].isna(), ['budget_source_group_id']] = 11
+
+        result = pm.save_to_db('importdb_prpm_v_grt_pj_budget_eis', con_string2, df)
+        if result:
+            print("Ending DUMP#3 ...")
+        else:
+            print("Ending DUMP#3 ... with ERROR!")
+            checkpoint = False
         
-        pm.save_to_db('cleaned_prpm_budget_eis', con_string2, df)
         #############################################################   
-        print("Ending DUMP#3 ...")
         return checkpoint
 
     except Exception as e :
@@ -1413,10 +1424,13 @@ def dump4():
         ###################################################
         # save path
         con_string2 = getConstring('sql')
-        pm.save_to_db('importDB_prpm_r_fund_type', con_string2, df)
-
+        result = pm.save_to_db('importdb_prpm_r_fund_type', con_string2, df)
+        if result:
+            print("Ending DUMP#4...")
+        else:
+            print("Ending DUMP#4 ... with ERROR!")
+            checkpoint = False
         #############################################################   
-        print("Ending DUMP#4 ...")
         return checkpoint
 
     except Exception as e :
@@ -1446,10 +1460,14 @@ def dump5():
         ###################################################
         # save path
         con_string2 = getConstring('sql')
-        pm.save_to_db('importDB_prpm_v_grt_pj_assistant_eis', con_string2, df)
-
+        result = pm.save_to_db('importdb_prpm_v_grt_pj_assistant_eis', con_string2, df)
+        if result:
+            print("Ending DUMP#5...")
+        else:
+            print("Ending DUMP#5 ... with ERROR!")
+            checkpoint = False
         ########################################################
-        print("Ending DUMP#5 ...")
+        
         return checkpoint
 
     except Exception as e :
@@ -1492,8 +1510,20 @@ def dump6():
                             HRMIS.V_AW_FOR_RANKING
                                             """
 
-        con_string = getConstring('oracle')
-        engine = create_engine(con_string, encoding="latin1" ,max_identifier_length=128)
+        # con_string = getConstring('oracle')
+
+        DIALECT = 'oracle'
+        SQL_DRIVER = 'cx_oracle'
+        USERNAME = 'pnantipat' #enter your username
+        PASSWORD = urllib.parse.quote_plus('abc123**') #enter your password
+        HOST = 'nora.psu.ac.th' #enter the oracle db host url
+        PORT = 1521 # enter the oracle port number
+        SERVICE = 'psu' # enter the oracle db service name
+        ENGINE_PATH_WIN_AUTH = DIALECT + '+' + SQL_DRIVER + '://' + USERNAME + ':' + PASSWORD +'@' + HOST + ':' + str(PORT) + '/?service_name=' + SERVICE
+        
+        engine = create_engine(ENGINE_PATH_WIN_AUTH, encoding="latin1" ,max_identifier_length=128)
+        
+        # engine = create_engine(con_string, encoding="latin1" ,max_identifier_length=128)
         df = pd.read_sql_query(sql_cmd, engine)
         # print(df.head())
         # df = pm.execute_query(sql_cmd, con_string)
@@ -1510,10 +1540,14 @@ def dump6():
         ###################################################
         # save path
         con_string2 = getConstring('sql')
-        pm.save_to_db('importDB_hrmis_v_aw_for_ranking', con_string2, df)
-
+        result = pm.save_to_db('importdb_hrmis_v_aw_for_ranking', con_string2, df)
+        if result:
+            print("Ending DUMP#6...")
+        else:
+            print("Ending DUMP#6 ... with ERROR!")
+            checkpoint = False
         ########################################################
-        print("Ending DUMP#6 ...")
+        
         return checkpoint
 
     except Exception as e :
@@ -2341,7 +2375,7 @@ def query1(): # 12 types of budget, budget_of_fac
     try:   
         sql_cmd =  """with temp1 as ( 
                         select psu_project_id, budget_year, budget_source_group_id, sum(budget_amount) as budget_amount
-                        from cleaned_prpm_budget_eis
+                        from importdb_prpm_v_grt_pj_budget_eis
                         where budget_group = 4 
                         group by 1, 2,3
                         order by 1
@@ -2349,7 +2383,7 @@ def query1(): # 12 types of budget, budget_of_fac
                     
                     temp2 as (
                         select psu_project_id, user_full_name_th, camp_name_thai, fac_name_thai,research_position_id,research_position_th ,lu_percent
-                        from cleaned_prpm_team_eis
+                        from importdb_prpm_v_grt_pj_team_eis
                         where psu_staff = "Y" 
                         order by 1
                     ),
@@ -2417,13 +2451,13 @@ def query1(): # 12 types of budget, budget_of_fac
                                 budget_source_group_id,
                                 sum( budget_amount ) AS budget_amount 
                             FROM
-                                cleaned_prpm_budget_eis 
+                                importdb_prpm_v_grt_pj_budget_eis 
                             WHERE
                                 budget_group = 4 
                             GROUP BY 1, 2, 3 
                             ORDER BY 1 
                                 ),
-                                temp2 AS ( SELECT psu_project_id, user_full_name_th, camp_name_thai, fac_name_thai, research_position_id, research_position_th, lu_percent FROM cleaned_prpm_team_eis WHERE psu_staff = "Y" ORDER BY 1 ),
+                                temp2 AS ( SELECT psu_project_id, user_full_name_th, camp_name_thai, fac_name_thai, research_position_id, research_position_th, lu_percent FROM importdb_prpm_v_grt_pj_team_eis WHERE psu_staff = "Y" ORDER BY 1 ),
                                 temp3 AS ( SELECT psu_project_id, fund_budget_year AS submit_year FROM importDB_prpm_v_grt_project_eis ),
                                 temp4 AS (
                             SELECT
@@ -2500,7 +2534,7 @@ def query2(): # รายได้ในประเทศ รัฐ/เอก�
     try:      
         sql_cmd = """with temp1 as ( 
                         select psu_project_id, budget_year, budget_source_group_id, sum(budget_amount) as budget_amount
-                        from cleaned_prpm_budget_eis
+                        from importdb_prpm_v_grt_pj_budget_eis
                         where budget_group = 4 
                               and budget_source_group_id = 3
                         group by 1, 2,3 
@@ -2509,7 +2543,7 @@ def query2(): # รายได้ในประเทศ รัฐ/เอก�
                     
                     temp2 as (
                         select psu_project_id, user_full_name_th, camp_name_thai, fac_name_thai,research_position_id,research_position_th ,lu_percent
-                        from cleaned_prpm_team_eis
+                        from importDB_prpm_v_grt_pj_team_eis
                         where psu_staff = "Y" 
                         order by 1
                     ),
@@ -2868,28 +2902,28 @@ def query5(): # ตาราง marker * และ ** ของแหล่ง�
         df1['marker'] = '*'
         
         ################## แหล่งทุน ให้ทุนซ้ำ>=3ครั้ง  #####################
-        sql_cmd2_old =  """with temp as  (SELECT A.FUND_TYPE_ID, 
-                                            A.FUND_TYPE_TH,
-                                            A.FUND_SOURCE_TH, 
-                                            C.Fund_type_group, 
-                                            A.fund_budget_year
-                                        from importDB_prpm_v_grt_project_eis as A 
-                                        join importDB_prpm_r_fund_type as C on A.FUND_TYPE_ID = C.FUND_TYPE_ID
-                                        where  (A.FUND_SOURCE_ID = 05 or A.FUND_SOURCE_ID = 06 )
-                                        ORDER BY 1 desc
-                                        ),
+        # sql_cmd2_old =  """with temp as  (SELECT A.FUND_TYPE_ID, 
+        #                                     A.FUND_TYPE_TH,
+        #                                     A.FUND_SOURCE_TH, 
+        #                                     C.Fund_type_group, 
+        #                                     A.fund_budget_year
+        #                                 from importDB_prpm_v_grt_project_eis as A 
+        #                                 join importDB_prpm_r_fund_type as C on A.FUND_TYPE_ID = C.FUND_TYPE_ID
+        #                                 where  (A.FUND_SOURCE_ID = 05 or A.FUND_SOURCE_ID = 06 )
+        #                                 ORDER BY 1 desc
+        #                                 ),
                                                                         
-                            temp2 as (select * 
-                                        from temp 
-                                        where  (fund_budget_year  BETWEEN YEAR(date_add(NOW(), INTERVAL 543 YEAR))-5 AND YEAR(date_add(NOW(), INTERVAL 543 YEAR))-1)
-                                    ),
+        #                     temp2 as (select * 
+        #                                 from temp 
+        #                                 where  (fund_budget_year  BETWEEN YEAR(date_add(NOW(), INTERVAL 543 YEAR))-5 AND YEAR(date_add(NOW(), INTERVAL 543 YEAR))-1)
+        #                             ),
         
-                            temp3 as( select FUND_TYPE_ID, FUND_TYPE_TH,FUND_SOURCE_TH, fund_budget_year ,count(fund_type_id) as count
-                                        from temp2
-                                        group by 1
-                                    )
+        #                     temp3 as( select FUND_TYPE_ID, FUND_TYPE_TH,FUND_SOURCE_TH, fund_budget_year ,count(fund_type_id) as count
+        #                                 from temp2
+        #                                 group by 1
+        #                             )
                         
-                            select FUND_TYPE_ID from temp3 where count >= 3"""
+        #                     select FUND_TYPE_ID from temp3 where count >= 3"""
         
         sql_cmd2 = """with temp as  (SELECT fund_type_id, fund_budget_year ,count( fund_budget_year) AS c
                                     FROM importDB_prpm_v_grt_project_eis
@@ -3288,7 +3322,9 @@ def query11(): # จำนวนผู้วิจัยที่ได้รั
     
 
         con_string = getConstring('sql')
+        
         re_df = pm.execute_query(sql_cmd, con_string)
+        
         re_df['year'] = re_df['year'].astype('int') 
         re_df.set_index('year', inplace=True)
         
