@@ -69,7 +69,8 @@ def getConstring(check):  # สร้างไว้เพื่อ เลือ
         port = 3306
         db = 'mydj2'
         con_string = f'mysql+pymysql://{uid}:{pwd}@{host}:{port}/{db}'
-    elif check == 'oracle':
+
+    elif check == 'oracle_prpm': # config สำหรับ เชื่อม oracle จาก ระบบ PRPM
         DIALECT = 'oracle'
         SQL_DRIVER = 'cx_oracle'
         USERNAME = 'pnantipat' #enter your username
@@ -79,6 +80,16 @@ def getConstring(check):  # สร้างไว้เพื่อ เลือ
         SERVICE = 'delita.psu.ac.th' # enter the oracle db service name
         con_string = DIALECT + '+' + SQL_DRIVER + '://' + USERNAME + ':' + PASSWORD +'@' + HOST + ':' + str(PORT) + '/?service_name=' + SERVICE
 
+    elif check == "oracle_hrims": # config สำหรับ เชื่อม oracle จาก ระบบ HRIMS
+        DIALECT = 'oracle'
+        SQL_DRIVER = 'cx_oracle'
+        USERNAME = 'pnantipat' #enter your username
+        PASSWORD = urllib.parse.quote_plus('abc123**') #enter your password
+        HOST = 'nora.psu.ac.th' #enter the oracle db host url
+        PORT = 1521 # enter the oracle port number
+        SERVICE = 'psu' # enter the oracle db service name
+        con_string = DIALECT + '+' + SQL_DRIVER + '://' + USERNAME + ':' + PASSWORD +'@' + HOST + ':' + str(PORT) + '/?service_name=' + SERVICE
+       
     return con_string
 
 def showdbsql(request):
@@ -577,578 +588,6 @@ def query(request): # Query ฐานข้อมูล Mysql (เป็น .csv
         def moneyformat(x):  # เอาไว้เปลี่ยน format เป็นรูปเงิน
             return "{:,.2f}".format(x)
 
-        def cited_isi():
-            path = """importDB"""
-            driver = webdriver.Chrome(path+'/chromedriver.exe')  # เปิด chromedriver
-            WebDriverWait(driver, 10)
-            
-            try: 
-                # get datafreame by web scraping
-                driver.get('http://apps.webofknowledge.com/WOS_GeneralSearch_input.do?product=WOS&SID=D2Ji7v7CLPlJipz1Cc4&search_mode=GeneralSearch')
-                wait = WebDriverWait(driver, 10)
-                element = wait.until(EC.element_to_be_clickable((By.ID, 'container(input1)')))  # hold by id
-
-                btn1 =driver.find_element_by_id('value(input1)')
-                btn1.clear()
-                btn1.send_keys("Prince Of Songkla University")
-                driver.find_element_by_xpath("//span[@id='select2-select1-container']").click()
-                driver.find_element_by_xpath("//input[@class='select2-search__field']").send_keys("Organization-Enhanced")  # key text
-                driver.find_element_by_xpath("//span[@class='select2-results']").click() 
-                driver.find_element_by_xpath("//span[@class='searchButton']").click()
-
-                WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, 'summary_CitLink')))   # hold by class_name
-                driver.find_element_by_class_name('summary_CitLink').click()
-
-                WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, 'select2-selection.select2-selection--single')))
-                driver.find_element_by_xpath("//a[@class='snowplow-citation-report']").click() 
-                element = wait.until(EC.element_to_be_clickable((By.NAME, 'cr_timespan_submission')))  # hold by name
-
-                # หาค่า citation ของปีปัจจุบันd
-                cited1 = driver.find_element_by_id("CR_HEADER_4" ).text
-                cited2 = driver.find_element_by_id("CR_HEADER_3" ).text
-                h_index = driver.find_element_by_id("H_INDEX" ).text
-                
-                # หาค่า h_index ของปีปัจจุบัน
-                
-                cited1 =  cited1.replace(",","")  # ตัด , ในตัวเลขที่ได้มา เช่น 1,000 เป็น 1000
-                cited2 =  cited2.replace(",","")
-
-                
-                # ใส่ ตัวเลขที่ได้ ลง dataframe
-                df1=pd.DataFrame({'year':datetime.now().year+543 , 'cited':cited1}, index=[0])
-                df2=pd.DataFrame({'year':datetime.now().year+543-1 , 'cited':cited2}, index=[1])
-                df_records = pd.concat([df1,df2],axis = 0) # ต่อ dataframe
-                df_records['cited'] = df_records['cited'].astype('int') # เปลี่ยนตัวเลขเป็น int    
-
-                print(df_records)
-
-                return df_records, h_index
-
-            except Exception as e:
-                print("Error")
-                print(e)
-                return None, None
-
-            finally:
-                driver.quit()
-
-        def get_new_uni_isi(item, driver, df): # ทำการ ดึงคะเเนน isi ของมหาลัยใหม่ ที่ถูกเพิ่มในฐานข้อมูล admin
-            try: 
-                driver.get('http://apps.webofknowledge.com/WOS_GeneralSearch_input.do?product=WOS&SID=D2Ji7v7CLPlJipz1Cc4&search_mode=GeneralSearch')
-                wait = WebDriverWait(driver, 10)
-                element = wait.until(EC.element_to_be_clickable((By.ID, 'container(input1)')))
-
-                btn1 =driver.find_element_by_id('value(input1)')  # เลือกกล่อง input
-                btn1.clear() # ลบ ค่าที่อยู่ในกล่องเดิม ที่อาจจะมีอยู่
-                btn1.send_keys(item['name_eng'])   # ใส่ค่าเพื่อค้นหาข้อมูล
-                driver.find_element_by_xpath("//span[@id='select2-select1-container']").click() # กดปุ่ม
-                driver.find_element_by_xpath("//input[@class='select2-search__field']").send_keys("Organization-Enhanced")
-                driver.find_element_by_xpath("//span[@class='select2-results']").click()
-                driver.find_element_by_xpath("//span[@class='searchButton']").click()
-
-                # กดปุ่ม Analyze Results
-                WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, 'summary_CitLink')))
-                # driver.find_element_by_class_name('summary_CitLink').click()
-                # WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.CLASS_NAME, 'd-flex.align-items-center')))
-                driver.find_element_by_class_name('summary_CitLink').click()
-
-                # กดปุ่ม Publication Years
-                WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, 'select2-selection.select2-selection--single')))
-                driver.find_element_by_xpath('//*[contains(text(),"Publication Years")]').click()  # กดจากการค้าหา  ด้วย text
-        
-                # ดึงข้อมูล ในปีปัจุบัน ใส่ใน row1 และ ปัจุบัน -1 ใส่ใน row2
-                WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.CLASS_NAME, 'd-flex.align-items-center')))
-                # row1 = driver.find_elements_by_class_name("RA-NEWRAresultsEvenRow" ).text.split(' ')
-                matched_elements = driver.find_elements_by_class_name("RA-NEWRAresultsEvenRow" )
-                texts_1 = []
-                for matched_element in matched_elements:
-                    text = matched_element.text.split(' ')[:2]
-                    texts_1.append(text)
-                    # print(texts_1)
-                WebDriverWait(driver, 15)  
-                matched_elements = driver.find_elements_by_class_name("RA-NEWRAresultsOddRow" )
-                texts_2 = []
-                for matched_element in matched_elements:
-                    text = matched_element.text.split(' ')[:2]
-                    texts_2.append(text)
-
-                new_column = pd.DataFrame()
-                
-                for i in range(len(texts_2)):
-                    texts_1[i][1] =  texts_1[i][1].replace(",","")  # ตัด , ในตัวเลขที่ได้มา เช่น 1,000 เป็น 1000
-                    texts_2[i][1] =  texts_2[i][1].replace(",","")
-                    df1=pd.DataFrame({'year':int(texts_1[i][0])+543 , item['short_name']:texts_1[i][1]}, index=[0])
-                    df2=pd.DataFrame({'year':int(texts_2[i][0])+543 , item['short_name']:texts_2[i][1]}, index=[1])
-                    temp = pd.concat([df1,df2],axis = 0) # รวมให้เป็น dataframe ชั่วคราว
-                    new_column = new_column.append(temp) # ต่อ dataframe ใหม่
-
-                new_column[item['short_name']] = new_column[item['short_name']].astype('int') # เปลี่ยนตัวเลขเป็น int
-                new_column = new_column.set_index('year')
-                df  = df.join(new_column)  # รวม dataframe เข้าด้วยกัน
-            except Exception as e:
-                print("Error: ",item['name_eng'])
-
-            return df    
-
-        def isi(): 
-            path = """importDB"""
-            df = pd.read_csv("""mydj1/static/csv/ranking_isi.csv""", index_col=0)
-            flag = False
-            col_used = df.columns.tolist()  # เก็บชื่อย่อมหาลัย ที่อยู่ใน ranking_isi.csv ตอนนี้
-            # print(path+'/chromedriver.exe')
-            driver = webdriver.Chrome(path+'/chromedriver.exe')  # เปิด chromedriver
-            # os.chdir(path)  # setpath
-            WebDriverWait(driver, 10)
-            try:
-                data = master_ranking_university_name.objects.all() # ดึงรายละเอียดมหาลัยที่จะค้นหา จากฐานข้อมูล Master
-                
-                # new_df = pd.DataFrame()
-                for item in data.values('short_name','name_eng','flag_used'): # วน for เพื่อตรวจสอบ ว่า มี มหาวิทยาลัยใหม่ ถูกเพิ่ม/หรือ ไม่ได้ใช้ (flag_used = false )มาในฐานข้อมูลหรือไม่
-                    if (item['flag_used'] == True) & (item['short_name'] not in col_used) :
-                        flag = True  # ธง ตั้งไว้เพื่อ จะตรวจสอบว่าต้อง save csv ตอนท้าย
-                        print(f"""There is a new university "{item['name_eng']}", saving isi value of the university to csv.....""")
-                        df = get_new_uni_isi(item, driver, df)
-
-                    if (item['flag_used'] == False) & (item['short_name'] in col_used):  # ถ้า มีมหาลัย flag_used == False ทำการลบออกจาก df เดิม
-                        flag = True 
-                        print(f"""ไม่ได้ใช้เเล้ว คือ :{item['name_eng']} ..... """)
-                        df = df.drop([item['short_name']], axis = 1)
-                        print(f"""{item['name_eng']} ถูกลบเเล้ว .... .""")
-
-                if flag:  # ทำการบันทึกเข้า csv ถ้าเกิด มี column ใหม่ หรือ ถูกลบ column
-                    print("--df--")
-                    print(df)
-                    ########## save df ISI  to csv ##########      
-                    if not os.path.exists("mydj1/static/csv"):
-                            os.mkdir("mydj1/static/csv")
-                            
-                    df.to_csv ("""mydj1/static/csv/ranking_isi.csv""", index = True, header=True)
-                    print("ranking_isi is updated")
-
-            
-                searches = {}
-                for item in data.values('short_name','name_eng','flag_used'):
-                    if item['flag_used'] == True:
-                        searches.update( {item['short_name'] : item['name_eng']} )
-
-                last_df =pd.DataFrame()    
-                driver.get('http://apps.webofknowledge.com/WOS_GeneralSearch_input.do?product=WOS&SID=D2Ji7v7CLPlJipz1Cc4&search_mode=GeneralSearch')
-                for key, value in searches.items(): 
-                    # print(value)
-                    # กำหนด URL ของ ISI
-                    driver.get('http://apps.webofknowledge.com/WOS_GeneralSearch_input.do?product=WOS&SID=D2Ji7v7CLPlJipz1Cc4&search_mode=GeneralSearch')
-                    wait = WebDriverWait(driver, 10)
-                    element = wait.until(EC.element_to_be_clickable((By.ID, 'container(input1)')))
-
-                    btn1 =driver.find_element_by_id('value(input1)')  # เลือกกล่อง input
-                    btn1.clear() # ลบ ค่าที่อยู่ในกล่องเดิม ที่อาจจะมีอยู่
-                    btn1.send_keys(value)   # ใส่ค่าเพื่อค้นหาข้อมูล
-                    driver.find_element_by_xpath("//span[@id='select2-select1-container']").click() # กดปุ่ม
-                    driver.find_element_by_xpath("//input[@class='select2-search__field']").send_keys("Organization-Enhanced")
-                    driver.find_element_by_xpath("//span[@class='select2-results']").click()
-                    driver.find_element_by_xpath("//span[@class='searchButton']").click()
-
-                    # กดปุ่ม Analyze Results
-                    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, 'summary_CitLink')))
-                    # driver.find_element_by_class_name('summary_CitLink').click()
-                    # WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.CLASS_NAME, 'd-flex.align-items-center')))
-                    driver.find_element_by_class_name('summary_CitLink').click()
-        
-                    # กดปุ่ม Publication Years
-                    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, 'select2-selection.select2-selection--single')))
-                    driver.find_element_by_xpath('//*[contains(text(),"Publication Years")]').click()  # กดจากการค้าหา  ด้วย text
-            
-                    # ดึงข้อมูล ในปีปัจุบัน ใส่ใน row1 และ ปัจุบัน -1 ใส่ใน row2
-                    WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.CLASS_NAME, 'd-flex.align-items-center')))
-                    row1 = driver.find_element_by_class_name("RA-NEWRAresultsEvenRow" ).text.split(' ')[:2]
-                    WebDriverWait(driver, 15)  
-                    row2 = driver.find_element_by_class_name("RA-NEWRAresultsOddRow" ).text.split(' ') [:2]
-                    # print(row2)
-                    for i in range(len(row2)):
-                        row2[i] =  row2[i].replace(",","")  # ตัด , ในตัวเลขที่ได้มา เช่น 1,000 เป็น 1000
-                        row1[i] =  row1[i].replace(",","")
-                    
-                    # ใส่ ตัวเลขที่ได้ ลง dataframe
-                    df1=pd.DataFrame({'year':row1[0] , key:row1[1]}, index=[0])
-                    df2=pd.DataFrame({'year':row2[0] , key:row2[1]}, index=[1])
-                    df_records = pd.concat([df1,df2],axis = 0) # ต่อ dataframe
-                    
-                    df_records[key] = df_records[key].astype('int') # เปลี่ยนตัวเลขเป็น int
-                    if(key=='PSU'):
-                        last_df = pd.concat([last_df,df_records], axis= 1)
-                    else:
-                        last_df = pd.concat([last_df,df_records[key]], axis= 1)
-                    
-
-                last_df['year'] = last_df['year'].astype('int')
-                last_df['year'] = last_df['year'] + 543
-                print("-------isi-------")
-                print(last_df)
-                print("-----------------")
-                return last_df
-
-            except Exception as e:
-                print(e)
-                return None
-
-            finally:
-                driver.quit()
-
-        def get_new_uni_tci(item, driver, df): # ทำการ ดึงคะเเนน tci ของมหาลัยใหม่ ที่ถูกเพิ่มในฐานข้อมูล admin  
-            try:
-                driver.get('https://tci-thailand.org/wp-content/themes/magazine-style/tci_search/advance_search.html')
-                WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID,'searchBtn')))
-                btn1 =driver.find_element_by_class_name('form-control')
-                btn1.send_keys(item['name_eng'])
-
-                driver.find_element_by_xpath("//button[@class='btn btn-success']").click()
-                WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME,'fa')))
-
-                elements =driver.find_elements_by_class_name('form-control')
-                elements[2].send_keys("OR")
-                elements[3].send_keys(item['name_th'])
-                elements[4].send_keys("Affiliation")
-
-                driver.find_element_by_xpath("//select[@class='form-control xxx']").click()
-                driver.find_element_by_xpath("//option[@value='affiliation']").click()
-                WebDriverWait(driver, 10)
-                driver.find_element_by_xpath("//button[@id='searchBtn']").click()
-                WebDriverWait(driver, 100).until(EC.element_to_be_clickable((By.ID,'export_excel_btn')))
-                # driver.find_element_by_xpath("//input[@value=' more']").click()
-                driver.find_element_by_xpath("//span[@class='right']").click()
-                WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID,'year2001')))
-                data = driver.find_element_by_class_name("col-md-3" ).text
-                WebDriverWait(driver, 10)
-                
-                data2 = data[15:]
-                st = data2.split('\n')
-                years = [int(st[i])+543 for i in range(0, 40, 2)]
-                values = [int(st[i][1:][:-1]) for i in range(1, 40, 2)]
-                # print(years)
-                # print(values)
-                
-                new_column = pd.DataFrame({"year" : years,
-                                        item["short_name"] : values
-                                        } )
-
-                new_column = new_column.set_index('year')
-                df  = df.join(new_column)  # รวม dataframe เข้าด้วยกัน
-
-            except Exception as e:
-                print("Error: ",item['name_eng'])
-
-            return df
-
-        def tci():
-            path = """importDB"""
-            df = pd.read_csv("""mydj1/static/csv/ranking_tci.csv""", index_col=0)
-            flag = False
-            col_used = df.columns.tolist()  # เก็บชื่อย่อมหาลัย ที่อยู่ใน ranking_isi.csv ตอนนี้
-            try : 
-                driver = webdriver.Chrome(path+'/chromedriver.exe')
-
-                data = master_ranking_university_name.objects.all() # ดึงรายละเอียดมหาลัยที่จะค้นหา จากฐานข้อมูล Master
-            
-                for item in data.values('short_name','name_eng','name_th','flag_used'): # วน for เพื่อตรวจสอบ ว่า มี มหาวิทยาลัยใหม่ ถูกเพิ่ม/หรือ ไม่ได้ใช้ (flag_used = false )มาในฐานข้อมูลหรือไม่
-                    if (item['flag_used'] == True) & (item['short_name'] not in col_used) :
-                        flag = True  # ธง ตั้งไว้เพื่อ จะตรวจสอบว่าต้อง save csv ตอนท้าย
-                        print(f"""There is a new university "{item['name_eng']}", saving isi value of the university to csv.....""")
-                        df = get_new_uni_tci(item, driver, df)
-
-                    if (item['flag_used'] == False) & (item['short_name'] in col_used):  # ถ้า มีมหาลัย flag_used == False ทำการลบออกจาก df เดิม
-                        flag = True 
-                        print(f"""ไม่ได้ใช้เเล้ว คือ :{item['name_eng']} ..... """)
-                        df = df.drop([item['short_name']], axis = 1)
-                        print(f"""{item['name_eng']} ถูกลบเเล้ว .... .""")
-
-                if flag:  # ทำการบันทึกเข้า csv ถ้าเกิด มี column ใหม่ หรือ ถูกลบ column
-
-                    ########## save df ISI  to csv ##########      
-                    if not os.path.exists("mydj1/static/csv"):
-                            os.mkdir("mydj1/static/csv")
-                            
-                    df.to_csv ("""mydj1/static/csv/ranking_tci.csv""", index = True, header=True)
-                    print("ranking_tci is updated")
-
-                searches = {} # ตัวแปรเก็บชื่อมหาลัย ที่ต้องการ update ข้อมูลปี ล่าสุด และ ล่าสุด-1
-                
-                for item in data.values('short_name','name_eng','name_th','flag_used'):
-                    if item['flag_used'] == True:
-                        searches.update( {item['short_name'] : [item['name_eng'],item['name_th']]} )
-                print(searches)
-                final_df =pd.DataFrame()   
-                
-                for key, value in searches.items():  # ทำการวน ดึงค่า tci จากแต่ละมหาลัย ที่อยู่ใน ตัวแปล searches
-                    print(value[0])
-                    driver.get('https://tci-thailand.org/wp-content/themes/magazine-style/tci_search/advance_search.html')
-                    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID,'searchBtn')))
-                    btn1 =driver.find_element_by_class_name('form-control')
-                    btn1.send_keys(value[0])
-
-                    driver.find_element_by_xpath("//button[@class='btn btn-success']").click()
-                    WebDriverWait(driver, 100).until(EC.element_to_be_clickable((By.CLASS_NAME,'fa')))
-
-                    elements =driver.find_elements_by_class_name('form-control')
-                    elements[2].send_keys("OR")
-                    elements[3].send_keys(value[1])
-                    elements[4].send_keys("Affiliation")
-
-                    driver.find_element_by_xpath("//select[@class='form-control xxx']").click()
-                    driver.find_element_by_xpath("//option[@value='affiliation']").click()
-                    WebDriverWait(driver, 10)
-                    driver.find_element_by_xpath("//button[@id='searchBtn']").click()
-                    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID,'export_excel_btn')))
-                    data2 = driver.find_element_by_class_name("col-md-3" ).text 
-                    df = pd.DataFrame({"year" : [data2[14:].split('\n')[1:3][0], data2[14:].split('\n')[3:5][0] ]
-                                                , key : [data2[14:].split('\n')[1:3][1][1:][:-1], data2[14:].split('\n')[3:5][1][1:][:-1]]} )
-                    if(key=='PSU'): # ถ้า key = psu ต้องเก็บอีกแแบบ เพราะ เป้นมหาลัยแรก ใน dataframe : final_df
-                        final_df = pd.concat([final_df,df], axis= 1)
-                    else:
-                        final_df = pd.concat([final_df,df[key]], axis= 1)
-                    
-                    print(final_df)
-                    
-
-                final_df['year'] =final_df['year'].astype(int) + 543
-                
-                for item in data.values('short_name','flag_used'):   # ทำการเปลี่ยน type ให้เป็น int 
-                    if item['flag_used'] == True:
-                        final_df[item['short_name']] = final_df[item['short_name']].astype(int)
-                
-                print("--TCI--")
-                print(final_df)
-                return final_df
-            
-            except Exception as e:
-                print(e)
-                return None
-
-            finally:
-                driver.quit() 
-        
-        def get_new_uni_scopus(item , df, apiKey, URL, year): # ทำการ ดึงคะเเนน scopus ของมหาลัยใหม่ ที่ถูกเพิ่มในฐานข้อมูล admin
-            new_df = pd.DataFrame()
-            final_df = pd.DataFrame()
-            
-            for y in range(2001,year+1):
-                print(item['short_name'],": ",y)
-                query = f"{item['af_id']} and PUBYEAR IS {y}"
-                # defining a params dict for the parameters to be sent to the API 
-                PARAMS = {'query':query,'apiKey':apiKey}  
-
-                # sending get request and saving the response as response object 
-                r = requests.get(url = URL, params = PARAMS) 
-
-                # extracting data in json format 
-                data = r.json() 
-
-                # convert the datas to dataframe
-                new_df=pd.DataFrame({'year':y+543, item['short_name']:data['search-results']['opensearch:totalResults']}, index=[0])
-            
-                new_df[item['short_name']] = new_df[item['short_name']].astype('int')
-                
-                final_df = pd.concat([final_df,new_df])
-
-            final_df = final_df.set_index('year')
-            df  = df.join(final_df)  # รวม dataframe เข้าด้วยกัน
-            
-            return df
-
-        def sco(year):
-            
-            URL = "https://api.elsevier.com/content/search/scopus"
-            
-            # params given here 
-            con_file = open("importDB\config.json")
-            config = json.load(con_file)
-            con_file.close()
-            year2 = year-1
-            
-            apiKey = config['apikey']
-
-            df = pd.read_csv("""mydj1/static/csv/ranking_scopus.csv""", index_col=0)
-            flag = False
-            col_used = df.columns.tolist()  # เก็บชื่อย่อมหาลัย ที่อยู่ใน ranking_isi.csv ตอนนี้ 
-
-            data = master_ranking_university_name.objects.all() # ดึงรายละเอียดมหาลัยที่จะค้นหา จากฐานข้อมูล Master
-
-            for item in data.values('short_name','name_eng','af_id','flag_used'): # วน for เพื่อตรวจสอบ ว่า มี มหาวิทยาลัยใหม่ ถูกเพิ่ม/หรือ ไม่ได้ใช้ (flag_used = false )มาในฐานข้อมูลหรือไม่
-                if (item['flag_used'] == True) & (item['short_name'] not in col_used) :
-                    flag = True  # ธง ตั้งไว้เพื่อ จะตรวจสอบว่าต้อง save csv ตอนท้าย
-                    print(f"""There is a new university "{item['name_eng']}", saving isi value of the university to csv.....""")
-                    df = get_new_uni_scopus(item , df, apiKey, URL , year)
-                    print(df)
-
-                if (item['flag_used'] == False) & (item['short_name'] in col_used):  # ถ้า มีมหาลัย flag_used == False ทำการลบออกจาก df เดิม
-                    flag = True 
-                    print(f"""ไม่ได้ใช้เเล้ว คือ :{item['name_eng']} ..... """)
-                    df = df.drop([item['short_name']], axis = 1)
-                    print(f"""{item['name_eng']} ถูกลบเเล้ว .... .""")
-
-            if flag:  # ทำการบันทึกเข้า csv ถ้าเกิด มี column ใหม่ หรือ ถูกลบ column
-                ########## save df ISI  to csv ##########      
-                if not os.path.exists("mydj1/static/csv"):
-                        os.mkdir("mydj1/static/csv")
-                        
-                df.to_csv ("""mydj1/static/csv/ranking_scopus.csv""", index = True, header=True)
-                print("ranking_scopus is updated")
-
-            searches = {}
-            for item in data.values('short_name','af_id', 'flag_used'):
-                if item['flag_used'] == True:
-                    searches.update( {item['short_name'] : item['af_id']} )  
-
-            last_df =pd.DataFrame()
-
-            try:
-                for key, value in searches.items():  
-                    query = f"{value} and PUBYEAR IS {year}"
-                    # defining a params dict for the parameters to be sent to the API 
-                    PARAMS = {'query':query,'apiKey':apiKey}  
-
-                    # sending get request and saving the response as response object 
-                    r = requests.get(url = URL, params = PARAMS) 
-
-                    # extracting data in json format 
-                    data1= r.json() 
-
-                    query = f"{value} and PUBYEAR IS {year2}"
-                        
-                    # defining a params dict for the parameters to be sent to the API 
-                    PARAMS = {'query':query,'apiKey':apiKey}  
-
-                    # sending get request and saving the response as response object 
-                    r = requests.get(url = URL, params = PARAMS) 
-
-                    # extracting data in json format 
-                    data2 = r.json() 
-                    # convert the datas to dataframe
-                    df1=pd.DataFrame({'year':year+543, key:data1['search-results']['opensearch:totalResults']}, index=[0])
-                    df2=pd.DataFrame({'year':year2+543 , key:data2['search-results']['opensearch:totalResults']}, index=[1])
-                    df_records = pd.concat([df1,df2],axis = 0)
-                    df_records[key]= df_records[key].astype('int')
-                    
-                    if(key=='PSU'):  # ถ้าใส่ข้อมูลใน last_df ครั้งแรก ต้องใส่ df_records แบบไม่ใส่ key
-                        last_df = pd.concat([last_df,df_records], axis= 1)
-                    else:            # ใส่ครั้งต่อๆ ไป 
-                        last_df = pd.concat([last_df,df_records[key]], axis= 1)
-
-                print("--scopus--")
-                print(last_df)
-                return last_df
-
-            except Exception as e:
-                print(e)
-                return None
-
-        def get_df_by_rows(rows):
-            categories = list()
-            i = 0
-            for row in rows:
-                j = 0
-                for j, c in enumerate(row.text):
-                    if c.isdigit():
-                        break
-                categories.append(tuple((row.text[0:j-1],row.text[j:])))
-
-            for index, item in enumerate(categories):
-                itemlist = list(item)
-                itemlist[1] = itemlist[1].split(" ",1)[0].replace(",","")
-                item = tuple(itemlist)
-                categories[index] = item
-
-            return(categories)    
-
-        def chrome_driver_get_research_areas_ISI():
-            path = """importDB"""
-            driver = webdriver.Chrome(path+'/chromedriver.exe')  # เปิด chromedriver
-            WebDriverWait(driver, 10)
-            try: 
-                # get datafreame by web scraping
-                driver.get('http://apps.webofknowledge.com/WOS_GeneralSearch_input.do?product=WOS&SID=D2Ji7v7CLPlJipz1Cc4&search_mode=GeneralSearch')
-                wait = WebDriverWait(driver, 10)
-                element = wait.until(EC.element_to_be_clickable((By.ID, 'container(input1)')))  # hold by id
-
-                btn1 =driver.find_element_by_id('value(input1)')
-                btn1.clear()
-                btn1.send_keys("Prince Of Songkla University")
-                driver.find_element_by_xpath("//span[@id='select2-select1-container']").click()
-                driver.find_element_by_xpath("//input[@class='select2-search__field']").send_keys("Organization-Enhanced")  # key text
-                driver.find_element_by_xpath("//span[@class='select2-results']").click() 
-                driver.find_element_by_xpath("//span[@class='searchButton']").click()
-
-                WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, 'summary_CitLink')))   # hold by class_name
-                driver.find_element_by_class_name('summary_CitLink').click()
-
-                WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, 'column-box.ra-bg-color'))) 
-                driver.find_element_by_xpath('//*[contains(text(),"Research Areas")]').click()  # กดจากการค้าหา  ด้วย text
-
-                WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//*[@class="bold-text" and contains(text(), "Treemap")]')))  # hold until find text by CLASSNAME
-
-                evens = driver.find_elements_by_class_name("RA-NEWRAresultsEvenRow" )
-                odds = driver.find_elements_by_class_name("RA-NEWRAresultsOddRow" )
-
-                categories_evens = get_df_by_rows(evens)
-                categories_odds = get_df_by_rows(odds)
-
-                df1 = pd.DataFrame(categories_evens, columns=['categories', 'count'])
-                df2 = pd.DataFrame(categories_odds, columns=['categories', 'count'])
-
-                df = pd.concat([df1,df2], axis = 0)
-                df['count'] = df['count'].astype('int')
-                df = df.sort_values(by='count', ascending=False)
-
-            except Exception as e :
-                df = None
-                print('Something went wrong :', e)
-            
-            return df
-
-        def chrome_driver_get_catagories_ISI():
-            path = """importDB"""
-            driver = webdriver.Chrome(path+'/chromedriver.exe')  # เปิด chromedriver
-            WebDriverWait(driver, 10)
-            try: 
-                # get datafreame by web scraping
-                driver.get('http://apps.webofknowledge.com/WOS_GeneralSearch_input.do?product=WOS&SID=D2Ji7v7CLPlJipz1Cc4&search_mode=GeneralSearch')
-                wait = WebDriverWait(driver, 10)
-                element = wait.until(EC.element_to_be_clickable((By.ID, 'container(input1)')))  # hold by id
-
-                btn1 =driver.find_element_by_id('value(input1)')
-                btn1.clear()
-                btn1.send_keys("Prince Of Songkla University")
-                driver.find_element_by_xpath("//span[@id='select2-select1-container']").click()
-                driver.find_element_by_xpath("//input[@class='select2-search__field']").send_keys("Organization-Enhanced")  # key text
-                driver.find_element_by_xpath("//span[@class='select2-results']").click() 
-                driver.find_element_by_xpath("//span[@class='searchButton']").click()
-
-                WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, 'summary_CitLink')))   # hold by class_name
-                driver.find_element_by_class_name('summary_CitLink').click()
-
-                WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, 'column-box.ra-bg-color'))) 
-                driver.find_element_by_xpath('//*[contains(text(),"Web of Science Categories")]').click()  # กดจากการค้าหา  ด้วย text
-
-                WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, '//*[@class="bold-text" and contains(text(), "Treemap")]')))  # hold until find text by CLASSNAME
-
-                evens = driver.find_elements_by_class_name("RA-NEWRAresultsEvenRow" )
-                odds = driver.find_elements_by_class_name("RA-NEWRAresultsOddRow" )
-
-                categories_evens = get_df_by_rows(evens)
-                categories_odds = get_df_by_rows(odds)
-
-                df1 = pd.DataFrame(categories_evens, columns=['categories', 'count'])
-                df2 = pd.DataFrame(categories_odds, columns=['categories', 'count'])
-
-                df = pd.concat([df1,df2], axis = 0)
-                df['count'] = df['count'].astype('int')
-                df = df.sort_values(by='count', ascending=False)
-
-            except Exception as e :
-                df = None
-                print('Something went wrong :', e)
-            
-            return df
-
         if request.POST['row']=='Query1': # 12 types of budget, budget_of_fac 
             checkpoint = query1()
             dt = datetime.now()
@@ -1259,28 +698,13 @@ def dump1():
         sql_cmd =  """select * from research60.v_grt_project_eis 
                     WHERE psu_project_id not in ('X541090' ,'X541067','X551445')
                 """
-        DIALECT = 'oracle'
-        SQL_DRIVER = 'cx_oracle'
-        USERNAME = 'pnantipat' #enter your username
-        PASSWORD = urllib.parse.quote_plus('sfdgr4g4') #enter your password
-        HOST = 'delita.psu.ac.th' #enter the oracle db host url
-        PORT = 1521 # enter the oracle port number
-        SERVICE = 'delita.psu.ac.th' # enter the oracle db service name
-        ENGINE_PATH_WIN_AUTH = DIALECT + '+' + SQL_DRIVER + '://' + USERNAME + ':' + PASSWORD +'@' + HOST + ':' + str(PORT) + '/?service_name=' + SERVICE
-        
-        engine = create_engine(ENGINE_PATH_WIN_AUTH, encoding="latin1" ,max_identifier_length=128)
+        con_string = getConstring("oracle_prpm") # return ค่า config ของฐาน oracle
+        engine = create_engine(con_string, encoding="latin1" ,max_identifier_length=128)
         df = pd.read_sql_query(sql_cmd, engine)
-        # df = pm.execute_query(sql_cmd, con_string)
         
-
         ###################################################
         # save path
-        uid = 'root'
-        pwd = ''
-        host = 'localhost'
-        port = 3306
-        db = 'mydj2'
-        con_string = f'mysql+pymysql://{uid}:{pwd}@{host}:{port}/{db}'
+        con_string = getConstring("sql") # return ค่า config ของฐาน sql
 
         result  =  pm.save_to_db('importdb_prpm_v_grt_project_eis', con_string, df)
         if result:
@@ -1304,28 +728,11 @@ def dump2():
     
     try:
         sql_cmd =""" select * from research60.v_grt_pj_team_eis"""
-        DIALECT = 'oracle'
-        SQL_DRIVER = 'cx_oracle'
-        USERNAME = 'pnantipat' #enter your username
-        PASSWORD = urllib.parse.quote_plus('sfdgr4g4') #enter your password
-        HOST = 'delita.psu.ac.th' #enter the oracle db host url
-        PORT = 1521 # enter the oracle port number
-        SERVICE = 'delita.psu.ac.th' # enter the oracle db service name
-        ENGINE_PATH_WIN_AUTH = DIALECT + '+' + SQL_DRIVER + '://' + USERNAME + ':' + PASSWORD +'@' + HOST + ':' + str(PORT) + '/?service_name=' + SERVICE
-
+        
+        ENGINE_PATH_WIN_AUTH = getConstring("oracle_prpm") # return ค่า config ของฐาน oracle
         engine = create_engine(ENGINE_PATH_WIN_AUTH, encoding="latin1" ,max_identifier_length=128 )
         df = pd.read_sql_query(sql_cmd, engine)
         
-        ###########################################################
-        ##### save data ที่ไม่ได้ clean ลง ฐานข้อมูล mysql ####
-        ############################################################
-        uid2 = 'root'
-        pwd2 = ''
-        host2 = 'localhost'
-        port2 = 3306
-        db2 = 'mydj2'
-        con_string = f'mysql+pymysql://{uid2}:{pwd2}@{host2}:{port2}/{db2}'
-
         ###########################################################
         ##### clean data ที่ sum(lu_percent) = 0 ให้ เก็บค่าเฉลี่ยแทน ####
         ############################################################
@@ -1334,6 +741,7 @@ def dump2():
             df.loc[df['psu_project_id'].isin(df2['psu_project_id']), ['lu_percent']] = 100/i
 
         #############################################################
+        con_string = getConstring("sql") # return ค่า config ของฐาน sql
         result= pm.save_to_db('importdb_prpm_v_grt_pj_team_eis', con_string, df)
         if result:
             print("Ending DUMP#2...")
@@ -1361,34 +769,23 @@ def dump3():
                     *
                 FROM research60.v_grt_pj_budget_eis
                 """
-        DIALECT = 'oracle'
-        SQL_DRIVER = 'cx_oracle'
-        USERNAME = 'pnantipat' #enter your username
-        PASSWORD = urllib.parse.quote_plus('sfdgr4g4') #enter your password
-        HOST = 'delita.psu.ac.th' #enter the oracle db host url
-        PORT = 1521 # enter the oracle port number
-        SERVICE = 'delita.psu.ac.th' # enter the oracle db service name
-        ENGINE_PATH_WIN_AUTH = DIALECT + '+' + SQL_DRIVER + '://' + USERNAME + ':' + PASSWORD +'@' + HOST + ':' + str(PORT) + '/?service_name=' + SERVICE
+        
+        ENGINE_PATH_WIN_AUTH = getConstring("oracle_prpm") # return ค่า config ของฐาน oracle
 
         engine = create_engine(ENGINE_PATH_WIN_AUTH, encoding="latin1" ,max_identifier_length=128)
         df = pd.read_sql_query(sql_cmd, engine)
         # df = pm.execute_query(sql_cmd, con_string)
         
-        ###################################################
-        # save path
-        uid2 = 'root'
-        pwd2 = ''
-        host2 = 'localhost'
-        port2 = 3306
-        db2 = 'mydj2'
-        con_string2 = f'mysql+pymysql://{uid2}:{pwd2}@{host2}:{port2}/{db2}'
-
+        
         ###########################################################
         ##### clean data ที่ budget_source_group_id = Null ให้ เก็บค่า 11 ####
         ############################################################
         df.loc[df['budget_source_group_id'].isna(), ['budget_source_group_id']] = 11
 
-        result = pm.save_to_db('importdb_prpm_v_grt_pj_budget_eis', con_string2, df)
+        ###################################################
+        # save path
+        con_string = getConstring("sql") # return ค่า config ของฐาน sql
+        result = pm.save_to_db('importdb_prpm_v_grt_pj_budget_eis', con_string, df)
         if result:
             print("Ending DUMP#3 ...")
         else:
@@ -1415,15 +812,14 @@ def dump4():
                 FROM RESEARCH60.R_FUND_TYPE
                 """
 
-        con_string = getConstring('oracle')
+        con_string = getConstring("oracle_prpm") # return ค่า config ของฐาน oracle
         engine = create_engine(con_string, encoding="latin1" ,max_identifier_length=128)
         df = pd.read_sql_query(sql_cmd, engine)
-        # df = pm.execute_query(sql_cmd, con_string)
         
 
         ###################################################
         # save path
-        con_string2 = getConstring('sql')
+        con_string2 = getConstring('sql')  # return ค่า config ของฐาน sql
         result = pm.save_to_db('importdb_prpm_r_fund_type', con_string2, df)
         if result:
             print("Ending DUMP#4...")
@@ -1451,15 +847,13 @@ def dump5():
                 FROM research60.v_grt_pj_assistant_eis
                 """
 
-        con_string = getConstring('oracle')
+        con_string = getConstring('oracle_prpm')  # return ค่า config ของฐาน oracle
         engine = create_engine(con_string, encoding="latin1" ,max_identifier_length=128)
         df = pd.read_sql_query(sql_cmd, engine)
-        # df = pm.execute_query(sql_cmd, con_string)
-        
-        print(df.head())
+    
         ###################################################
         # save path
-        con_string2 = getConstring('sql')
+        con_string2 = getConstring('sql')  # return ค่า config ของฐาน sql
         result = pm.save_to_db('importdb_prpm_v_grt_pj_assistant_eis', con_string2, df)
         if result:
             print("Ending DUMP#5...")
@@ -1510,25 +904,15 @@ def dump6():
                             HRMIS.V_AW_FOR_RANKING
                                             """
 
-        # con_string = getConstring('oracle')
+        con_string = getConstring('oracle_hrims')  # return ค่า config ของฐาน hrims
 
-        DIALECT = 'oracle'
-        SQL_DRIVER = 'cx_oracle'
-        USERNAME = 'pnantipat' #enter your username
-        PASSWORD = urllib.parse.quote_plus('abc123**') #enter your password
-        HOST = 'nora.psu.ac.th' #enter the oracle db host url
-        PORT = 1521 # enter the oracle port number
-        SERVICE = 'psu' # enter the oracle db service name
-        ENGINE_PATH_WIN_AUTH = DIALECT + '+' + SQL_DRIVER + '://' + USERNAME + ':' + PASSWORD +'@' + HOST + ':' + str(PORT) + '/?service_name=' + SERVICE
+        engine = create_engine(con_string, encoding="latin1" ,max_identifier_length=128)
         
-        engine = create_engine(ENGINE_PATH_WIN_AUTH, encoding="latin1" ,max_identifier_length=128)
-        
-        # engine = create_engine(con_string, encoding="latin1" ,max_identifier_length=128)
         df = pd.read_sql_query(sql_cmd, engine)
-        # print(df.head())
-        # df = pm.execute_query(sql_cmd, con_string)
-    
-        # cleaning
+        
+        ###################################################
+        # ############## cleaning #########################
+        ###################################################
         print("Start Cleaning")  # ลบ ค่า 0 ใน column ข้างล่างนี้ ให้เป็น none
         df['budget_amount'] = df['budget_amount'].apply(lambda x: None if x == 0 else x) 
         df['revenue_amount'] = df['revenue_amount'].apply(lambda x: None if x == 0 else x) 
@@ -1539,7 +923,7 @@ def dump6():
 
         ###################################################
         # save path
-        con_string2 = getConstring('sql')
+        con_string2 = getConstring('sql') # return ค่า config ของฐาน sql
         result = pm.save_to_db('importdb_hrmis_v_aw_for_ranking', con_string2, df)
         if result:
             print("Ending DUMP#6...")
@@ -2510,7 +1894,7 @@ def query1(): # 12 types of budget, budget_of_fac
                             GROUP BY 1, 2, 3, 4, 5, 6
                                 """
 
-        con_string = getConstring('sql')
+        # con_string = getConstring('sql')
         df = pm.execute_query(sql_cmd, con_string)
         df.to_csv ("""mydj1/static/csv/budget_of_fac.csv""", index = False, header=True)
     
@@ -2880,16 +2264,6 @@ def query5(): # ตาราง marker * และ ** ของแหล่ง�
     
     try:
         ################### แหล่งทุนใหม่ #######################
-        # sql_cmd =  """with temp as  (SELECT A.FUND_TYPE_ID, A.FUND_TYPE_TH,A.FUND_SOURCE_TH, C.Fund_type_group, count(A.fund_type_id) as count, A.fund_budget_year
-        #                             from importdb_prpm_v_grt_project_eis as A 
-        #                             join importdb_prpm_r_fund_type as C on A.FUND_TYPE_ID = C.FUND_TYPE_ID
-        #                             where  (A.FUND_SOURCE_ID = 05 or A.FUND_SOURCE_ID = 06 )
-        #                             group by 1, 2 ,3 ,4 
-        #                             ORDER BY 5 desc)
-                                                            
-        #             select FUND_TYPE_ID from temp where count = 1 and (fund_budget_year >= YEAR(date_add(NOW(), INTERVAL 543 YEAR))-1)
-        #             order by 1"""
-        
         sql_cmd =  """SELECT DISTINCT A.FUND_TYPE_ID
                 from importDB_prpm_v_grt_project_eis as A 
                 join (SELECT fund_type_id, count(DISTINCT fund_budget_year) AS c FROM importDB_prpm_v_grt_project_eis GROUP BY 1 HAVING c =1) AS D ON A.FUND_TYPE_ID = D.FUND_TYPE_ID
@@ -2901,30 +2275,8 @@ def query5(): # ตาราง marker * และ ** ของแหล่ง�
         df1 = pm.execute_query(sql_cmd, con_string)
         df1['marker'] = '*'
         
+
         ################## แหล่งทุน ให้ทุนซ้ำ>=3ครั้ง  #####################
-        # sql_cmd2_old =  """with temp as  (SELECT A.FUND_TYPE_ID, 
-        #                                     A.FUND_TYPE_TH,
-        #                                     A.FUND_SOURCE_TH, 
-        #                                     C.Fund_type_group, 
-        #                                     A.fund_budget_year
-        #                                 from importDB_prpm_v_grt_project_eis as A 
-        #                                 join importDB_prpm_r_fund_type as C on A.FUND_TYPE_ID = C.FUND_TYPE_ID
-        #                                 where  (A.FUND_SOURCE_ID = 05 or A.FUND_SOURCE_ID = 06 )
-        #                                 ORDER BY 1 desc
-        #                                 ),
-                                                                        
-        #                     temp2 as (select * 
-        #                                 from temp 
-        #                                 where  (fund_budget_year  BETWEEN YEAR(date_add(NOW(), INTERVAL 543 YEAR))-5 AND YEAR(date_add(NOW(), INTERVAL 543 YEAR))-1)
-        #                             ),
-        
-        #                     temp3 as( select FUND_TYPE_ID, FUND_TYPE_TH,FUND_SOURCE_TH, fund_budget_year ,count(fund_type_id) as count
-        #                                 from temp2
-        #                                 group by 1
-        #                             )
-                        
-        #                     select FUND_TYPE_ID from temp3 where count >= 3"""
-        
         sql_cmd2 = """with temp as  (SELECT fund_type_id, fund_budget_year ,count( fund_budget_year) AS c
                                     FROM importDB_prpm_v_grt_project_eis
                                     where FUND_SOURCE_ID = 05 or FUND_SOURCE_ID = 06 
