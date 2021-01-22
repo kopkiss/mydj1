@@ -12,13 +12,12 @@
                 <th scope="col">Action</th>
                 <th scope="col">Result</th>
                 <th scope="col">Lastest</th>
-                <th scope="col">action</th>
             </tr>
             </thead>
             <tbody>
                 <tr>
                     <td>1</td>
-                    <td> 12 types of budget </td>
+                    <td> 12 Budget Groups </td>
                     <td><button type="submit" name="row"  value ="Query1" class="btn btn-primary">Query</button></td>
                     <td>
                         {% if whichrow == 'row1'%}
@@ -29,8 +28,7 @@
                         {% if whichrow == 'row1'%}
                             {{time}}
                         {%endif%}
-                    </td>
-                    <td><button type="submit" name="viewrow" value ="view1" class="btn btn-primary">view</button></td>  
+                    </td>  
                 </tr>
                 <tr>
                     <td>2</td>
@@ -46,11 +44,10 @@
                             {{time}}
                         {%endif%}
                     </td>
-                    <td><button type="submit" name="viewrow" value ="view2" class="btn btn-primary">view</button></td>
                 </tr>
                 <tr>
                     <td>3</td>
-                    <td> 13 Graphs on "revenues.html" tamplate</td>
+                    <td> Marker แหล่งทุนภายนอก</td>
                     <td><button type="submit" name="row"  value ="Query3" class="btn btn-primary">Query</button></td>
                     <td>
                         {% if whichrow == 'row3'%}
@@ -62,7 +59,6 @@
                             {{time}}
                         {%endif%}
                     </td>
-                    <td><button type="submit" name="viewrow" value ="view3" class="btn btn-primary">view</button></td>
                 </tr>
                 <tr>
                     <td>4</td>
@@ -78,11 +74,10 @@
                             {{time}}
                         {%endif%}
                     </td>
-                    <td><button type="submit" name="viewrow" value ="view4" class="btn btn-primary">view</button></td>
                 </tr>
                 <tr>
                     <td>5</td>
-                    <td> Marker แหล่งทุนภายนอก </td>
+                    <td> จำนวนผู้วิจัยที่ได้รับทุน </td>
                     <td><button type="submit" name="row"  value ="Query5" class="btn btn-primary">Query</button></td>
                     <td>
                         {% if whichrow == 'row5'%}
@@ -94,11 +89,10 @@
                             {{time}}
                         {%endif%}
                     </td>
-                    <td><button type="submit" name="viewrow" value ="view5" class="btn btn-primary">view</button></td>  
                 </tr>
                 <tr>
                     <td>6</td>
-                    <td>ISI, Scopus, TCI</td>
+                    <td> จำนวนผู้วิจัยหลัก </td>
                     <td><button type="submit" name="row"  value ="Query6" class="btn btn-primary">Query</button></td>
                     <td>
                         {% if whichrow == 'row6'%}
@@ -109,12 +103,11 @@
                         {% if whichrow == 'row6'%}
                             {{time}}
                         {%endif%}
-                    </td>
-                    <td><button type="submit" name="viewrow" value ="view6" class="btn btn-primary">view</button></td> 
+                    </td> 
                 </tr>
                 <tr>
                     <td>7</td>
-                    <td> Head_page </td>
+                    <td> 4 Head_page </td>
                     <td><button type="submit" name="row"  value ="Query7" class="btn btn-primary">Query</button></td>
                     <td>
                         {% if whichrow == 'row7'%}
@@ -126,11 +119,10 @@
                             {{time}}
                         {%endif%}
                     </td>
-                    <td><button type="submit" name="viewrow" value ="view7" class="btn btn-primary">view</button></td>
                 </tr>
                 <tr>
                     <td>8</td>
-                    <td> Research Areas </td>
+                    <td> parameter ของ ARIMA Regression </td>
                     <td><button type="submit" name="row"  value ="Query8" class="btn btn-primary">Query</button></td>
                     <td>
                         {% if whichrow == 'row8'%}
@@ -142,11 +134,10 @@
                             {{time}}
                         {%endif%}
                     </td>
-                    <td><button type="submit" name="viewrow" value ="view8" class="btn btn-primary">view</button></td> 
                 </tr>
                 <tr>
                     <td>9</td>
-                    <td> web of science catagories</td>
+                    <td> ISI-WoS, SCOPUS, TCI 3 ปีย้อนหลัง</td>
                     <td><button type="submit" name="row"  value ="Query9" class="btn btn-primary">Query</button></td>
                     <td>
                         {% if whichrow == 'row9'%}
@@ -158,11 +149,10 @@
                             {{time}}
                         {%endif%}
                     </td>
-                    <td><button type="submit" name="viewrow" value ="view9" class="btn btn-primary">view</button></td>
                 </tr>
                 <tr>
                     <td>10</td>
-                    <td> Citation and H-index </td>
+                    <td> ISI-WoS Research Areas </td>
                     <td><button type="submit" name="row"  value ="Query10" class="btn btn-primary">Query</button></td>
                     <td>
                         {% if whichrow == 'row10'%}
@@ -174,11 +164,10 @@
                             {{time}}
                         {%endif%}
                     </td>
-                    <td><button type="submit" name="viewrow" value ="view10" class="btn btn-primary">view</button></td>
                 </tr>
                 <tr>
                     <td>11</td>
-                    <td>จำนวนผู้วิจัยที่ได้รับทุน</td>
+                    <td> ISI-WoS catagories </td>
                     <td><button type="submit" name="row" value ="Query11" class="btn btn-primary">Query</button></td>
                     <td>
                         {% if whichrow == 'row11'%}
@@ -190,11 +179,10 @@
                             {{time}}
                         {%endif%}
                     </td>
-                    <td><button type="submit" name="viewrow" value ="view11" class="btn btn-primary">view</button></td>
                 </tr>
                 <tr>
                     <td>12</td>
-                    <td>จำนวนผู้วิจัยหลัก</td>
+                    <td> ISI-WoS Citation and H-index </td>
                     <td><button type="submit" name="row" value ="Query12" class="btn btn-primary">Query</button></td>
                     <td>
                         {% if whichrow == 'row12'%}
@@ -206,9 +194,8 @@
                             {{time}}
                         {%endif%}
                     </td>
-                    <td><button type="submit" name="viewrow" value ="view12" class="btn btn-primary">view</button></td>
                 </tr>
-                <tr>
+                <!-- <tr>
                     <td>13</td>
                     <td>Parameter ของ ARIMA Model</td>
                     <td><button type="submit" name="row"  value ="Query13" class="btn btn-primary">Query</button></td>
@@ -222,8 +209,8 @@
                             {{time}}
                         {%endif%}
                     </td>
-                    <td><button type="submit" name="viewrow" value ="view13" class="btn btn-primary">view</button></td>
-                </tr>
+                    <td><button type="submit" name="viewrow" value ="view13" class="btn btn-primary">view</button></td> 
+                </tr>-->
             </tbody>
         </table>
     </form>  
