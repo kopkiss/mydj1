@@ -165,328 +165,6 @@ def showdbOracle(request):
 
     return render(request,'importDB/showdbOracle.html',{'posts': data})
 
-def home(requests):  # หน้า homepage หน้าแรก
-
-    def moneyformat(x):  # เอาไว้เปลี่ยน format เป็นรูปเงิน
-        return "{:,.2f}".format(x)
-
-    def get_head_page(): # get จำนวนของนักวิจัย 
-        df = pd.read_csv("""mydj1/static/csv/head_page.csv""")
-        return df.iloc[0].astype(int)
-
-
-    def graph7():
-        df = pd.read_csv("""mydj1/static/csv/Filled_area_chart.csv""")
-
-        df1 = df[["year","Goverment"]]
-        df2 = df[["year","Revenue"]]
-        df3 = df[["year","Campus"]]
-        df4 = df[["year","Department"]]
-        df5 = df[["year","National"]]
-        df6 = df[["year","International"]]
-        df7 = df[["year","Matching_fund"]]
-
-        fig = go.Figure()
-
-        # 0
-        fig.add_trace(go.Scatter(
-            x=df1["year"], y=df1["Goverment"],
-            fill='tozeroy',
-            mode='lines',
-            line_color='#0066FF',
-            line=dict(width=0.8),
-            name="เงินงบประมาณแผ่นดิน"
-            ))
-        # 1
-        fig.add_trace(go.Scatter(
-            x=df2["year"], 
-            y=df2["Revenue"],
-            fill='tozeroy', # fill area between trace0 and trace1
-            mode='lines',
-            line_color='#1976D2 ' ,
-            line=dict(width=0.8),
-            name="เงินรายได้มหาวิทยาลัย"
-            ))
-        # 2
-        fig.add_trace(go.Scatter(
-            x=df3["year"], y=df3["Campus"],
-            fill='tozeroy',
-            mode='lines',
-            line_color='#4FC3F7  ',
-            line=dict(width=0.8),
-            name="เงินรายได้วิทยาเขต"
-            ))
-        # 3
-        fig.add_trace(go.Scatter(
-            x=df4["year"], 
-            y=df4["Department"],
-            fill='tozeroy', # fill area between trace0 and trace1
-            mode='lines',
-            line_color='#03A9F4', 
-            line=dict(width=0.8),
-            name="เงินรายได้คณะ/หน่วยงาน"
-        ))
-        # 4
-        fig.add_trace(go.Scatter(
-            x=df5["year"], 
-            y=df5["National"],
-            fill='tozeroy',
-            mode='lines',
-            line_color='#5DADE2   ',
-            line=dict(width=0.8),
-            name="เงินทุนภายนอก(ในประเทศ)"
-            ))
-        # 5
-        fig.add_trace(go.Scatter(
-            x=df6["year"], 
-            y=df6["International"],
-            fill='tozeroy', # fill area between trace0 and trace1
-            mode='lines', line_color='#2196F3 ' ,
-            line=dict(width=0.8),
-            name="เงินทุนภายนอก (ต่างประเทศ)"
-        ))
-        # 6
-        fig.add_trace(go.Scatter(
-            x=df7["year"], y=df7["Matching_fund"],
-            fill='tozeroy',
-            mode='lines',
-            line_color='#80DEEA ',
-            line=dict(width=0.8),
-            name="เงินทุนร่วม"
-            ))
-
-        fig.update_layout(
-            xaxis_title="<b>ปี พ.ศ.</b>",
-            yaxis_title="<b>จำนวนเงิน (บาท)</b>",
-            # font=dict(
-            #     size=16,
-            # )
-        )
-        fig.update_layout(  # ปรับความสูง ของกราฟให้เต็ม ถ้าใช้ graph object
-            margin=dict(t=50),
-        )
-    
-        plot_div = plot(fig, output_type='div', include_plotlyjs=False,)
-
-        return  plot_div
-
-    def graph8(filter_year):  # แสดงกราฟโดนัด ของจำนวน เงินทั้ง 11 หัวข้อ
-        
-        df = pd.read_csv("""mydj1/static/csv/12types_of_budget.csv""")
-        df.reset_index(level=0, inplace=False)
-        df = df.rename(columns={"Unnamed: 0" : "budget_year"}, errors="raise")
-        re_df =df[df["budget_year"]==int(filter_year)]
-        newdf = pd.DataFrame({'BUDGET_TYPE' : ["สกอ-มหาวิทยาลัยวิจัยแห่งชาติ (NRU)"
-                                       ,"เงินงบประมาณแผ่นดิน"
-                                       ,"เงินกองทุนวิจัยมหาวิทยาลัย"
-                                       ,"เงินจากแหล่งทุนภายนอก ในประเทศไทย"
-                                       ,"เงินจากแหล่งทุนภายนอก ต่างประเทศ"
-                                       ,"เงินรายได้มหาวิทยาลัย"
-                                       ,"เงินรายได้คณะ (เงินรายได้)"
-                                       ,"เงินรายได้คณะ (กองทุนวิจัย)"
-                                       ,"เงินกองทุนวิจัยวิทยาเขต"
-                                       ,"เงินรายได้วิทยาเขต"
-                                       ,"เงินอุดหนุนโครงการการพัฒนาความปลอดภัยและความมั่นคง"     
-                            ]})
-        
-        newdf["budget"] = 0.0
-
-        for n in range(0,11):   # สร้างใส่ค่าใน column ใหม่
-            newdf.budget[n] = re_df[str(n)]
-
-        fig = px.pie(newdf, values='budget', names='BUDGET_TYPE' ,color_discrete_sequence=px.colors.sequential.haline, hole=0.5 ,)
-        fig.update_traces(textposition='inside', textfont_size=14)
-        # fig.update_traces(hoverinfo="label+percent+name",
-        #           marker=dict(line=dict(color='#000000', width=2)))
-
-        fig.update_layout(uniformtext_minsize=12 , uniformtext_mode='hide')  #  ถ้าเล็กกว่า 12 ให้ hide 
-        # fig.update_layout(legend=dict(font=dict(size=16))) # font ของ คำอธิบายสีของกราฟ (legend) ด้านข้างซ้าย
-        # fig.update_layout(showlegend=False)  # ไม่แสดง legend
-        fig.update_layout(legend=dict(orientation="h"))  # แสดง legend ด้านล่างของกราฟ
-        fig.update_layout( height=600)
-        fig.update_layout( margin=dict(l=30, r=30, t=30, b=5))
-
-        fig.update_layout( annotations=[dict(text="<b> &#3647; {:,.2f}</b>".format(newdf.budget.sum()), x=0.50, y=0.5,  font_color = "black", showarrow=False)]) ##font_size=20,
-        # fig.update_traces(hovertemplate='%{name} <br> %{value}') 
-         
-        plot_div = plot(fig, output_type='div', include_plotlyjs=False)
-        
-        return plot_div
-
-    def graph3():
-
-        df = pd.read_csv("""mydj1/static/csv/query_graph3.csv""")
-
-        # df.to_csv ("""mydj1/static/csv/query_graph3.csv""", index = False, header=True)
-
-        fig = px.line(df, x="budget_year", y="budget", color="camp_owner",
-        line_shape="spline", render_mode="svg",  )
-        fig.update_layout(
-            xaxis_title="<b>ปี พ.ศ.</b>",
-            yaxis_title="<b>จำนวนเงิน (บาท)</b>",
-            # font=dict(
-            #     size=16,
-            # )
-        )
-        # fig.update_traces(mode="markers+lines", hovertemplate=None)
-        # fig.update_layout(hovermode="x")
-        plot_div = plot(fig, output_type='div', include_plotlyjs=False)
-        
-        return plot_div
-
-    def graph5():
-        sql_cmd =  """SELECT camp_owner, sum(budget) as budget
-                    FROM querygraph2
-                    where budget_year = YEAR(date_add(NOW(), INTERVAL 543 YEAR))
-                    group by 1"""
-        con_string = getConstring('sql')
-        df = pm.execute_query(sql_cmd, con_string) 
-
-        # df = pd.read_csv("""mydj1/static/csv/querygraph2.csv""")
-        
-        fig = px.pie(df, values='budget', names='camp_owner')
-        fig.update_traces(textposition='inside', textfont_size=14)
-        # fig.update_layout( width=900, height=450)
-        fig.update_layout(uniformtext_minsize=12 , uniformtext_mode='hide')  #  ถ้าเล็กกว่า 12 ให้ hide 
-        # fig.update_layout(legend=dict(font=dict(size=16))) # font ของ คำอธิบายสีของกราฟ (legend) ด้านข้างซ้าย
-        # fig.update_layout(showlegend=False)  # ไม่แสดง legend
-        fig.update_layout(legend=dict(orientation="h"))  # แสดง legend ด้านล่างของกราฟ
-        # fig.update_layout( width=1000, height=485)
-        fig.update_layout( margin=dict(l=30, r=30, t=30, b=5))
-
-        fig.update_traces(hoverinfo="label+percent+name",
-                  marker=dict(line=dict(color='#000000', width=2)))
-        
-        # fig.update_layout( height=400, width=520,)
-        plot_div = plot(fig, output_type='div', include_plotlyjs=False)
-        return plot_div
-
-    def graph1():
-        df = pd.read_csv("""mydj1/static/csv/query_graph1.csv""")
-
-        fig = make_subplots(rows=1, cols=2,
-                            column_widths=[1, 0.5],
-                            specs=[[{"type": "bar"},{"type": "table"}]]
-                            )
-
-        fig.add_trace(
-                        px.bar( df,
-                            x = 'budget_year',
-                            y = 'budget', 
-                       ).data[0],
-                       row=1,col=1
-        )
-              
-    
-
-        df['budget'] = df['budget'].apply(moneyformat) #เปลี่ยน format ของ budget เป็นรูปเเบบของเงิน
-
-        fig.add_trace(
-                        go.Table( 
-                            columnwidth = [140,400],
-                            header=dict(values=["<b>Year</b>","<b>Budget<b>"],
-                                        fill = dict(color='#C2D4FF'),
-                                        align = ['center'] * 10),
-                            cells=dict(values=[df.budget_year, df.budget],
-                                    fill = dict(color='#F5F8FF'),
-                                    align = ['center','right'] * 5)
-                                    )
-                            , row=1, col=2)
-
-        fig.update_layout(
-                        
-                        # height=500, width=800,
-                        xaxis_title="<b>ปี พ.ศ</b>",
-                        yaxis_title="<b>จำนวนเงิน (บาท)</b>")
-
-        fig.update_layout(  # ปรับความสูง ของกราฟให้เต็ม ถ้าใช้ graph object
-            margin=dict(t=50),
-        )
-        
-        plot_div = plot(fig, output_type='div', include_plotlyjs=False)
-        
-        return plot_div
-
-    def graph2():
-        # sql_cmd =  """SELECT * FROM querygraph2 where budget_year < YEAR(date_add(NOW(), INTERVAL 543 YEAR)) """
-        # con_string = getConstring('sql')
-        # df = pm.execute_query(sql_cmd, con_string) 
-        df = pd.read_csv("""mydj1/static/csv/query_graph2.csv""")
-
-        fig = px.bar(df, x="camp_owner", y="budget", color="camp_owner",
-            animation_frame="budget_year", animation_group="faculty_owner")
-
-        fig.update_layout(
-            
-            width=900, height=450)
-
-
-
-        plot_div = plot(fig, output_type='div', include_plotlyjs=False)
-        return plot_div
-
-    def graph4():
-
-        df = pd.read_csv("""mydj1/static/csv/query_graph4.csv""")
-
-        fig = px.bar(df, x="year", y="n", color="time",  barmode="group" , template='presentation', text='n')
-
-        fig.update_layout(
-            title={   #กำหนดให้ title อยู่ตรงกลาง
-                'text': "งานวิจัยที่เสร็จทัน และไม่ทันเวลาที่กำหนด",
-                'y':0.9,
-                'x':0.5,
-                'xanchor': 'center',
-                'yanchor': 'top'}
-            ,width=900, height=450,  #ความกว้างความสูง ของกราฟในหน้าต่าง 
-            xaxis_title="ปี ค.ศ",
-            yaxis_title="จำนวน"
-            ,margin=dict(l=100, r=100, t=100, b=100)  # กำหนด left right top bottom ของกราฟในหน้าต่าง 
-            ,paper_bgcolor="LightSteelBlue" # กำหนด สี BG 
-            # font=dict(
-            #     family="Courier New, monospace",
-            #     size=18,
-            #     color="#7f7f7f"
-            )
-        fig.update_xaxes(ticks="outside", tickwidth=2, tickcolor='crimson', ticklen=10)    #เพิ่มเส้นขีดสีแดง ตามแกน x 
-        fig.update_yaxes(ticks="outside", tickwidth=2, tickcolor='crimson', ticklen=10, col=1) #เพิ่มเส้นขีดสีแดง ตามแกน y
-        # fig.update_yaxes(automargin=True)    
-
-        plot_div = plot(fig, output_type='div', include_plotlyjs=False)
-        
-        return plot_div
-
-    def graph6():
-        sql_cmd =  """select year, n_of_publish  as number_of_publication
-                    from importdb_prpm_scopus
-                    where year BETWEEN YEAR(date_add(NOW(), INTERVAL 543 YEAR))-10 AND YEAR(date_add(NOW(), INTERVAL 543 YEAR))-1"""
-        con_string = getConstring('sql')
-        df = pm.execute_query(sql_cmd, con_string) 
-        
-        fig = px.line(df, x="year", y="number_of_publication",
-        line_shape="spline", render_mode="svg",  template='plotly_dark' )
-        
-        plot_div = plot(fig, output_type='div', include_plotlyjs=False)
-        
-        return plot_div
-
-    context={
-        ###### Head_page ########################    
-        'head_page': get_head_page(),
-        'now_year' : (datetime.now().year)+543,
-        #########################################
-        
-        'plot1' : graph1(),
-        'plot3': graph3(),
-        # 'plot4': graph4(),
-        'plot5': graph5(),
-        # 'plot6': graph6(),
-        'plot7': graph7(),
-        'plot8': graph8(datetime.now().year+543),
-
-    }
-    
-    return render(requests, 'importDB/welcome.html', context)
     
 def rodReport(request):
 
@@ -2941,6 +2619,270 @@ def get_fiscal_year(): # return ปีงบประมาณ
 ##################################################################
 ##### " function หลัก " ในการ สร้าง page html และ อื่นๆ ##############
 ##################################################################
+
+@login_required(login_url='login')
+def home(requests):  # หน้า homepage หน้าแรก
+
+    def moneyformat(x):  # เอาไว้เปลี่ยน format เป็นรูปเงิน
+        return "{:,.2f}".format(x)
+
+    def get_head_page(): # get 
+        df = pd.read_csv("""mydj1/static/csv/head_page.csv""")
+        return df.iloc[0].astype(int)
+
+    def graph3():  #12types_of_budget.csv
+
+        df = pd.read_csv("""mydj1/static/csv/12types_of_budget.csv""")
+
+        df['total'] = df.iloc[:,1:].sum(axis=1)
+        newdf = df.iloc[-10:,[0,-1]]
+        new_df = newdf.rename(columns={'Unnamed: 0': 'ปี พ.ศ.'})
+
+        df_line = new_df.iloc[:-1]
+        df_dot_line = new_df.iloc[-2:]
+        df_dot = new_df.iloc[-1:]
+
+        fig = go.Figure(data = go.Scatter(x=df_line['ปี พ.ศ.'], y=df_line['total'],
+                    mode='lines+markers',
+                    name= '',
+                    line=dict( width=2,color='royalblue'),
+                    line_shape='spline',
+                        
+                     ) )
+        fig.add_trace(go.Scatter(x=df_dot_line['ปี พ.ศ.'], y=df_dot_line["total"],
+                            mode='lines',
+                            line=dict( width=2, dash='dot',color='royalblue'),
+                            showlegend=False,
+                            hoverinfo='skip',
+                            line_shape='spline'
+                            ))
+
+        fig.add_trace(go.Scatter(x=df_dot['ปี พ.ศ.'], y=df_dot["total"],
+                            mode='markers',
+                            name= '',
+                            line=dict(color='royalblue'),
+                            showlegend=False,
+                                
+                        ))
+        fig.update_xaxes( 
+                                ticks="outside",
+                                showspikes=True,
+                                spikethickness=2,
+                                spikedash="dot",
+                                spikecolor="#999999",)
+        fig.update_yaxes(
+                                ticks="outside",
+                                showspikes=True,
+                                spikethickness=2,
+                                spikedash="dot",
+                                spikecolor="#999999",)
+
+
+        fig.update_layout(
+                    # hovermode="x",
+                    xaxis = dict(
+                        tickmode = 'linear',
+                        dtick = 1,
+                        showgrid=False,
+                        linecolor="#BCCCDC",
+                        
+                    ),
+                    yaxis = dict(
+                        showgrid=False,
+                        linecolor="#BCCCDC", 
+                    ),
+                    margin=dict(t=50),
+                    plot_bgcolor="#FFF",
+                    xaxis_title="<b>ปี งบประมาณ</b>",
+                    yaxis_title="<b>จำนวนเงิน</b>",
+            
+            showlegend=False,
+            
+            )
+
+        plot_div = plot(fig, output_type='div', include_plotlyjs=False)
+        
+        return plot_div
+
+    def graph1(): # line_chart_total_publications
+
+        df_isi = pd.read_csv("""mydj1/static/csv/ranking_isi.csv""", index_col=0)
+        df_sco = pd.read_csv("""mydj1/static/csv/ranking_scopus.csv""", index_col=0)
+        df_tci = pd.read_csv("""mydj1/static/csv/ranking_tci.csv""", index_col=0)
+
+        ####  กราฟเส้นทึบ
+        df_isi_line = df_isi[-20:-1]['PSU'].to_frame()
+        df_sco_line = df_sco[-20:-1]['PSU'].to_frame()
+        df_tci_line = df_tci[-20:-1]['PSU'].to_frame()
+
+
+        ####  กราฟเส้นทึบ     
+        fig = go.Figure(data = go.Scatter(x=df_sco_line.index, y=df_sco_line['PSU'],
+                    mode='lines+markers',
+                    name='Scopus' ,
+                    line=dict( width=2,color='red'),
+                    legendgroup = 'sco' ) )
+
+        fig.add_trace(go.Scatter(x=df_isi_line.index, y=df_isi_line['PSU'],
+                    mode='lines+markers',
+                    name='ISI-WoS',
+                    line=dict( width=2,color='royalblue'),
+                    legendgroup = 'isi' ))
+
+        fig.add_trace(go.Scatter(x=df_tci_line.index, y=df_tci_line['PSU'],
+                    mode='lines+markers',
+                    name='TCI',
+                    line=dict( width=2,color='#F39C12'),
+                    legendgroup = 'tci' ))
+        
+        # ####  กราฟเส้นประ
+        df_isi_dot = df_isi[-2:]['PSU'].to_frame()
+        df_sco_dot = df_sco[-2:]['PSU'].to_frame()
+        df_tci_dot = df_tci[-2:]['PSU'].to_frame()
+        
+        # scopus dot line
+        fig.add_trace(go.Scatter(x=df_sco_dot.index, y=df_sco_dot["PSU"],
+                    mode='lines',
+                    line=dict( width=2, dash='dot',color='red'),
+                    showlegend=False,
+                    hoverinfo='skip',
+                    legendgroup = 'sco'))
+        fig.add_trace(go.Scatter(x=df_sco_dot.index[-1::], y=df_sco_dot["PSU"][-1::],
+                    mode='markers',
+                    name='Scopus' ,
+                    line=dict(color='red'),
+                    showlegend=False,
+                    legendgroup = 'sco'))
+
+        # isi dot line
+        fig.add_trace(go.Scatter(x=df_isi_dot.index, y=df_isi_dot["PSU"],
+                    mode='lines',
+                    line=dict( width=2, dash='dot',color='royalblue'),
+                    showlegend=False,
+                    hoverinfo='skip',
+                    legendgroup = 'isi'))
+        fig.add_trace(go.Scatter(x=df_isi_dot.index[-1::], y=df_isi_dot["PSU"][-1::],
+                    mode='markers',
+                    name='ISI-WoS' ,
+                    line=dict(color='royalblue'),
+                    showlegend=False,
+                    legendgroup = 'isi'))
+
+        # tci dot line
+        fig.add_trace(go.Scatter(x=df_tci_dot.index, y=df_tci_dot["PSU"],
+                    mode='lines',
+                    line=dict( width=2, dash='dot',color='#F39C12'),
+                    showlegend=False,
+                    hoverinfo='skip',
+                    legendgroup = 'tci'))
+        fig.add_trace(go.Scatter(x=df_tci_dot.index[-1::], y=df_tci_dot["PSU"][-1::],
+                    mode='markers',
+                    name='TCI' ,
+                    line=dict(color='#F39C12'),
+                    showlegend=False,
+                    legendgroup = 'tci'))
+        
+        # fig.update_traces(mode='lines+markers')
+        fig.update_layout(
+            xaxis_title="<b>ปี พ.ศ.</b>",
+            yaxis_title="<b>จำนวนการตีพิมพ์</b>",
+            hovermode="x",
+            legend=dict(x=0, y=1.1),
+        )
+        
+
+        fig.update_layout(
+            plot_bgcolor="#FFF"
+            ,xaxis = dict(
+                tickmode = 'linear',
+                # tick0 = 2554,
+                dtick = 1,
+                showgrid=False,
+                linecolor="#BCCCDC",
+                showspikes=True, # Show spike line for X-axis
+                # Format spike
+                spikethickness=1,
+                spikedash="dot",
+                spikecolor="#999999",
+                spikemode="across",
+            ),
+            yaxis = dict(
+                showgrid=False,
+                linecolor="#BCCCDC", 
+            ),
+            hoverdistance=100, # Distance to show hover label of data point
+            spikedistance=1000, # Distance to show spike
+        )
+
+        fig.update_xaxes(ticks="outside")
+        fig.update_yaxes(ticks="outside")
+
+        fig.update_layout(legend=dict(orientation="h"))
+        fig.update_layout(
+            margin=dict(t=55, ),
+        )
+
+        plot_div = plot(fig, output_type='div', include_plotlyjs=False,)
+        return  plot_div
+
+    def graph2(): #main_research
+        
+        df = pd.read_csv("""mydj1/static/csv/main_research.csv""")
+
+        new_df = df[-10:].rename(columns={'year': 'ปี พ.ศ.', 'teacher': 'อาจารย์', 'research_staff':'นักวิจัย','post_doc':'นักวิจัยหลังปริญญาเอก', 'asst_staff':'ผู้ช่วยวิจัย'})
+        new_df2 = pd.melt(new_df,id_vars=['ปี พ.ศ.'], var_name='ประเภท', value_name='จำนวน')
+
+        fig = px.bar(new_df2, x="ปี พ.ศ.", color="ประเภท",
+             y='จำนวน',
+             barmode='relative',
+            )
+        fig.update_traces( textposition= 'auto' )
+        fig.update_traces( marker_line_color='black',
+                        marker_line_width=1,opacity=0.9 )
+        fig.update_layout(
+                    xaxis_title="<b>ปี พ.ศ.</b>",
+                    yaxis_title="<b>จำนวน (คน)</b>",
+                )
+        fig.update_xaxes(ticks="outside")
+        fig.update_yaxes(ticks="outside")
+        fig.update_layout(hovermode="x" ,  legend=dict(x=0, y=1.1,orientation="h" ),) 
+        fig.update_layout({
+                'legend_title_text': ''})  
+        fig.update_layout(
+            margin=dict(t=50),
+            plot_bgcolor="#FFF",
+            xaxis = dict(
+                tickmode = 'linear',
+                dtick = 1,
+                showgrid=False,
+                linecolor="#BCCCDC", 
+            ),
+            yaxis = dict(
+                showgrid=False,
+                linecolor="#BCCCDC", 
+            ),
+        )
+
+
+        plot_div = plot(fig, output_type='div', include_plotlyjs=False)
+        return plot_div
+
+    
+    context={
+        ###### Head_page ########################    
+        'head_page': get_head_page(),
+        'now_year' : (datetime.now().year)+543,
+        #########################################
+        
+        'plot1' : graph1(),
+        'plot2': graph2(),
+        'plot3': graph3(),
+        'top_bar_title': "หน้าหลัก"
+
+    }
+    
+    return render(requests, 'importDB/welcome.html', context)
+
 @login_required(login_url='login')
 def pageRevenues(request): # page รายได้งานวิจัย
 

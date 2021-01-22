@@ -238,6 +238,9 @@ SESSION_COOKIE_AGE = 60 * 60 #  5 * 60 = 5 นาที
 
 ##### ใช้ในการ update ข้อมูล โดยการใช้ Celery Scheduler #####
 # CELERY_BROKER_URL = 'redis://h:p00634b4bbcaae541336b6ae31adc8d93e2cd88f1886df232b8006d9ff8e9d27f@ec2-54-160-125-169.compute-1.amazonaws.com:28879'
+CELERY_BROKER_URL ='redis://localhost:6379'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERYBEAT_SCHEDULER = 'djcelery_schedulers_DatabaseScheduler'

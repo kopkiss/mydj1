@@ -4,7 +4,7 @@ from . import views  # . คือ อยู่ใน folder เดียวก�
 
 
 urlpatterns = [
-    path('', views.pageResearchMan, name = 'home-page'),
+    path('', views.home, name = 'home-page'),
     # path('', include("django.contrib.auth.urls")),
     # path('django_plotly_dash/', include('django_plotly_dash.urls')),
     path('showdbsql/', views.showdbsql),
