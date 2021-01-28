@@ -22,7 +22,7 @@ urlpatterns = [
     path('ess-admin/', admin.site.urls),
     path('', include('importDB.urls')),
 
-    path('login/' , views.login_, name = 'login'),
+    path('login/' , views.login_2, name = 'login'),
 
     # ปกรติ ต้องใช้ code ในการ login ข้างล่างนี้ แต่เนื่องจาก ต้องทำการเช็คระบบจากระบบ PSU passport จึงทำให้ต้องใช้ views.login_
     # path('login/', auth_views.LoginView.as_view(template_name='importDB/login.html') , name = 'login'),

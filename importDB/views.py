@@ -314,35 +314,41 @@ def query(request): # Query ฐานข้อมูล Mysql (เป็น .csv
             timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
             whichrows = 'row8'
         
-        elif request.POST['row']=='Query9': # ISI-WoS SCOPUS TCI 3 ปีย้อนหลัง     
-            ranking,checkpoint = query9() 
+        elif request.POST['row']=='Query9': # จำนวนงานที่จัดสรร และ ไม่จัดสรร   
+            checkpoint = query9() 
             dt = datetime.now()
             timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
             whichrows = 'row9'
 
-        elif request.POST['row']=='Query10': # ISI-WoS Research Areas  
-            checkpoint = query10() 
+        elif request.POST['row']=='Query10': # ISI-WoS SCOPUS TCI 3 ปีย้อนหลัง     
+            ranking,checkpoint = query10() 
             dt = datetime.now()
             timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
             whichrows = 'row10'
-            
-        elif request.POST['row']=='Query11': # ISI-WoS catagories 
+
+        elif request.POST['row']=='Query11': # ISI-WoS Research Areas  
             checkpoint = query11() 
             dt = datetime.now()
             timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
-            whichrows = 'row11'  
-        
-        elif request.POST['row']=='Query12': # ISI-WoS Citation and H-index
+            whichrows = 'row11'
+            
+        elif request.POST['row']=='Query12': # ISI-WoS catagories 
             checkpoint = query12() 
             dt = datetime.now()
             timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
-            whichrows = 'row12'
+            whichrows = 'row12'  
+        
+        elif request.POST['row']=='Query13': # ISI-WoS Citation and H-index
+            checkpoint = query13() 
+            dt = datetime.now()
+            timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
+            whichrows = 'row13'
 
-        # elif request.POST['row']=='Query13': 13 Graphs on "revenues.html" tamplate
-        #     checkpoint = query13() 
+        # elif request.POST['row']=='Query14': #13 Graphs on "revenues.html" tamplate
+        #     checkpoint = query14() 
         #     dt = datetime.now()
         #     timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
-        #     whichrows = 'row13'
+        #     whichrows = 'row14'
 
         
         if checkpoint == 'chk_ranking':
@@ -1486,11 +1492,13 @@ def query1(): # 12 types of budget, budget_of_fac
         df = pm.execute_query(sql_cmd, con_string)
         print(df)
         ############## build dataframe for show in html ##################
-        index_1 = df["budget_year"].unique()
+        # index_1 = df["budget_year"].unique()
+        index_1 = df["submit_year"].unique()
         df2 = pd.DataFrame(columns=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],index = index_1)  
  
         for index, row in df.iterrows():
-            df2[int(row['budget_source_group_id'])][row["budget_year"]] = row['sum_final_budget']
+            # df2[int(row['budget_source_group_id'])][row["budget_year"]] = row['sum_final_budget']
+            df2[int(row['budget_source_group_id'])][row["submit_year"]] = row['sum_final_budget']
  
         df2 = df2.fillna(0.0)
         df2 = df2.sort_index(ascending=False)
@@ -2083,9 +2091,53 @@ def query8(): # parameter ของ ARIMA Regression
         print('At Query#8: Something went wrong :', e)
         return checkpoint
 
-def query9(): # ISI SCOPUS TCI  3 ปีย้อนหลัง
+def query9(): # จำนวนงานที่จัดสรร และ ไม่จัดสรร
     print("-"*20)
     print("Starting Query#9 ...")
+    checkpoint = True
+    os.environ["NLS_LANG"] = ".UTF8"  # ทำให้แสดงข้อความเป็น ภาษาไทยได้
+    
+    try:
+        fiscal_year = get_fiscal_year() # ปีงบประมาณ
+        
+        sql_cmd =  """with temp1 as (select fund_budget_year, count(psu_project_id) as c1
+							from importdb_prpm_v_grt_project_eis
+							where psu_project_id in ( select distinct psu_project_id
+																				from importdb_prpm_v_grt_pj_budget_eis 
+																				where  budget_group = 4 )
+							group by 1
+							order by 1), 
+			temp2  as (select fund_budget_year, count(psu_project_id) as c2
+							from importdb_prpm_v_grt_project_eis
+							group by 1)
+			
+			select t1.fund_budget_year, t1.c1 as received , c2-c1 as notreceive, t2.c2 as allproject
+			from temp1 as t1
+			join temp2 as t2 on t1.fund_budget_year = t2.fund_budget_year
+			where t1.fund_budget_year between """+str(fiscal_year-9)+""" and """+str(fiscal_year)+"""
+            """
+
+        con_string = getConstring('sql')
+        df = pm.execute_query(sql_cmd, con_string)
+        print(df)      
+
+        ########## save to csv ตาราง เงิน 12 ประเภท ##########      
+        if not os.path.exists("mydj1/static/csv"):
+                os.mkdir("mydj1/static/csv")
+                
+        df.to_csv ("""mydj1/static/csv/pay_revieved.csv""", index = True, header=True)
+        print ("Data#9 is saved")
+
+        return checkpoint
+
+    except Exception as e :
+        checkpoint = False
+        print('At Query#9: Something went wrong :', e)
+        return checkpoint
+
+def query10(): # ISI SCOPUS TCI  3 ปีย้อนหลัง
+    print("-"*20)
+    print("Starting Query#10 ...")
     checkpoint = True
     os.environ["NLS_LANG"] = ".UTF8"  # ทำให้แสดงข้อความเป็น ภาษาไทยได้
 
@@ -2212,9 +2264,9 @@ def query9(): # ISI SCOPUS TCI  3 ปีย้อนหลัง
     print("Results: ",ranking)
     return ranking,checkpoint
 
-def query10(): # ISI Research Areas
+def query11(): # ISI Research Areas
     print("-"*20)
-    print("Starting Query#10 ...")
+    print("Starting Query#11 ...")
     checkpoint = True
     os.environ["NLS_LANG"] = ".UTF8"  # ทำให้แสดงข้อความเป็น ภาษาไทยได้
     path = """importDB"""
@@ -2244,18 +2296,18 @@ def query10(): # ISI Research Areas
         df[:20].to_csv ("""mydj1/static/csv/research_areas_20_isi.csv""", index = False, header=True)
                     
         print ("Data is saved")
-        print("Ending Query#10 ...")
+        print("Ending Query#11 ...")
 
         return checkpoint
 
     except Exception as e :
         checkpoint = False
-        print('At Query#10: Something went wrong :', e)
+        print('At Query#11: Something went wrong :', e)
         return checkpoint
  
-def query11(): # ISI catagories
+def query12(): # ISI catagories
     print("-"*20)
-    print("Starting Query#11 ...")
+    print("Starting Query#12 ...")
     checkpoint = True
     os.environ["NLS_LANG"] = ".UTF8"  # ทำให้แสดงข้อความเป็น ภาษาไทยได้
     path = """importDB"""
@@ -2287,18 +2339,18 @@ def query11(): # ISI catagories
         df[:20].to_csv ("""mydj1/static/csv/categories_20_isi.csv""", index = False, header=True)
         
         print ("Data is saved")
-        print("Ending Query#11 ...")
+        print("Ending Query#12 ...")
 
         return checkpoint
 
     except Exception as e :
         checkpoint = False
-        print('At Query#11: Something went wrong :', e)
+        print('At Query#12: Something went wrong :', e)
         return checkpoint
 
-def query12(): # Citation ISI and H-index and avg_per_item
+def query13(): # Citation ISI and H-index and avg_per_item
     print("-"*20)
-    print("Starting Query#12 ...")
+    print("Starting Query#13 ...")
     checkpoint = True
     os.environ["NLS_LANG"] = ".UTF8"  # ทำให้แสดงข้อความเป็น ภาษาไทยได้
     dt = datetime.now()
@@ -2352,18 +2404,18 @@ def query12(): # Citation ISI and H-index and avg_per_item
         df.to_csv ("""mydj1/static/csv/ranking_avg_cite_per_item.csv""", index = False, header=True)
 
         print ("Data is saved")
-        print("Ending Query#12 ...")
+        print("Ending Query#13 ...")
 
         return checkpoint
 
     except Exception as e :
         checkpoint = False
-        print('At Query#12: Something went wrong :', e)
+        print('At Query#13: Something went wrong :', e)
         return checkpoint
 
-def query13(): # Query รูปกราฟ ที่จะแสดงใน ตารางของ tamplate revenues.html
+def query14(): # Query รูปกราฟ ที่จะแสดงใน ตารางของ tamplate revenues.html
     print("-"*20)
-    print("Starting Query#13 ...")
+    print("Starting Query#14 ...")
     checkpoint = True
     os.environ["NLS_LANG"] = ".UTF8"  # ทำให้แสดงข้อความเป็น ภาษาไทยได้
     fiscal_year = get_fiscal_year() # ปีงบประมาณ
@@ -2602,13 +2654,13 @@ def query13(): # Query รูปกราฟ ที่จะแสดงใน �
         result_sum.to_csv ("""mydj1/static/csv/table_sum_inter&national.csv""", index = True, header=True)
         
         print ("All Data and images are saved")
-        print("Ending Query#13 ...")
+        print("Ending Query#14 ...")
 
         return checkpoint
         
     except Exception as e :
         checkpoint = False
-        print('At Query#13: Something went wrong :', e) 
+        print('At Query#14: Something went wrong :', e) 
         return checkpoint
 
 def get_fiscal_year(): # return ปีงบประมาณ
@@ -2645,13 +2697,13 @@ def home(requests):  # หน้า homepage หน้าแรก
         fig = go.Figure(data = go.Scatter(x=df_line['ปี พ.ศ.'], y=df_line['total'],
                     mode='lines+markers',
                     name= '',
-                    line=dict( width=2,color='royalblue'),
+                    line=dict( width=2,color='rgb(0, 60, 113)'),
                     line_shape='spline',
                         
                      ) )
         fig.add_trace(go.Scatter(x=df_dot_line['ปี พ.ศ.'], y=df_dot_line["total"],
                             mode='lines',
-                            line=dict( width=2, dash='dot',color='royalblue'),
+                            line=dict( width=2, dash='dot',color='rgb(0, 60, 113)'),
                             showlegend=False,
                             hoverinfo='skip',
                             line_shape='spline'
@@ -2660,7 +2712,7 @@ def home(requests):  # หน้า homepage หน้าแรก
         fig.add_trace(go.Scatter(x=df_dot['ปี พ.ศ.'], y=df_dot["total"],
                             mode='markers',
                             name= '',
-                            line=dict(color='royalblue'),
+                            line=dict(color='rgb(0, 60, 113)'),
                             showlegend=False,
                                 
                         ))
@@ -2867,6 +2919,61 @@ def home(requests):  # หน้า homepage หน้าแรก
         plot_div = plot(fig, output_type='div', include_plotlyjs=False)
         return plot_div
 
+    def graph4(): #งานที่ได้รับการจัดสรร และรอการจัดสรรงบประมาณ
+        df = pd.read_csv("""mydj1/static/csv/pay_revieved.csv""")
+
+        fig = go.Figure()
+        fig.add_trace(go.Bar(x=df.fund_budget_year,
+                        y= df.received,
+                        name='โครงการที่ได้รับการจัดสรร',
+                        marker_color='rgb(0, 60, 113)',
+                        ))
+        fig.add_trace(go.Bar(x=df.fund_budget_year,
+                        y=df.notreceive,
+                        name='โครงการที่ยังไม่ได้รับการจัดสรร',
+                        marker_color='rgb(0, 156, 222)',
+                        ))
+
+        fig.update_layout(
+        #     title='จำนวนโครงการที่ได้รับการจัดสรร และยังไม่ได้รับการจัดสรร',
+            xaxis_tickfont_size=14,
+            xaxis_title="<b>ปี งบประมาณ</b>",
+            yaxis=dict(
+                title='<b>จำนวนโครงการ</b>',
+                titlefont_size=16,
+                tickfont_size=14,
+            ),
+            legend=dict(
+                x=0,
+                y=1.0,
+                bgcolor='rgba(255, 255, 255, 0)',
+                bordercolor='rgba(255, 255, 255, 0)'
+            ),
+            barmode='group',
+            bargap=0.15, # gap between bars of adjacent location coordinates.
+            bargroupgap=0.1 # gap between bars of the same location coordinate.
+        )
+
+        fig.update_layout(
+                    margin=dict(t=50),
+                    plot_bgcolor="#FFF",
+                    xaxis = dict(
+                        tickmode = 'linear',
+                        dtick = 1,
+                        showgrid=False,
+                        linecolor="#BCCCDC", 
+                    ),
+                    yaxis = dict(
+                        showgrid=False,
+                        linecolor="#BCCCDC", 
+                    )),
+
+        fig.update_xaxes(ticks="outside")
+        fig.update_yaxes(ticks="outside")
+
+
+        plot_div = plot(fig, output_type='div', include_plotlyjs=False)
+        return plot_div
     
     context={
         ###### Head_page ########################    
@@ -2877,6 +2984,7 @@ def home(requests):  # หน้า homepage หน้าแรก
         'plot1' : graph1(),
         'plot2': graph2(),
         'plot3': graph3(),
+        'plot4' : graph4(),
         'top_bar_title': "หน้าหลัก"
 
     }
@@ -4863,34 +4971,79 @@ def login_2(request):
     if request.method == "POST":
         username = request.POST.get('username') # RO ใช้ username = request.POST['username']
         password = request.POST.get('password')
+        # password= "".join(password.split())  
+        print("password = ",password)
+        user_list = list()
+        user = object()
+        if username.find("admin") == -1:  ## ถ้า user ขึ้นต้นด้วย admin ให้ ใช้ login django  ถ้าไม่ใช่ ให้ login psu-passport
+            print("psu-login")
+            password = password.replace("`", "\\`")
+            password = "\"\"\""+password+"\"\"\""  # ทำการ ใส่ "  " ให้กับ password เพราะ อาจจะมี charactor พิเศษ ที่ทำให้เกิด error เช่น มี & | not ใน password
+            
+            # password = """aaa\`1aaa"""
+            # print("################")
+            # print("password = ",password)
+            # print("################")
+            # print("""php importDB/index.php """+username+""" """+password)
+            proc = subprocess.Popen("""php importDB/index.php """+username+""" """+password , shell=True, stdout=subprocess.PIPE) #Call function authentication from PHP
+            # proc = subprocess.Popen("""php importDB/index.php """+username+""" aaa`1aaa""" , shell=True, stdout=subprocess.PIPE) #Call function authentication from PHP
+           
+            # print("AAAAAAAAAAAAAAAAA", proc)
+            script_response = proc.stdout.read()
+            # print("BBBBBBBBBBBBBBBBBBB", script_response)
+            decode = script_response.decode("utf-8")  # ทำการ decode จาก bit เป็น string
+            # print("CCCCCCCCCCCCCCCCCC")
+            user_list = decode.split(",") # split ข้อมูล ด้วย ,
+            print("list --> ",decode)
+            # print(user_list[0])
+            # print(user_list[1])
+            user = authenticate(request, username = user_list[1] , password = default_pass) # นำ รหัสพนักงาน  มาตรวจสอบว่าอยู่ใน ฐานข้อมูล django หรือไม่ โดยใช้รหัส default
 
-        password = "\""+password+"\""  # ทำการ ใส่ "  " ให้กับ password เพราะ อาจจะมี charactor พิเศษ ที่ทำให้เกิด error เช่น มี & | not ใน password
-        
-        # ทำการ ตรวจสอบ user และ pass จาก index.php และ ldappsu.php โดย ถ้ามี user ใน psupassport จะ Return เป็น "1,รหัสพนักงาน" ถ้าไม่มีจะ return 0 
-        # print("user = ",username)
-        # print("pass = ",password)
-        proc = subprocess.Popen("""php importDB/index.php """+username+""" """+password , shell=True, stdout=subprocess.PIPE) #Call function authentication from PHP
-        script_response = proc.stdout.read()
+            if ((user_list[0] == "1") & (user is not None)):  # ถ้า เจอ user ใน ระบบ psupassport และ เจอ user ใน ฐานข้อมูล django ให้ทำการเข้าสู่ระบบได้
+                login(request, user)  # ทำการเข้าสู่ระบบ
+                return redirect('home-page')  # เมื่อเข้าสู่ระบบเเล้ว ทำการเปิดหน้าแรกของ page
+            else:
+                # print("ไม่พบ user")
+                messages.info(request, 'Username หรือ password ไม่ถูกต้อง')
 
-        decode = script_response.decode("utf-8")  # ทำการ decode จาก bit เป็น string
-
-        user_list = decode.split(",") # split ข้อมูล ด้วย , 
-        print(script_response)
-        print("list --> ",decode)
-        print(user_list[0])
-        print(user_list[1])
-        
-        #Call function authentication from django
-        # user_list[1]
-        user = authenticate(request, username = user_list[1] , password = default_pass) # นำ รหัสพนักงาน (user_list[1]) มาตรวจสอบว่าอยู่ใน ฐานข้อมูล django หรือไม่ โดยใช้รหัส default
-
-        if ((user_list[0] == "1") & (user is not None)):  # ถ้า เจอ user ใน ระบบ psupassport และ เจอ user ใน ฐานข้อมูล django ให้ทำการเข้าสู่ระบบได้
-            login(request, user)  # ทำการเข้าสู่ระบบ
-            return redirect('home-page')  # เมื่อเข้าสู่ระบบเเล้ว ทำการเปิดหน้าแรกของ page
-    
         else:
-            # print("ไม่พบ user")
-            messages.info(request, 'Username หรือ password ไม่ถูกต้อง')
+            print("admin-login")   ## login ด้วย admin django user
+            user = authenticate(request, username = username , password = password) # login ด้วย user pass ในฐานข้อมูล Django
+            if (user is not None):  # ถ้า เจอ user ใน ระบบ psupassport และ เจอ user ใน ฐานข้อมูล django ให้ทำการเข้าสู่ระบบได้
+                login(request, user)  # ทำการเข้าสู่ระบบ
+                return redirect('home-page')  # เมื่อเข้าสู่ระบบเเล้ว ทำการเปิดหน้าแรกของ page
+            else:
+                # print("ไม่พบ user")
+                messages.info(request, 'Username หรือ password ไม่ถูกต้อง')
+
+
+        # ทำการ ตรวจสอบ user และ pass จาก index.php และ ldappsu.php โดย ถ้ามี user ใน psupassport จะ Return เป็น "1,รหัสพนักงาน" ถ้าไม่มีจะ return 0 
+
+        ### 26/1/64
+
+        # proc = subprocess.Popen("""php importDB/index.php """+username+""" """+password , shell=True, stdout=subprocess.PIPE) #Call function authentication from PHP
+        # script_response = proc.stdout.read()
+
+        # decode = script_response.decode("utf-8")  # ทำการ decode จาก bit เป็น string
+
+        # user_list = decode.split(",") # split ข้อมูล ด้วย , 
+        # print(script_response)
+        # print("list --> ",decode)
+        # print(user_list[0])
+        # print(user_list[1])
+
+        
+        # #Call function authentication from django
+        # # user_list[1]
+        # user = authenticate(request, username = user_list[1] , password = default_pass) # นำ รหัสพนักงาน (user_list[1]) มาตรวจสอบว่าอยู่ใน ฐานข้อมูล django หรือไม่ โดยใช้รหัส default
+        
+        # if ((user_list[0] == "1") & (user is not None)):  # ถ้า เจอ user ใน ระบบ psupassport และ เจอ user ใน ฐานข้อมูล django ให้ทำการเข้าสู่ระบบได้
+        #     login(request, user)  # ทำการเข้าสู่ระบบ
+        #     return redirect('home-page')  # เมื่อเข้าสู่ระบบเเล้ว ทำการเปิดหน้าแรกของ page
+       
+        # else:
+        #     # print("ไม่พบ user")
+        #     messages.info(request, 'Username หรือ password ไม่ถูกต้อง')
 
 
     context={

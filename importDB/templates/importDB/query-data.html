@@ -137,7 +137,7 @@
                 </tr>
                 <tr>
                     <td>9</td>
-                    <td> ISI-WoS, SCOPUS, TCI 3 ปีย้อนหลัง</td>
+                    <td> จำนวนโครงการที่ได้รับการจัดสรรงบประมาณ และรอการจัดสรรงบประมาณ </td>
                     <td><button type="submit" name="row"  value ="Query9" class="btn btn-primary">Query</button></td>
                     <td>
                         {% if whichrow == 'row9'%}
@@ -152,7 +152,7 @@
                 </tr>
                 <tr>
                     <td>10</td>
-                    <td> ISI-WoS Research Areas </td>
+                    <td> ISI-WoS, SCOPUS, TCI 3 ปีย้อนหลัง</td>
                     <td><button type="submit" name="row"  value ="Query10" class="btn btn-primary">Query</button></td>
                     <td>
                         {% if whichrow == 'row10'%}
@@ -167,8 +167,8 @@
                 </tr>
                 <tr>
                     <td>11</td>
-                    <td> ISI-WoS catagories </td>
-                    <td><button type="submit" name="row" value ="Query11" class="btn btn-primary">Query</button></td>
+                    <td> ISI-WoS Research Areas </td>
+                    <td><button type="submit" name="row"  value ="Query11" class="btn btn-primary">Query</button></td>
                     <td>
                         {% if whichrow == 'row11'%}
                             {{result}}
@@ -182,7 +182,7 @@
                 </tr>
                 <tr>
                     <td>12</td>
-                    <td> ISI-WoS Citation and H-index </td>
+                    <td> ISI-WoS catagories </td>
                     <td><button type="submit" name="row" value ="Query12" class="btn btn-primary">Query</button></td>
                     <td>
                         {% if whichrow == 'row12'%}
@@ -195,10 +195,10 @@
                         {%endif%}
                     </td>
                 </tr>
-                <!-- <tr>
+                <tr>
                     <td>13</td>
-                    <td>Parameter ของ ARIMA Model</td>
-                    <td><button type="submit" name="row"  value ="Query13" class="btn btn-primary">Query</button></td>
+                    <td> ISI-WoS Citation and H-index </td>
+                    <td><button type="submit" name="row" value ="Query13" class="btn btn-primary">Query</button></td>
                     <td>
                         {% if whichrow == 'row13'%}
                             {{result}}
@@ -209,7 +209,21 @@
                             {{time}}
                         {%endif%}
                     </td>
-                    <td><button type="submit" name="viewrow" value ="view13" class="btn btn-primary">view</button></td> 
+                </tr>
+                <!-- <tr>
+                    <td>14</td>
+                    <td>13 Graphs on "revenues.html" tamplate</td>
+                    <td><button type="submit" name="row"  value ="Query13" class="btn btn-primary">Query</button></td>
+                    <td>
+                        {% if whichrow == 'row14'%}
+                            {{result}}
+                        {%endif%}
+                    </td>
+                    <td>
+                        {% if whichrow == 'row14'%}
+                            {{time}}
+                        {%endif%}
+                    </td>
                 </tr>-->
             </tbody>
         </table>
