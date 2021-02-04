@@ -47,7 +47,7 @@ INSTALLED_APPS = [  # เป็นการบอกว่า ในชั้น
     'corsheaders',
     #---------- celery
     'django_celery_beat',
-
+    'django_extensions',
     #----------- https runserver
     # runserver_plus
     # 'werkzeug_debugger_runserver',

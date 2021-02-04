@@ -207,6 +207,15 @@
                                                     <input  name = {{filter_year}}/12 type="submit" value="View" class="btn-shadow btn btn-primary" style="width:70px"/>
                                                 </form>
                                             </td>
+                                        </tr>
+                                        <tr id = "no_spec" class = "no_spec" style="display:none; background-color: #D4FBFF;">
+                                            <td class="text-center text-muted" style="width: 5%;  " id = "vertical-align-center" ><b></b></td>
+                                            <td class="text-left pl-3" style="width: 30%;">&#10625; ไม่ระบุ</td>
+                                            <td class="text-left" style="width: 25%; ">
+                                                <span class=" pl-4 ml-3 pr-2 opacity-6"><i class="fas fa-money-bill-alt fa-1x "></i></span>
+                                                {{no_spec| floatformat:2|intcomma }}     
+                                            </td>
+                                           
                                         </tr>  
                                     </span>  
                                     <tr>
@@ -622,6 +631,7 @@
         $('#row_national').on('click',function(){	
             $('.gov').toggle();
             $('.comp').toggle();
+            $('.no_spec').toggle();
         });
 
         
