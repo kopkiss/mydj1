@@ -1,234 +1,234 @@
 {% extends 'importDB/base_2.html' %}
 {% block content %}
     <!-- Content Row -->
-<div class="container ml-2">
-    <form action = "" method ="POST">
-        {% csrf_token %}
-        <table class="table">
-            <thead class="thead-dark">
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col">QueryName</th>
-                <th scope="col">Action</th>
-                <th scope="col">Result</th>
-                <th scope="col">Lastest</th>
-            </tr>
-            </thead>
-            <tbody>
+    <div class="container ml-2">
+        <form action = "" method ="POST">
+            {% csrf_token %}
+            <table class="table">
+                <thead class="thead-dark">
                 <tr>
-                    <td>1</td>
-                    <td> 12 Budget Groups </td>
-                    <td><button type="submit" name="row"  value ="Query1" class="btn btn-primary">Query</button></td>
-                    <td>
-                        {% if whichrow == 'row1'%}
-                            {{result}}
-                        {%endif%}
-                    </td>
-                    <td>
-                        {% if whichrow == 'row1'%}
-                            {{time}}
-                        {%endif%}
-                    </td>  
+                    <th scope="col">#</th>
+                    <th scope="col">QueryName</th>
+                    <th scope="col">Action</th>
+                    <th scope="col">Result</th>
+                    <th scope="col">Lastest</th>
                 </tr>
-                <tr>
-                    <td>2</td>
-                    <td> รายได้รัฐ/เอกชน </td>
-                    <td><button type="submit" name="row"  value ="Query2" class="btn btn-primary">Query</button></td>
-                    <td>
-                        {% if whichrow == 'row2'%}
-                            {{result}}
-                        {%endif%}
-                    </td>
-                    <td>
-                        {% if whichrow == 'row2'%}
-                            {{time}}
-                        {%endif%}
-                    </td>
-                </tr>
-                <tr>
-                    <td>3</td>
-                    <td> Marker แหล่งทุนภายนอก</td>
-                    <td><button type="submit" name="row"  value ="Query3" class="btn btn-primary">Query</button></td>
-                    <td>
-                        {% if whichrow == 'row3'%}
-                            {{result}}
-                        {%endif%}
-                    </td>
-                    <td>
-                        {% if whichrow == 'row3'%}
-                            {{time}}
-                        {%endif%}
-                    </td>
-                </tr>
-                <tr>
-                    <td>4</td>
-                    <td> แสดง ชื่อ แหล่งทุนภายนอก ใน exFund tamplate </td>
-                    <td><button type="submit" name="row"  value ="Query4" class="btn btn-primary">Query</button></td>
-                    <td>
-                        {% if whichrow == 'row4'%}
-                            {{result}}
-                        {%endif%}
-                    </td>
-                    <td>
-                        {% if whichrow == 'row4'%}
-                            {{time}}
-                        {%endif%}
-                    </td>
-                </tr>
-                <tr>
-                    <td>5</td>
-                    <td> จำนวนผู้วิจัยที่ได้รับทุน </td>
-                    <td><button type="submit" name="row"  value ="Query5" class="btn btn-primary">Query</button></td>
-                    <td>
-                        {% if whichrow == 'row5'%}
-                            {{result}}
-                        {%endif%}
-                    </td>
-                    <td>
-                        {% if whichrow == 'row5'%}
-                            {{time}}
-                        {%endif%}
-                    </td>
-                </tr>
-                <tr>
-                    <td>6</td>
-                    <td> จำนวนผู้วิจัยหลัก </td>
-                    <td><button type="submit" name="row"  value ="Query6" class="btn btn-primary">Query</button></td>
-                    <td>
-                        {% if whichrow == 'row6'%}
-                            {{result}}
-                        {%endif%}
-                    </td>
-                    <td>
-                        {% if whichrow == 'row6'%}
-                            {{time}}
-                        {%endif%}
-                    </td> 
-                </tr>
-                <tr>
-                    <td>7</td>
-                    <td> 4 Head_page </td>
-                    <td><button type="submit" name="row"  value ="Query7" class="btn btn-primary">Query</button></td>
-                    <td>
-                        {% if whichrow == 'row7'%}
-                            {{result}}
-                        {%endif%}
-                    </td>
-                    <td>
-                        {% if whichrow == 'row7'%}
-                            {{time}}
-                        {%endif%}
-                    </td>
-                </tr>
-                <tr>
-                    <td>8</td>
-                    <td> parameter ของ ARIMA Regression </td>
-                    <td><button type="submit" name="row"  value ="Query8" class="btn btn-primary">Query</button></td>
-                    <td>
-                        {% if whichrow == 'row8'%}
-                            {{result}}
-                        {%endif%}
-                    </td>
-                    <td>
-                        {% if whichrow == 'row8'%}
-                            {{time}}
-                        {%endif%}
-                    </td>
-                </tr>
-                <tr>
-                    <td>9</td>
-                    <td> จำนวนโครงการที่ได้รับการจัดสรรงบประมาณ และรอการจัดสรรงบประมาณ </td>
-                    <td><button type="submit" name="row"  value ="Query9" class="btn btn-primary">Query</button></td>
-                    <td>
-                        {% if whichrow == 'row9'%}
-                            {{result}}
-                        {%endif%}
-                    </td>
-                    <td>
-                        {% if whichrow == 'row9'%}
-                            {{time}}
-                        {%endif%}
-                    </td>
-                </tr>
-                <tr>
-                    <td>10</td>
-                    <td> ISI-WoS, SCOPUS, TCI 3 ปีย้อนหลัง</td>
-                    <td><button type="submit" name="row"  value ="Query10" class="btn btn-primary">Query</button></td>
-                    <td>
-                        {% if whichrow == 'row10'%}
-                            {{result}}
-                        {%endif%}
-                    </td>
-                    <td>
-                        {% if whichrow == 'row10'%}
-                            {{time}}
-                        {%endif%}
-                    </td>
-                </tr>
-                <tr>
-                    <td>11</td>
-                    <td> ISI-WoS Research Areas </td>
-                    <td><button type="submit" name="row"  value ="Query11" class="btn btn-primary">Query</button></td>
-                    <td>
-                        {% if whichrow == 'row11'%}
-                            {{result}}
-                        {%endif%}
-                    </td>
-                    <td>
-                        {% if whichrow == 'row11'%}
-                            {{time}}
-                        {%endif%}
-                    </td>
-                </tr>
-                <tr>
-                    <td>12</td>
-                    <td> ISI-WoS catagories </td>
-                    <td><button type="submit" name="row" value ="Query12" class="btn btn-primary">Query</button></td>
-                    <td>
-                        {% if whichrow == 'row12'%}
-                            {{result}}
-                        {%endif%}
-                    </td>
-                    <td>
-                        {% if whichrow == 'row12'%}
-                            {{time}}
-                        {%endif%}
-                    </td>
-                </tr>
-                <tr>
-                    <td>13</td>
-                    <td> ISI-WoS Citation and H-index </td>
-                    <td><button type="submit" name="row" value ="Query13" class="btn btn-primary">Query</button></td>
-                    <td>
-                        {% if whichrow == 'row13'%}
-                            {{result}}
-                        {%endif%}
-                    </td>
-                    <td>
-                        {% if whichrow == 'row13'%}
-                            {{time}}
-                        {%endif%}
-                    </td>
-                </tr>
-                <tr>
-                    <td>14</td>
-                    <td>13 Graphs on "revenues.html" tamplate</td>
-                    <td><button type="submit" name="row"  value ="Query14" class="btn btn-primary">Query</button></td>
-                    <td>
-                        {% if whichrow == 'row14'%}
-                            {{result}}
-                        {%endif%}
-                    </td>
-                    <td>
-                        {% if whichrow == 'row14'%}
-                            {{time}}
-                        {%endif%}
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </form>  
-</div>  
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td> 12 Budget Groups </td>
+                        <td><button type="submit" name="row"  value ="Query1" class="btn btn-primary">Query</button></td>
+                        <td>
+                            {% if whichrow == 'row1'%}
+                                {{result}}
+                            {%endif%}
+                        </td>
+                        <td>
+                            
+                            {{time.q1}}
+                            
+                        </td>  
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td> รายได้รัฐ/เอกชน </td>
+                        <td><button type="submit" name="row"  value ="Query2" class="btn btn-primary">Query</button></td>
+                        <td>
+                            {% if whichrow == 'row2'%}
+                                {{result}}
+                            {%endif%}
+                        </td>
+                        <td>
+                            
+                            {{time.q2}}
+                            
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td> Marker แหล่งทุนภายนอก</td>
+                        <td><button type="submit" name="row"  value ="Query3" class="btn btn-primary">Query</button></td>
+                        <td>
+                            {% if whichrow == 'row3'%}
+                                {{result}}
+                            {%endif%}
+                        </td>
+                        <td>
+                            
+                            {{time.q3}}
+                            
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td> แสดง ชื่อ แหล่งทุนภายนอก ใน exFund tamplate </td>
+                        <td><button type="submit" name="row"  value ="Query4" class="btn btn-primary">Query</button></td>
+                        <td>
+                            {% if whichrow == 'row4'%}
+                                {{result}}
+                            {%endif%}
+                        </td>
+                        <td>
+                            
+                            {{time.q4}}
+                            
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td> จำนวนผู้วิจัยที่ได้รับทุน </td>
+                        <td><button type="submit" name="row"  value ="Query5" class="btn btn-primary">Query</button></td>
+                        <td>
+                            {% if whichrow == 'row5'%}
+                                {{result}}
+                            {%endif%}
+                        </td>
+                        <td>
+                            
+                            {{time.q5}}
+                            
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td> จำนวนผู้วิจัยหลัก </td>
+                        <td><button type="submit" name="row"  value ="Query6" class="btn btn-primary">Query</button></td>
+                        <td>
+                            {% if whichrow == 'row6'%}
+                                {{result}}
+                            {%endif%}
+                        </td>
+                        <td>
+                            
+                            {{time.q6}}
+                            
+                        </td> 
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td> 4 Head_page </td>
+                        <td><button type="submit" name="row"  value ="Query7" class="btn btn-primary">Query</button></td>
+                        <td>
+                            {% if whichrow == 'row7'%}
+                                {{result}}
+                            {%endif%}
+                        </td>
+                        <td>
+                            
+                            {{time.q7}}
+                            
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td> parameter ของ ARIMA Regression </td>
+                        <td><button type="submit" name="row"  value ="Query8" class="btn btn-primary">Query</button></td>
+                        <td>
+                            {% if whichrow == 'row8'%}
+                                {{result}}
+                            {%endif%}
+                        </td>
+                        <td>
+                            
+                            {{time.q8}}
+                            
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>9</td>
+                        <td> จำนวนโครงการที่ได้รับการจัดสรรงบประมาณ และรอการจัดสรรงบประมาณ </td>
+                        <td><button type="submit" name="row"  value ="Query9" class="btn btn-primary">Query</button></td>
+                        <td>
+                            {% if whichrow == 'row9'%}
+                                {{result}}
+                            {%endif%}
+                        </td>
+                        <td>
+                            
+                            {{time.q9}}
+                            
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>10</td>
+                        <td> ISI-WoS, SCOPUS, TCI 3 ปีย้อนหลัง</td>
+                        <td><button type="submit" name="row"  value ="Query10" class="btn btn-primary" >Query</button></td>
+                        <td>
+                            {% if whichrow == 'row10'%}
+                                {{result}}
+                            {%endif%}
+                        </td>
+                        <td>
+                            
+                            {{time.q10}}
+                            
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>11</td>
+                        <td> ISI-WoS Research Areas </td>
+                        <td><button type="submit" name="row"  value ="Query11" class="btn btn-primary" >Query</button></td>
+                        <td>
+                            {% if whichrow == 'row11'%}
+                                {{result}}
+                            {%endif%}
+                        </td>
+                        <td>
+                            
+                            {{time.q11}}
+                            
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>12</td>
+                        <td> ISI-WoS catagories </td>
+                        <td><button type="submit" name="row" value ="Query12" class="btn btn-primary" >Query</button></td>
+                        <td>
+                            {% if whichrow == 'row12'%}
+                                {{result}}
+                            {%endif%}
+                        </td>
+                        <td>
+                            
+                            {{time.q12}}
+                            
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>13</td>
+                        <td> ISI-WoS Citation and H-index </td>
+                        <td><button type="submit" name="row" value ="Query13" class="btn btn-primary" >Query</button></td>
+                        <td>
+                            {% if whichrow == 'row13'%}
+                                {{result}}
+                            {%endif%}
+                        </td>
+                        <td>
+                            
+                            {{time.q13}}
+                            
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>14</td>
+                        <td>13 Graphs on "revenues.html" tamplate</td>
+                        <td><button type="submit" name="row"  value ="Query14" class="btn btn-primary">Query</button></td>
+                        <td>
+                            {% if whichrow == 'row14'%}
+                                {{result}}
+                            {%endif%}
+                        </td>
+                        <td>
+                            
+                            {{time.q14}}
+                            
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>  
+    </div>    
     
 
     

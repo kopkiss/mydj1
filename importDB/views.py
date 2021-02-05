@@ -184,6 +184,11 @@ def rodReport(request):
 @login_required(login_url='login')
 def dump(request):  # ดึงข้อมูล จาก Oracle เข้าสู่ ฐาน Mysql
     print('dumping')
+    
+    def getTimestemp():
+        df = pd.read_csv("""mydj1/static/csv/timestamp.csv""",index_col = 0)
+        return df.iloc[0]
+
     if request.method == "POST":
         # print(f'pymysql version: {pymysql.__version__}')
         # print(f'pandas version: {pd.__version__}')
@@ -192,191 +197,223 @@ def dump(request):  # ดึงข้อมูล จาก Oracle เข้า�
         checkpoint = True
         whichrows = ''
         dt = datetime.now()
-        timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
-
+        timestamp = time.mktime(dt.timetuple()) 
+        col = '' # สร้างไว้ตอนบันทึกในไฟล์ timestamp.csv
+        #########################
         if request.POST['row']=='Dump1':  #project
             checkpoint = dump1()
             dt = datetime.now()
-            timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
+            timestamp = time.mktime(dt.timetuple()) 
             whichrows = 'row1'
+            col = 'd1'
 
         elif request.POST['row']=='Dump2':  #team
             checkpoint = dump2()
             dt = datetime.now()
-            timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
+            timestamp = time.mktime(dt.timetuple()) 
             whichrows = 'row2'
+            col = 'd2'
 
         elif request.POST['row']=='Dump3':   #budget
             checkpoint = dump3()
             dt = datetime.now()
-            timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
+            timestamp = time.mktime(dt.timetuple()) 
             whichrows = 'row3'
+            col = 'd3'
 
         elif request.POST['row']=='Dump4':   #FUND_TYPE
             checkpoint = dump4()
             dt = datetime.now()
-            timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
+            timestamp = time.mktime(dt.timetuple()) 
             whichrows = 'row4'
+            col = 'd4'
         
         elif request.POST['row']=='Dump5':   #assistant
             checkpoint = dump5()
             dt = datetime.now()
-            timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
+            timestamp = time.mktime(dt.timetuple()) 
             whichrows = 'row5'
+            col = 'd5'
 
         elif request.POST['row']=='Dump6':   #HRIMS
             checkpoint = dump6()
             dt = datetime.now()
-            timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
+            timestamp = time.mktime(dt.timetuple()) 
             whichrows = 'row6'
+            col = 'd6'
 
         if checkpoint:
             result = 'นำเข้าสำเร็จ'
+            ### get timestamp.csv ###
+            df = pd.read_csv("""mydj1/static/csv/timestamp.csv""",index_col = 0)
+            df[col] = datetime.fromtimestamp(timestamp)
+            df.to_csv ("""mydj1/static/csv/timestamp.csv""", index = True, header=True)
         else:
             result = "ผิดพลาด"
     
         context={
             'result': result,
-            'time':datetime.fromtimestamp(timestamp),
+            'time':getTimestemp(),
+            # 'time':datetime.fromtimestamp(timestamp),
             'whichrow' : whichrows
         }
+        
 
     else :
-        context={}
-
+        context={
+         'time':getTimestemp(),
+        }
+    # print(context['time'])
     return render(request,'importDB/dump-data.html',context)
 
 @login_required(login_url='login')
 def query(request): # Query ฐานข้อมูล Mysql (เป็น .csv) เพื่อสร้างเป็น กราฟ หรือ แสดงข้อมูล บน tamplate
-    # print('dQuery')
+    print('dQuery')
     # print(f'pymysql version: {pymysql.__version__}')
     # print(f'pandas version: {pd.__version__}')
     # print(f'cx_Oracle version: {cx_Oracle.__version__}')
     
+    def getTimestemp():
+        df = pd.read_csv("""mydj1/static/csv/timestamp.csv""",index_col = 0)
+        return df.iloc[0]
+
     if request.method == "POST":
         os.environ["NLS_LANG"] = ".UTF8"  # ทำให้แสดงข้อความเป็น ภาษาไทยได้
         checkpoint = True
         whichrows = ""
         ranking = ""
-        
         dt = datetime.now()
-        timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
-
-        def save_timestamp():
-            ########## save to csv  ##########      
-            if not os.path.exists("mydj1/static/csv"):
-                    os.mkdir("mydj1/static/csv")
-                    
-            df.to_csv ("""mydj1/static/csv/timestamp.csv""", index = True, header=True)
-            print ("tTmestamp is saved")
-            
-
-
-        def moneyformat(x):  # เอาไว้เปลี่ยน format เป็นรูปเงิน
-            return "{:,.2f}".format(x)
+        timestamp = time.mktime(dt.timetuple())
+        col = '' # สร้างไว้ตอนบันทึกในไฟล์ timestamp.csv
 
         if request.POST['row']=='Query1': # 12 types of budget, budget_of_fac 
             checkpoint = query1()
             dt = datetime.now()
-            timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
+            timestamp = time.mktime(dt.timetuple()) 
             whichrows = 'row1'
+            col = 'q1'
 
         elif request.POST['row']=='Query2': # รายได้ในประเทศ รัฐ/เอกชน
             checkpoint = query2()
             dt = datetime.now()
-            timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
+            timestamp = time.mktime(dt.timetuple()) 
             whichrows = 'row2'
+            col = 'q2'
 
         elif request.POST['row']=='Query3': #ตาราง marker * และ ** ของแหล่งทุน
             checkpoint = query3()
             dt = datetime.now()
-            timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
+            timestamp = time.mktime(dt.timetuple())
             whichrows = 'row3'
+            col = 'q3'
             
         elif request.POST['row']=='Query4': #ตารางแหล่งทุนภายนอก exFund.html
             checkpoint = query4() 
             dt = datetime.now()
-            timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
+            timestamp = time.mktime(dt.timetuple()) 
             whichrows = 'row4'
+            col = 'q4'
             
         elif request.POST['row']=='Query5': # จำนวนผู้วิจัยที่ได้รับทุน
             checkpoint = query5() 
             dt = datetime.now()
-            timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
+            timestamp = time.mktime(dt.timetuple())
             whichrows = 'row5'
+            col = 'q5'
 
         elif request.POST['row']=='Query6': # จำนวนผู้วิจัยหลัก
             checkpoint = query6() 
             dt = datetime.now()
-            timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
+            timestamp = time.mktime(dt.timetuple())
             whichrows = 'row6'
+            col = 'q6'
 
         elif request.POST['row']=='Query7': # Head Page
             checkpoint = query7() 
             dt = datetime.now()
-            timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
+            timestamp = time.mktime(dt.timetuple())
             whichrows = 'row7'
+            col = 'q7'
         
         elif request.POST['row']=='Query8': # parameter ของ ARIMA Regression   
             checkpoint = query8() 
             dt = datetime.now()
-            timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
+            timestamp = time.mktime(dt.timetuple())
             whichrows = 'row8'
+            col = 'q8'
         
         elif request.POST['row']=='Query9': # จำนวนงานที่จัดสรร และ ไม่จัดสรร   
             checkpoint = query9() 
             dt = datetime.now()
-            timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
+            timestamp = time.mktime(dt.timetuple()) 
             whichrows = 'row9'
+            col = 'q9'
 
         elif request.POST['row']=='Query10': # ISI-WoS SCOPUS TCI 3 ปีย้อนหลัง     
             ranking,checkpoint = query10() 
             dt = datetime.now()
-            timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
+            timestamp = time.mktime(dt.timetuple()) 
             whichrows = 'row10'
+            col = 'q10'
 
         elif request.POST['row']=='Query11': # ISI-WoS Research Areas  
             checkpoint = query11() 
             dt = datetime.now()
-            timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
+            timestamp = time.mktime(dt.timetuple()) 
             whichrows = 'row11'
+            col = 'q11'
             
         elif request.POST['row']=='Query12': # ISI-WoS catagories 
             checkpoint = query12() 
             dt = datetime.now()
-            timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
-            whichrows = 'row12'  
+            timestamp = time.mktime(dt.timetuple()) 
+            whichrows = 'row12'
+            col = 'q12'
         
         elif request.POST['row']=='Query13': # ISI-WoS Citation and H-index
             checkpoint = query13() 
             dt = datetime.now()
-            timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
+            timestamp = time.mktime(dt.timetuple()) 
             whichrows = 'row13'
+            col = 'q13'
 
         elif request.POST['row']=='Query14': #13 Graphs on "revenues.html" tamplate
             checkpoint = query14() 
             dt = datetime.now()
-            timestamp = time.mktime(dt.timetuple()) + dt.microsecond/1e6
+            timestamp = time.mktime(dt.timetuple())
             whichrows = 'row14'
+            col = 'q14'
 
-        
         if checkpoint == 'chk_ranking':
             result = ""+ranking
+            ### get timestamp.csv ###
+            df = pd.read_csv("""mydj1/static/csv/timestamp.csv""",index_col = 0)
+            df[col] = datetime.fromtimestamp(timestamp)
+            df.to_csv ("""mydj1/static/csv/timestamp.csv""", index = True, header=True)
+
         elif checkpoint:
             result = 'นำเข้าสำเร็จ'
+            ### get timestamp.csv ###
+            df = pd.read_csv("""mydj1/static/csv/timestamp.csv""",index_col = 0)
+            df[col] = datetime.fromtimestamp(timestamp)
+            df.to_csv ("""mydj1/static/csv/timestamp.csv""", index = True, header=True)
+            
         else:
             result = "ผิดพลาด"
         
         context={
             'result': result,
-            'time':datetime.fromtimestamp(timestamp),
+            # 'time':datetime.fromtimestamp(timestamp),
+            'time':getTimestemp(),
             'whichrow' : whichrows
         }
 
     else:
-        context={}
+        context={
+            'time':getTimestemp(),
+        }
+        
     return render(request,'importDB/query-data.html',context)
-
 
 ###################################################################
 #### "function DUMP" เพื่อ dump ข้อมูลจาก External Data เช่น Oracle ####
