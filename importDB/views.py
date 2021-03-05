@@ -382,8 +382,8 @@ def query(request): # Query ฐานข้อมูล Mysql (เป็น .csv
             whichrows = 'row9'
             col = 'q9'
 
-        elif request.POST['row']=='Query10': # ISI-WoS SCOPUS TCI 3 ปีย้อนหลัง     
-            ranking,checkpoint = query10() 
+        elif request.POST['row']=='Query10': # ISI-WoS SCOPUS TCI     
+            checkpoint = query10() 
             dt = datetime.now()
             timestamp = time.mktime(dt.timetuple()) 
             whichrows = 'row10'
@@ -2179,15 +2179,15 @@ def query7(): # Head Page
         df = pd.read_csv("""mydj1/static/csv/main_research.csv""", index_col=0)
         df = df.loc[(df.index == int(datetime.now().year+543))]
         
-        print(df[['teacher','research_staff','post_doc']].sum(axis=1)[int(datetime.now().year+543)])
-        final_df=pd.DataFrame({'total_of_guys':df[['teacher','research_staff','post_doc']].sum(axis=1)[int(datetime.now().year+543)] }, index=[0])
+        # print(df[['teacher','research_staff','post_doc']].sum(axis=1)[int(datetime.now().year+543)])
+        final_df=pd.DataFrame({'total_of_guys':[df[['teacher','research_staff','post_doc']].sum(axis=1)[int(datetime.now().year+543)]] }, index=[0])
         
         ### รายได้งานวิจัย 
         df = pd.read_csv("""mydj1/static/csv/12types_of_budget.csv""", index_col=0)
         # df = df.rename(columns={"Unnamed: 0" : "budget_year"}, errors="raise")
         
         df = df.loc[(df.index == int(datetime.now().year+543))]
-                
+         
         final_df["total_of_budget"] = df.sum(axis=1)[int(datetime.now().year+543)]
         
         ### จำนวนงานวิจัย 
@@ -2199,13 +2199,13 @@ def query7(): # Head Page
         final_df["num_of_pub_isi"] = df_isi.iloc[-1][0]
         final_df["num_of_pub_tci"] = df_tci.iloc[-1][0]
         
-
         ### หน่วยงานภายนอกที่เข้าร่วม 
         sql_cmd =  """SELECT count(*) as count 
                         from importDB_prpm_r_fund_type 
                         where flag_used = "1" and (fund_source_id = 05 or fund_source_id = 06) """
 
         df = pm.execute_query(sql_cmd, con_string)
+        
         final_df["num_of_networks"] = df["count"].astype(int)
         print(final_df)
         ########## save to csv ##########      
@@ -2343,14 +2343,13 @@ def query10(): # ISI SCOPUS TCI
 
     dt = datetime.now()
     now_year = dt.year+543
-    ranking = ""
 
     try: 
-        ########################
-        #### สร้าง df เพื่อ บันทึก ISI #########
-        ########################
-        print("start ISI update")
-        
+        ############################################
+        #### เตรียมข้อมูลโดย Query มาเป็น df #########
+        ############################################
+        print("starting Pubplicaitions update")
+        #### ข้อมูล publications ของมหาลัยอื่นๆ #########
         sql_cmd =  """ with temp1 as (SELECT short_name, name_eng FROM `importdb_master_ranking_university_name`),
                             temp2 as (
                                                 select index_source, year, univ_name, total
@@ -2362,24 +2361,14 @@ def query10(): # ISI SCOPUS TCI
                     from temp2
                     join temp1 on temp2.univ_name = temp1.name_eng
                     """
-
         con_string = getConstring('sql')
-
-        df = pm.execute_query(sql_cmd, con_string)
-
-        print(df.head())
-        
-        
-        ########## save df ISI  to csv ##########      
-        if not os.path.exists("mydj1/static/csv"):
-                os.mkdir("mydj1/static/csv")
-                
-        df.to_csv ("""mydj1/static/csv/univ_publications.csv""", index = True, header=True)
-        print("ISI saved")
-        ranking = ranking + "ISI Ok!, "
-
-        ######################################
-        #######################################
+        df_univs = pm.execute_query(sql_cmd, con_string)
+        df_univs = df_univs.fillna(0)
+        df_univs.loc[df_univs['index_source'] == 'Scopus','index_source'] = "scopus"
+        df_univs.loc[df_univs['index_source'] == 'WoS','index_source'] = "isi"
+        df_univs.loc[df_univs['index_source'] == 'TCI','index_source'] = "tci"
+        print(df_univs)
+        #### ข้อมูล publications ของ PSU #########
         sql_cmd =  """ with temp1 as ( select year, count(*) as c1
 								from importdb_psuswatch_v_grt_wk_publication
 								where year is not null
@@ -2401,31 +2390,42 @@ def query10(): # ISI SCOPUS TCI
                             left join temp2 on temp1.year = temp2.year
                             left join temp3 on temp1.year = temp3.year
                     """
-
         con_string = getConstring('sql')
-
-        df = pm.execute_query(sql_cmd, con_string)
-
-        print(df.head())
+        df_psu = pm.execute_query(sql_cmd, con_string)
+        df_psu = df_psu.fillna(0)
+        df_psu = df_psu.astype(int)
         
-        
-        ########## save df ISI  to csv ##########      
-        if not os.path.exists("mydj1/static/csv"):
+        #### ทำการสร้างไฟล์ CSV เพื่อแสดงผลบนหน้าจอ หรือนำไปประมวลผลอื่นๆ #########
+        sources = ['isi','scopus','tci']    
+        for s in sources:
+            print(f'source = {s}')
+            # df_t = pd.read_csv("""C:/Users/Asus/Desktop/Learn/univ_results.csv""").fillna(0)
+            piv_df = pd.pivot_table(df_univs[df_univs["index_source"]==s], values='total', index=['year'],
+                                columns=['short_name']).reset_index()
+            results = pd.merge(df_psu[['year',s]],piv_df,left_on="year",right_on="year",how='inner')
+            results = results.rename(columns={s: 'PSU'})
+            results = results.astype(int)
+
+            ############# ตรวจสอบว่าปี ปัจจุบัน มีค่าอยู่ใน df เเล้วหรือไม่ ถ้าไม่มี ให้เติม ปีปัจจุบัน ด้วยค่า 0 ทั้งหมด ########
+            if now_year not in results['year'].values:
+                results = results.append({'year': now_year}, ignore_index=True).fillna(0)
+                results = results.astype(int)
+
+            ############# เรียงลำดับปีใหม่    
+            results = results.sort_values(by='year').reset_index(drop=True)
+
+            ########## save df to csv ##########
+            if not os.path.exists("mydj1/static/csv"):
                 os.mkdir("mydj1/static/csv")
-                
-        df.to_csv ("""mydj1/static/csv/psu_publications.csv""", index = True, header=True)
-        print("ISI saved")
-        ranking = ranking + "psu Ok!, "
+            results.to_csv (f"mydj1/static/csv/ranking_{s}.csv", index = False, header=True)
+            print(f'finished: {s}')
 
-    except Exception as e:
-        print("ISI_Error: "+str(e))
-        ranking = ranking + "ISI Error, "
+        return checkpoint
 
-
-    ##############  end #####################
-    checkpoint = "chk_ranking"
-    print("Results: ",ranking)
-    return ranking,checkpoint
+    except Exception as e :
+        checkpoint = False
+        print('At Query#10: Something went wrong :', e)
+        return checkpoint
 
 def query11(): # ISI Research Areas
     print("-"*20)
@@ -2826,7 +2826,7 @@ def query14(): # Query รูปกราฟ ที่จะแสดงใน �
         print('At Query#14: Something went wrong :', e) 
         return checkpoint
 
-def query15(): # ยังทำไม่เสร็จ  สร้างไฟล์ csv ของ isi tci scopus โดยรวม มหาลัยอื่นด้วย 
+def query15(): #  
     print("-"*20)
     print("Starting Query#15 ...")
     checkpoint = True
@@ -2835,33 +2835,7 @@ def query15(): # ยังทำไม่เสร็จ  สร้างไฟ�
     print("ปีงบประมาณ",fiscal_year)
 
     try:      
-        sql_cmd = """select year , count(*) as PSU
-                    from importdb_psuswatch_v_grt_wk_publication
-                    where year is not null
-                    group by year
-                    order by year
-                    """
-
-        con_string = getConstring('sql')
-        n_df = pm.execute_query(sql_cmd, con_string)
-        n_df = n_df.astype('int64')
-        print(n_df.info())
-
-        ##### read csv #####
-        main_df = pd.read_csv("""mydj1/static/csv/ranking_isi.csv""", index_col=0)
-        # main_df['P'] = n_df['PSU']
-        # n_df['PSU']
-        
-
-        main_df.join(n_df.set_index('year'))
-        print(main_df)
-
-        ########## save to csv ตาราง เงิน 11 ประเภท ##########      
-        if not os.path.exists("mydj1/static/csv"):
-                os.mkdir("mydj1/static/csv")
-
-        # main_df.to_csv("""mydj1/static/csv/ranking_isi.csv""", index = True, header=True)
-
+        ######## ว่าง 
         print ("Data#15 is saved")
         print("Ending Query ...")
         return checkpoint
@@ -3148,8 +3122,6 @@ def query19(): # Citation ISI and H-index and avg_per_item
         checkpoint = False
         print('At Query#13: Something went wrong :', e)
         return checkpoint
-
-
 
 def get_fiscal_year(): # return ปีงบประมาณ
     date = datetime.now()
