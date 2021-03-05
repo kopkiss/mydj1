@@ -19,7 +19,7 @@ from .models import PRPM_v_grt_pj_team_eis
 from .models import PRPM_v_grt_pj_budget_eis
 from .models import Prpm_v_grt_project_eis
 from .models import master_ranking_university_name
-import plotly.io as pio #add 29-12-2563
+# import plotly.io as pio #add 29-12-2563
 # pio.orca.config.use_xvfb = True #add 29-12-2563
 import pymysql
 import cx_Oracle
@@ -32,7 +32,7 @@ from plotly.offline import plot
 import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 # เกี่ยวกับ scopus isi tci
 from bs4 import BeautifulSoup
@@ -194,13 +194,31 @@ def dump(request):  # ดึงข้อมูล จาก Oracle เข้า�
         # print(f'pandas version: {pd.__version__}')
         # print(f'cx_Oracle version: {cx_Oracle.__version__}')
         os.environ["NLS_LANG"] = ".UTF8"  # ทำให้แสดงข้อความเป็น ภาษาไทยได้  
-        checkpoint = True
+        checkpoint = True  # สำหรับเก็บผลลัพธ์ ของการกดปุ่ม "นำเข้า" 
+        dumpallresults = [True,True,True,True,True,] # สำหรับเก็บผลลัพธ์ ของการกดปุ่ม "นำเข้าทั้งหมด"
         whichrows = ''
+        
         dt = datetime.now()
         timestamp = time.mktime(dt.timetuple()) 
         col = '' # สร้างไว้ตอนบันทึกในไฟล์ timestamp.csv
         #########################
-        if request.POST['row']=='Dump1':  #project
+        if request.POST['row']=='All1':  # สำหรับการ dump ทุกหัวข้อ 1-5 จากระบบ PRPM
+            dumpallresults[0] = dump1()
+            dumpallresults[1] = dump2()
+            dumpallresults[2] = dump3()
+            dumpallresults[3] = dump4()
+            dumpallresults[4] = dump5()
+            dumpallresults = ['นำเข้าสำเร็จ' if i == True else 'ไม่สำเร็จ' for i in dumpallresults]
+            dt = datetime.now()
+            timestamp = time.mktime(dt.timetuple()) 
+            whichrows = 'all1'
+            
+            # save date 
+            df = pd.read_csv("""mydj1/static/csv/timestamp.csv""",index_col = 0)
+            df[0:5] = datetime.fromtimestamp(timestamp)
+            df.to_csv ("""mydj1/static/csv/timestamp.csv""", index = True, header=True)
+
+        elif request.POST['row']=='Dump1':  #project
             checkpoint = dump1()
             dt = datetime.now()
             timestamp = time.mktime(dt.timetuple()) 
@@ -242,7 +260,22 @@ def dump(request):  # ดึงข้อมูล จาก Oracle เข้า�
             whichrows = 'row6'
             col = 'd6'
 
-        if checkpoint:
+        elif request.POST['row']=='Dump7':   # ISI SCOPUS TCI ของ PSU จาก PSUSWATCH
+            checkpoint = dump7()
+            dt = datetime.now()
+            timestamp = time.mktime(dt.timetuple()) 
+            whichrows = 'row7'
+            col = 'd7'
+
+        elif request.POST['row']=='Dump8':  #University Publication อื่นๆ จาก PSUSWatch
+            checkpoint = dump8()
+            dt = datetime.now()
+            timestamp = time.mktime(dt.timetuple()) 
+            whichrows = 'row8'
+            col = 'd8'
+
+
+        if checkpoint:  #ไว้เพื่อบันทึกเวลา และ แสดงผลลัพธ์ เมื่อกดปุ่ม "นำเข้า" 
             result = 'นำเข้าสำเร็จ'
             ### get timestamp.csv ###
             df = pd.read_csv("""mydj1/static/csv/timestamp.csv""",index_col = 0)
@@ -255,10 +288,10 @@ def dump(request):  # ดึงข้อมูล จาก Oracle เข้า�
             'result': result,
             'time':getTimestemp(),
             # 'time':datetime.fromtimestamp(timestamp),
-            'whichrow' : whichrows
+            'whichrow' : whichrows,
+            'dumpallresults' :dumpallresults
         }
         
-
     else :
         context={
          'time':getTimestemp(),
@@ -384,6 +417,13 @@ def query(request): # Query ฐานข้อมูล Mysql (เป็น .csv
             whichrows = 'row14'
             col = 'q14'
 
+        elif request.POST['row']=='Query15': #test
+            checkpoint = query15() 
+            dt = datetime.now()
+            timestamp = time.mktime(dt.timetuple())
+            whichrows = 'row15'
+            col = 'q15'
+
         if checkpoint == 'chk_ranking':
             result = ""+ranking
             ### get timestamp.csv ###
@@ -495,7 +535,7 @@ def dump3():
     os.environ["NLS_LANG"] = ".UTF8"  # ทำให้แสดงข้อความเป็น ภาษาไทยได้
     
     try:
-        sql_cmd =  """SELECT 
+        sql_cmd =  """SELECT
                     *
                 FROM research60.v_grt_pj_budget_eis
                 """
@@ -669,6 +709,120 @@ def dump6():
         print('Something went wrong :', e)
         return checkpoint
 
+def dump7():  ## ISI TCI SCOPUS publication ของ PSU จาก PSUSWatch
+    print("-"*20)
+    print("Starting DUMP#7 ...")
+    checkpoint = True
+    os.environ["NLS_LANG"] = ".UTF8"  # ทำให้แสดงข้อความเป็น ภาษาไทยได้
+    try:
+        #####################################################
+        ################# ISI DUMP ##########################
+        #####################################################
+        sql_cmd =  """SELECT article_title as title, author_note, year+543 as year,journal, publication_type, times_cited_wos as cited
+                    FROM PSUSWATCH.V_GRT_WK_PUBLICATION"""
+
+        con_string = getConstring('oracle_hrims')  # return ค่า config ของฐาน hrims
+
+        engine = create_engine(con_string, encoding="latin1" ,max_identifier_length=128)
+        
+        df = pd.read_sql_query(sql_cmd, engine)
+        
+        ################ save to db ##########################
+        con_string2 = getConstring('sql') # return ค่า config ของฐาน sql
+        result = pm.save_to_db('importdb_psuswatch_v_grt_wk_publication', con_string2, df)
+        print("ISI publication is finished")
+
+        #####################################################
+        ################### SCOPUS DUMP #####################
+        #####################################################
+        sql_cmd =  """SELECT title, author_note, year+543 as year, journal, publication_type, citedby as cited 
+                    FROM PSUSWATCH.V_GRT_SC_PUBLICATION"""
+
+        con_string = getConstring('oracle_hrims')  # return ค่า config ของฐาน hrims
+
+        engine = create_engine(con_string, encoding="latin1" ,max_identifier_length=128)
+        
+        df = pd.read_sql_query(sql_cmd, engine)
+        
+        ################ save to db ##########################
+        con_string2 = getConstring('sql') # return ค่า config ของฐาน sql
+        result = pm.save_to_db('importdb_psuswatch_v_grt_sc_publication', con_string2, df)
+        print("SCOPUS publication is finished")
+
+        #####################################################
+        ################### TCI DUMP #####################
+        #####################################################
+        sql_cmd =  """SELECT article_name as title, author_note, year+543 as year,journal, cited 
+                    FROM PSUSWATCH.V_GRT_TC_PUBLICATION"""
+
+        con_string = getConstring('oracle_hrims')  # return ค่า config ของฐาน hrims
+
+        engine = create_engine(con_string, encoding="latin1" ,max_identifier_length=128)
+        
+        df = pd.read_sql_query(sql_cmd, engine)
+        
+        ################ save to db ##########################
+        con_string2 = getConstring('sql') # return ค่า config ของฐาน sql
+        result = pm.save_to_db('importdb_psuswatch_v_grt_tc_publication', con_string2, df)
+        print("TCI publication is finished")
+
+
+        if result:
+            print("Ending DUMP#7...")
+        else:
+            print("Ending DUMP#7 ... with ERROR!")
+            checkpoint = False
+        ########################################################
+        
+        return checkpoint
+
+    except Exception as e :
+        checkpoint = False
+        print('Something went wrong :', e)
+        return checkpoint
+
+def dump8():  ## University Publication อื่นๆ จาก PSUSWatch
+    print("-"*20)
+    print("Starting DUMP#8 ...")
+    checkpoint = True
+    os.environ["NLS_LANG"] = ".UTF8"  # ทำให้แสดงข้อความเป็น ภาษาไทยได้
+    try:
+        #####################################################
+        ################# Univ_DUMP ##########################
+        #####################################################
+
+        sql_cmd =  """select index_source, year+543 as year, univ_id,univ_name, sum(total) as total
+                        from PSUSWATCH.V_GRT_INDEX_BENCHMARK
+                        where  year >= 2001 and univ_id <> 0011
+                        group by index_source ,year,univ_id, univ_name
+                        order by index_source, year, univ_id"""
+
+
+        con_string = getConstring('oracle_hrims')  # return ค่า config ของฐาน hrims
+
+        engine = create_engine(con_string, encoding="latin1" ,max_identifier_length=128)
+        
+        df = pd.read_sql_query(sql_cmd, engine)
+        
+        ################ save to db ##########################
+        con_string = getConstring('sql') # return ค่า config ของฐาน sql
+        result = pm.save_to_db('importdb_psuswatch_v_grt_univ_publication', con_string, df)
+        print("Universities publication is finished")
+
+
+        if result:
+            print("Ending DUMP#8...")
+        else:
+            print("Ending DUMP#8 ... with ERROR!")
+            checkpoint = False
+        ########################################################
+        
+        return checkpoint
+
+    except Exception as e :
+        checkpoint = False
+        print('Something went wrong :', e)
+        return checkpoint
 
 ###################################################################
 #### "function เสริม" เพื่อช่วยในการ query ข้อมูล ที่จะเเสดงใน dashboard####
@@ -2181,7 +2335,7 @@ def query9(): # จำนวนงานที่จัดสรร และ �
         print('At Query#9: Something went wrong :', e)
         return checkpoint
 
-def query10(): # ISI SCOPUS TCI  3 ปีย้อนหลัง
+def query10(): # ISI SCOPUS TCI 
     print("-"*20)
     print("Starting Query#10 ...")
     checkpoint = True
@@ -2196,114 +2350,77 @@ def query10(): # ISI SCOPUS TCI  3 ปีย้อนหลัง
         #### สร้าง df เพื่อ บันทึก ISI #########
         ########################
         print("start ISI update")
-        isi_df = isi()  # get ISI dataframe จาก web Scraping
-
-        if(isi_df is None): 
-            print("ISI'web scraping ERROR 1 time, call isi() again....")
-            isi_df = isi()
-            if(isi_df is None): 
-                print("ISI'web scraping ERROR 2 times, break....")
-        else:
-            print("finished_web_scraping_ISI")
-
-        isi_df.set_index('year', inplace=True)
-        df = pd.read_csv("""mydj1/static/csv/ranking_isi.csv""", index_col=0)
         
-        if df[-1:].index.values != now_year: # เช่น ถ้า เป็นปีใหม่ (ไม่อยู่ใน df มาก่อน) จะต้องใส่ index ปีใหม่ โดยการ append
-            df.loc[now_year-2:now_year-2].update(isi_df.loc[now_year-2:now_year-2])  #ปีใหม่ - 2
-            df.loc[now_year-1:now_year-1].update(isi_df.loc[now_year-1:now_year-1])  #ปีใหม่ - 1
-            df =  df.append(isi_df.loc[now_year:now_year])  # ปีใหม่ 
-        else :  
-            df.loc[now_year:now_year].update(isi_df.loc[now_year:now_year])  # ปีปัจจุบัน 
-            df.loc[now_year-1:now_year-1].update(isi_df.loc[ now_year-1:now_year-1]) # ปีปัจจุบัน - 1
-            df.loc[now_year-2:now_year-2].update(isi_df.loc[ now_year-2:now_year-2]) # ปีปัจจุบัน - 2
+        sql_cmd =  """ with temp1 as (SELECT short_name, name_eng FROM `importdb_master_ranking_university_name`),
+                            temp2 as (
+                                                select index_source, year, univ_name, total
+                                                from importdb_psuswatch_v_grt_univ_publication as tb1
+                                                where univ_name in (select name_eng from temp1)
+                                )
+                        
+                    select index_source, year,temp1.short_name, univ_name, total 
+                    from temp2
+                    join temp1 on temp2.univ_name = temp1.name_eng
+                    """
+
+        con_string = getConstring('sql')
+
+        df = pm.execute_query(sql_cmd, con_string)
+
+        print(df.head())
+        
         
         ########## save df ISI  to csv ##########      
         if not os.path.exists("mydj1/static/csv"):
                 os.mkdir("mydj1/static/csv")
                 
-        df.to_csv ("""mydj1/static/csv/ranking_isi.csv""", index = True, header=True)
+        df.to_csv ("""mydj1/static/csv/univ_publications.csv""", index = True, header=True)
         print("ISI saved")
         ranking = ranking + "ISI Ok!, "
+
+        ######################################
+        #######################################
+        sql_cmd =  """ with temp1 as ( select year, count(*) as c1
+								from importdb_psuswatch_v_grt_wk_publication
+								where year is not null
+								group by year
+                                    ), 
+                            temp2 as ( select year, count(*) as c2
+                                        from importdb_psuswatch_v_grt_sc_publication
+                                        where year is not null
+                                        group by year
+                                    ), 
+                            temp3 as ( select year, count(*) as c3
+                                        from importdb_psuswatch_v_grt_tc_publication
+                                        where year is not null
+                                        group by year
+                                    )
+
+                            select temp1.year, temp1.c1 as isi, temp2.c2 as scopus, temp3.c3 as tci
+                            from temp1
+                            left join temp2 on temp1.year = temp2.year
+                            left join temp3 on temp1.year = temp3.year
+                    """
+
+        con_string = getConstring('sql')
+
+        df = pm.execute_query(sql_cmd, con_string)
+
+        print(df.head())
+        
+        
+        ########## save df ISI  to csv ##########      
+        if not os.path.exists("mydj1/static/csv"):
+                os.mkdir("mydj1/static/csv")
+                
+        df.to_csv ("""mydj1/static/csv/psu_publications.csv""", index = True, header=True)
+        print("ISI saved")
+        ranking = ranking + "psu Ok!, "
 
     except Exception as e:
         print("ISI_Error: "+str(e))
         ranking = ranking + "ISI Error, "
 
-    try:
-        ########################
-        #### สร้าง df เพื่อ บันทึก scopus #########
-        ########################
-        print("start SCOPUS update")
-        sco_df = sco(now_year-543)  # get scopus dataframe จาก API scopus_search
-        
-        if(sco_df is None): 
-            print("Scopus can't scrap")
-        else:
-            print("finished_web_scraping_Scopus")
-
-        sco_df.set_index('year', inplace=True)
-        df = pd.read_csv("""mydj1/static/csv/ranking_scopus.csv""", index_col=0)
-        
-        if df[-1:].index.values != now_year: # เช่น ถ้า เป็นปีใหม่ (ไม่อยู่ใน df มาก่อน) จะต้องใส่ index ปีใหม่ โดยการ append
-            df.loc[now_year-2:now_year-2].update(sco_df.loc[now_year-2:now_year-2])  #ปีใหม่ - 2
-            df.loc[now_year-1:now_year-1].update(sco_df.loc[now_year-1:now_year-1])  #ปีใหม่ - 1
-            df =  df.append(sco_df.loc[now_year:now_year])  # ปีใหม่
-            
-        else :  
-            df.loc[now_year:now_year].update(sco_df.loc[now_year:now_year])  # ปีปัจจุบัน 
-            df.loc[now_year-1:now_year-1].update(sco_df.loc[ now_year-1:now_year-1]) # ปีปัจจุบัน - 1
-            df.loc[now_year-2:now_year-2].update(sco_df.loc[ now_year-2:now_year-2]) # ปีปัจจุบัน - 2
-            
-        ########## save df scopus to csv ##########      
-        if not os.path.exists("mydj1/static/csv"):
-                os.mkdir("mydj1/static/csv")
-                
-        df.to_csv ("""mydj1/static/csv/ranking_scopus.csv""", index = True, header=True)
-        print("Scopus saved")
-        ranking = ranking + "SCO Ok!, "
-
-    except Exception as e:
-        print("SCO Error: "+str(e))
-        ranking = ranking + "SCO Error, "
-    
-    try:
-        ########################
-        #### สร้าง df เพื่อ บันทึก TCI #########
-        ########################
-        print("start TCI update")
-        tci_df = tci()  # get TCI dataframe จาก web Scraping
-        if(tci_df is None): 
-            print("TCI'web scraping ERROR 1 time, call TCI() again....")
-            tci_df = tci()
-            if(tci_df is None): 
-                print("TCI'web scraping ERROR 2 times, break....")
-        else:
-            print("finished_web scraping_TCI")
-
-        tci_df.set_index('year', inplace=True)
-
-        df = pd.read_csv("""mydj1/static/csv/ranking_tci.csv""", index_col=0)
-    
-        if df[-1:].index.values != now_year: # เช่น ถ้า เป็นปีใหม่ (ไม่อยู่ใน df มาก่อน) จะต้องใส่ index ปีใหม่ โดยการ append
-            df.loc[now_year-1:now_year-1].update(tci_df.loc[now_year-1:now_year-1])  #ปีใหม่ - 1
-            df.loc[now_year-2:now_year-2].update(tci_df.loc[now_year-2:now_year-2])  #ปีใหม่ - 2
-            df =  df.append(tci_df.loc[now_year:now_year])  # ปีใหม่
-        else :  
-            df.loc[now_year:now_year].update(tci_df.loc[now_year:now_year])  # ปีปัจจุบัน 
-            df.loc[now_year-1:now_year-1].update(tci_df.loc[ now_year-1:now_year-1]) # ปีปัจจุบัน - 1
-            df.loc[now_year-2:now_year-2].update(tci_df.loc[ now_year-2:now_year-2]) # ปีปัจจุบัน - 2
-        ########## save df TCI  to csv ##########      
-        if not os.path.exists("mydj1/static/csv"):
-                os.mkdir("mydj1/static/csv")
-                
-        df.to_csv ("""mydj1/static/csv/ranking_tci.csv""", index = True, header=True)
-        print("TCI saved")
-        ranking = ranking + "TCI Ok!, "
-
-    except Exception as e:
-        print("TCI Error: "+str(e))
-        ranking = ranking + "TCI Error, "
 
     ##############  end #####################
     checkpoint = "chk_ranking"
@@ -2694,7 +2811,7 @@ def query14(): # Query รูปกราฟ ที่จะแสดงใน �
         #     os.mkdir("mydj1/static/img")
         # fig.write_image("""mydj1/static/img/fig_sum_international.png""")
 
-        #save to csv บันทึก CSV ของกราฟ 
+        #save to csv บันทึก CSV ของกร��ฟ 
         if not os.path.exists("mydj1/static/csv"):
                 os.mkdir("mydj1/static/csv")       
         result_sum.to_csv ("""mydj1/static/csv/table_sum_inter&national.csv""", index = True, header=True)
@@ -2708,6 +2825,331 @@ def query14(): # Query รูปกราฟ ที่จะแสดงใน �
         checkpoint = False
         print('At Query#14: Something went wrong :', e) 
         return checkpoint
+
+def query15(): # ยังทำไม่เสร็จ  สร้างไฟล์ csv ของ isi tci scopus โดยรวม มหาลัยอื่นด้วย 
+    print("-"*20)
+    print("Starting Query#15 ...")
+    checkpoint = True
+    os.environ["NLS_LANG"] = ".UTF8"  # ทำให้แสดงข้อความเป็น ภาษาไทยได้
+    fiscal_year = get_fiscal_year() # ปีงบประมาณ
+    print("ปีงบประมาณ",fiscal_year)
+
+    try:      
+        sql_cmd = """select year , count(*) as PSU
+                    from importdb_psuswatch_v_grt_wk_publication
+                    where year is not null
+                    group by year
+                    order by year
+                    """
+
+        con_string = getConstring('sql')
+        n_df = pm.execute_query(sql_cmd, con_string)
+        n_df = n_df.astype('int64')
+        print(n_df.info())
+
+        ##### read csv #####
+        main_df = pd.read_csv("""mydj1/static/csv/ranking_isi.csv""", index_col=0)
+        # main_df['P'] = n_df['PSU']
+        # n_df['PSU']
+        
+
+        main_df.join(n_df.set_index('year'))
+        print(main_df)
+
+        ########## save to csv ตาราง เงิน 11 ประเภท ##########      
+        if not os.path.exists("mydj1/static/csv"):
+                os.mkdir("mydj1/static/csv")
+
+        # main_df.to_csv("""mydj1/static/csv/ranking_isi.csv""", index = True, header=True)
+
+        print ("Data#15 is saved")
+        print("Ending Query ...")
+        return checkpoint
+
+    except Exception as e :
+        checkpoint = False
+        print('At Query#15: Something went wrong :', e)    
+        return checkpoint
+
+def query16(): # ISI SCOPUS TCI  3 ปีย้อนหลัง
+    print("-"*20)
+    print("Starting Query#10 ...")
+    checkpoint = True
+    os.environ["NLS_LANG"] = ".UTF8"  # ทำให้แสดงข้อความเป็น ภาษาไทยได้
+
+    dt = datetime.now()
+    now_year = dt.year+543
+    ranking = ""
+
+    try: 
+        ########################
+        #### สร้าง df เพื่อ บันทึก ISI #########
+        ########################
+        print("start ISI update")
+        isi_df = isi()  # get ISI dataframe จาก web Scraping
+
+        if(isi_df is None): 
+            print("ISI'web scraping ERROR 1 time, call isi() again....")
+            isi_df = isi()
+            if(isi_df is None): 
+                print("ISI'web scraping ERROR 2 times, break....")
+        else:
+            print("finished_web_scraping_ISI")
+
+        isi_df.set_index('year', inplace=True)
+        df = pd.read_csv("""mydj1/static/csv/ranking_isi.csv""", index_col=0)
+        
+        if df[-1:].index.values != now_year: # เช่น ถ้า เป็นปีใหม่ (ไม่อยู่ใน df มาก่อน) จะต้องใส่ index ปีใหม่ โดยการ append
+            df.loc[now_year-2:now_year-2].update(isi_df.loc[now_year-2:now_year-2])  #ปีใหม่ - 2
+            df.loc[now_year-1:now_year-1].update(isi_df.loc[now_year-1:now_year-1])  #ปีใหม่ - 1
+            df =  df.append(isi_df.loc[now_year:now_year])  # ปีใหม่ 
+        else :  
+            df.loc[now_year:now_year].update(isi_df.loc[now_year:now_year])  # ปีปัจจุบัน 
+            df.loc[now_year-1:now_year-1].update(isi_df.loc[ now_year-1:now_year-1]) # ปีปัจจุบัน - 1
+            df.loc[now_year-2:now_year-2].update(isi_df.loc[ now_year-2:now_year-2]) # ปีปัจจุบัน - 2
+        
+        ########## save df ISI  to csv ##########      
+        if not os.path.exists("mydj1/static/csv"):
+                os.mkdir("mydj1/static/csv")
+                
+        df.to_csv ("""mydj1/static/csv/ranking_isi.csv""", index = True, header=True)
+        print("ISI saved")
+        ranking = ranking + "ISI Ok!, "
+
+    except Exception as e:
+        print("ISI_Error: "+str(e))
+        ranking = ranking + "ISI Error, "
+
+    try:
+        ########################
+        #### สร้าง df เพื่อ บันทึก scopus #########
+        ########################
+        print("start SCOPUS update")
+        sco_df = sco(now_year-543)  # get scopus dataframe จาก API scopus_search
+        
+        if(sco_df is None): 
+            print("Scopus can't scrap")
+        else:
+            print("finished_web_scraping_Scopus")
+
+        sco_df.set_index('year', inplace=True)
+        df = pd.read_csv("""mydj1/static/csv/ranking_scopus.csv""", index_col=0)
+        
+        if df[-1:].index.values != now_year: # เช่น ถ้า เป็นปีใหม่ (ไม่อยู่ใน df มาก่อน) จะต้องใส่ index ปีใหม่ โดยการ append
+            df.loc[now_year-2:now_year-2].update(sco_df.loc[now_year-2:now_year-2])  #ปีใหม่ - 2
+            df.loc[now_year-1:now_year-1].update(sco_df.loc[now_year-1:now_year-1])  #ปีใหม่ - 1
+            df =  df.append(sco_df.loc[now_year:now_year])  # ปีใหม่
+            
+        else :  
+            df.loc[now_year:now_year].update(sco_df.loc[now_year:now_year])  # ปีปัจจุบัน 
+            df.loc[now_year-1:now_year-1].update(sco_df.loc[ now_year-1:now_year-1]) # ปีปัจจุบัน - 1
+            df.loc[now_year-2:now_year-2].update(sco_df.loc[ now_year-2:now_year-2]) # ปีปัจจุบัน - 2
+            
+        ########## save df scopus to csv ##########      
+        if not os.path.exists("mydj1/static/csv"):
+                os.mkdir("mydj1/static/csv")
+                
+        df.to_csv ("""mydj1/static/csv/ranking_scopus.csv""", index = True, header=True)
+        print("Scopus saved")
+        ranking = ranking + "SCO Ok!, "
+
+    except Exception as e:
+        print("SCO Error: "+str(e))
+        ranking = ranking + "SCO Error, "
+    
+    try:
+        ########################
+        #### สร้าง df เพื่อ บันทึก TCI #########
+        ########################
+        print("start TCI update")
+        tci_df = tci()  # get TCI dataframe จาก web Scraping
+        if(tci_df is None): 
+            print("TCI'web scraping ERROR 1 time, call TCI() again....")
+            tci_df = tci()
+            if(tci_df is None): 
+                print("TCI'web scraping ERROR 2 times, break....")
+        else:
+            print("finished_web scraping_TCI")
+
+        tci_df.set_index('year', inplace=True)
+
+        df = pd.read_csv("""mydj1/static/csv/ranking_tci.csv""", index_col=0)
+    
+        if df[-1:].index.values != now_year: # เช่น ถ้า เป็นปีใหม่ (ไม่อยู่ใน df มาก่อน) จะต้องใส่ index ปีใหม่ โดยการ append
+            df.loc[now_year-1:now_year-1].update(tci_df.loc[now_year-1:now_year-1])  #ปีใหม่ - 1
+            df.loc[now_year-2:now_year-2].update(tci_df.loc[now_year-2:now_year-2])  #ปีใหม่ - 2
+            df =  df.append(tci_df.loc[now_year:now_year])  # ปีใหม่
+        else :  
+            df.loc[now_year:now_year].update(tci_df.loc[now_year:now_year])  # ปีปัจจุบัน 
+            df.loc[now_year-1:now_year-1].update(tci_df.loc[ now_year-1:now_year-1]) # ปีปัจจุบัน - 1
+            df.loc[now_year-2:now_year-2].update(tci_df.loc[ now_year-2:now_year-2]) # ปีปัจจุบัน - 2
+        ########## save df TCI  to csv ##########      
+        if not os.path.exists("mydj1/static/csv"):
+                os.mkdir("mydj1/static/csv")
+                
+        df.to_csv ("""mydj1/static/csv/ranking_tci.csv""", index = True, header=True)
+        print("TCI saved")
+        ranking = ranking + "TCI Ok!, "
+
+    except Exception as e:
+        print("TCI Error: "+str(e))
+        ranking = ranking + "TCI Error, "
+
+    ##############  end #####################
+    checkpoint = "chk_ranking"
+    print("Results: ",ranking)
+    return ranking,checkpoint
+
+def query17(): # ISI Research Areas
+    print("-"*20)
+    print("Starting Query#11 ...")
+    checkpoint = True
+    os.environ["NLS_LANG"] = ".UTF8"  # ทำให้แสดงข้อความเป็น ภาษาไทยได้
+    path = """importDB"""
+
+    try:
+        driver = webdriver.Chrome(path+'/chromedriver.exe')  # เปิด chromedriver
+    except Exception as e:
+        print(e,"โปรดทำการ update เวอร์ชั่นใหม่ของ File chromedriver.exe")
+        print("https://chromedriver.chromium.org/downloads")
+        return None
+
+    WebDriverWait(driver, 10)
+    try:
+        df = chrome_driver_get_research_areas_ISI(driver)
+        if df is None:
+            print("fail to get df, call again...")
+            df = chrome_driver_get_research_areas_ISI(driver)
+    
+        driver.quit()
+        ######### Save to DB
+        con_string = getConstring('sql')
+        pm.save_to_db('research_areas_isi', con_string, df) 
+
+        if not os.path.exists("mydj1/static/csv"):
+                os.mkdir("mydj1/static/csv")
+        # save to csv        
+        df[:20].to_csv ("""mydj1/static/csv/research_areas_20_isi.csv""", index = False, header=True)
+                    
+        print ("Data is saved")
+        print("Ending Query#11 ...")
+
+        return checkpoint
+
+    except Exception as e :
+        checkpoint = False
+        print('At Query#11: Something went wrong :', e)
+        return checkpoint
+ 
+def query18(): # ISI catagories
+    print("-"*20)
+    print("Starting Query#12 ...")
+    checkpoint = True
+    os.environ["NLS_LANG"] = ".UTF8"  # ทำให้แสดงข้อความเป็น ภาษาไทยได้
+    path = """importDB"""
+
+    try:
+        driver = webdriver.Chrome(path+'/chromedriver.exe')  # เปิด chromedriver
+    except Exception as e:
+        print(e,"โปรดทำการ update เวอร์ชั่นใหม่ของ File chromedriver.exe")
+        print("https://chromedriver.chromium.org/downloads")
+        return None
+
+    WebDriverWait(driver, 10)
+    
+    try: 
+        df = chrome_driver_get_catagories_ISI(driver)
+        if df is None:
+            print("fail to get df, call again...")
+            df = chrome_driver_get_catagories_ISI(driver)    
+
+        driver.quit()
+        ######### Save to DB
+        con_string = getConstring('sql')
+        pm.save_to_db('categories_isi', con_string, df) 
+
+
+        if not os.path.exists("mydj1/static/csv"):
+                os.mkdir("mydj1/static/csv")
+        # save to csv        
+        df[:20].to_csv ("""mydj1/static/csv/categories_20_isi.csv""", index = False, header=True)
+        
+        print ("Data is saved")
+        print("Ending Query#12 ...")
+
+        return checkpoint
+
+    except Exception as e :
+        checkpoint = False
+        print('At Query#12: Something went wrong :', e)
+        return checkpoint
+
+def query19(): # Citation ISI and H-index and avg_per_item
+    print("-"*20)
+    print("Starting Query#13 ...")
+    checkpoint = True
+    os.environ["NLS_LANG"] = ".UTF8"  # ทำให้แสดงข้อความเป็น ภาษาไทยได้
+    dt = datetime.now()
+    now_year = dt.year+543
+        
+    cited, h_index, avg = cited_isi()
+    
+    if(cited is None): 
+            print("Get Citation ERROR 1 time, call cited_isi() again....")
+            cited, h_index, avg = cited_isi()
+            if(cited is None): 
+                print("Get Citation ERROR 2 times, break....")
+            else:
+                print("finished Get Citation")
+    else:
+        print("finished Get Citation")
+
+    try:   
+        cited.set_index('year', inplace=True)
+        
+        df = pd.read_csv("""mydj1/static/csv/ranking_cited_score.csv""", index_col=0)
+
+        if df[-1:].index.values != cited[0:1].index.values : # เช่น ถ้า เป็นปีใหม่ (ไม่อยู่ใน df มาก่อน) จะต้องใส่ index ปีใหม่ โดยการ append
+            df.iloc[-1].update(cited.iloc[1])
+            df = df.append(cited.iloc[0])
+            
+        else :  
+            df.iloc[-1].update(cited.iloc[0])  # ปีปัจจุบัน 
+            df.iloc[-2].update(cited.iloc[1]) # ปีปัจจุบัน - 1
+            
+        ########## save df scopus to csv ##########      
+        if not os.path.exists("mydj1/static/csv"):
+                os.mkdir("mydj1/static/csv")
+                
+        df.to_csv ("""mydj1/static/csv/ranking_cited_score.csv""", index = True, header=True)
+        print("Cited Score is Saved")
+
+
+        ###### save h-index to csv ######
+        df=pd.DataFrame({'h_index':h_index }, index=[0])
+        if not os.path.exists("mydj1/static/csv"):
+                os.mkdir("mydj1/static/csv")
+                
+        df.to_csv ("""mydj1/static/csv/ranking_h_index.csv""", index = False, header=True)
+
+        ###### save avg_cite_per_item to csv ######
+        df=pd.DataFrame({'avg':avg }, index=[0])
+        if not os.path.exists("mydj1/static/csv"):
+                os.mkdir("mydj1/static/csv")
+                
+        df.to_csv ("""mydj1/static/csv/ranking_avg_cite_per_item.csv""", index = False, header=True)
+
+        print ("Data is saved")
+        print("Ending Query#13 ...")
+
+        return checkpoint
+
+    except Exception as e :
+        checkpoint = False
+        print('At Query#13: Something went wrong :', e)
+        return checkpoint
+
+
 
 def get_fiscal_year(): # return ปีงบประมาณ
     date = datetime.now()
@@ -2886,6 +3328,7 @@ def home(requests):  # หน้า homepage หน้าแรก
             yaxis_title="<b>จำนวนการตีพิมพ์</b>",
             hovermode="x",
             legend=dict(x=0, y=1.1),
+            xaxis_rangeslider_visible = True,
         )
         
 
@@ -3200,7 +3643,7 @@ def pageRevenues(request): # page รายได้งานวิจัย
         
         list_in=['col0','col1','col3','col4','col10']
         list_out=['col2','col5','col6','col7','col8','col9']
-
+        
         result_in = df[list_in].sum(axis=1)
         result_out = df[list_out].sum(axis=1)
 
@@ -3208,9 +3651,10 @@ def pageRevenues(request): # page รายได้งานวิจัย
         result_out = result_out.iloc[0]
         
         re_df = pd.DataFrame(
-                            {'in' : result_in, 
-                            'out' : result_out,  
-                            }, index=[0])
+                            {'in' : [result_in], 
+                            'out' : [result_out],  
+                             }, index=[0])
+
         
         return re_df
 
@@ -3947,7 +4391,7 @@ def pageRanking(request): # page Ranking ISI/SCOPUS/TCI
         
 
         re_df = pd.DataFrame({'isi': [isi_sum], 'sco': [sco_sum], 'tci':[tci_sum]})
-        
+        print(re_df)
         return re_df.iloc[0]
 
         # return _sum
