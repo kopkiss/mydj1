@@ -133,8 +133,8 @@
                         </td>
                     </tr>
                     <tr style="color:black; background-color:#D6EAF8;">
-                        <td colspan="6" class=" pt-3"><b>&#10148; ข้อมูลจากระบบ PSUSWATCH </b></td>
-                        <!-- <td colspan="3"><button type="submit" name="row"  value ="all2" class="btn btn-warning">นำเข้าทั้งหมด</button></td> -->
+                        <td colspan="3" class=" pt-3"><b>&#10148; ข้อมูลจากระบบ PSUSWATCH </b></td>
+                        <td colspan="3"><button type="submit" name="row"  value ="All2" class="btn btn-warning">นำเข้าทั้งหมด</button></td>
                     </tr>
                     <tr>
                         <td> </td>
@@ -144,6 +144,8 @@
                         <td>
                             {% if whichrow == 'row7'%}
                                 {{result}}
+                            {% elif whichrow == 'all2' %}
+                                {{dumpallresults.0}}
                             {%endif%}
                         </td>
                         <td>
@@ -158,6 +160,8 @@
                         <td>
                             {% if whichrow == 'row8'%}
                                 {{result}}
+                            {% elif whichrow == 'all2' %}
+                                {{dumpallresults.1}}
                             {%endif%}
                         </td>
                         <td>

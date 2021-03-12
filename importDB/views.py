@@ -58,6 +58,9 @@ from sklearn.metrics import r2_score
 import subprocess
 from subprocess import check_output
 
+# นับค่า ใน dataframe 
+from collections import Counter
+
 # Create your views here.
 
 def getConstring(check):  # สร้างไว้เพื่อ เลือกที่จะ get database ด้วย mysql หรือ oracle
@@ -216,6 +219,19 @@ def dump(request):  # ดึงข้อมูล จาก Oracle เข้า�
             # save date 
             df = pd.read_csv("""mydj1/static/csv/timestamp.csv""",index_col = 0)
             df[0:5] = datetime.fromtimestamp(timestamp)
+            df.to_csv ("""mydj1/static/csv/timestamp.csv""", index = True, header=True)
+
+        elif request.POST['row']=='All2':  # สำหรับการ dump ทุกหัวข้อ 7-8 จากระบบ Pubswatch
+            dumpallresults[0] = dump7()
+            dumpallresults[1] = dump8()
+            dumpallresults = ['นำเข้าสำเร็จ' if i == True else 'ไม่สำเร็จ' for i in dumpallresults]
+            dt = datetime.now()
+            timestamp = time.mktime(dt.timetuple()) 
+            whichrows = 'all2'
+            
+            # save date 
+            df = pd.read_csv("""mydj1/static/csv/timestamp.csv""",index_col = 0)
+            df[6:8] = datetime.fromtimestamp(timestamp)
             df.to_csv ("""mydj1/static/csv/timestamp.csv""", index = True, header=True)
 
         elif request.POST['row']=='Dump1':  #project
@@ -718,7 +734,7 @@ def dump7():  ## ISI TCI SCOPUS publication ของ PSU จาก PSUSWatch
         #####################################################
         ################# ISI DUMP ##########################
         #####################################################
-        sql_cmd =  """SELECT article_title as title, author_note, year+543 as year,journal, publication_type, times_cited_wos as cited
+        sql_cmd =  """SELECT article_title as title, author_note, year+543 as year,journal,research_areas, publication_type, times_cited_wos as cited
                     FROM PSUSWATCH.V_GRT_WK_PUBLICATION"""
 
         con_string = getConstring('oracle_hrims')  # return ค่า config ของฐาน hrims
@@ -2427,37 +2443,23 @@ def query10(): # ISI SCOPUS TCI
         print('At Query#10: Something went wrong :', e)
         return checkpoint
 
-def query11(): # ISI Research Areas
+def query11(): # ISI research_areas
     print("-"*20)
     print("Starting Query#11 ...")
     checkpoint = True
     os.environ["NLS_LANG"] = ".UTF8"  # ทำให้แสดงข้อความเป็น ภาษาไทยได้
-    path = """importDB"""
-
-    try:
-        driver = webdriver.Chrome(path+'/chromedriver.exe')  # เปิด chromedriver
-    except Exception as e:
-        print(e,"โปรดทำการ update เวอร์ชั่นใหม่ของ File chromedriver.exe")
-        print("https://chromedriver.chromium.org/downloads")
-        return None
-
-    WebDriverWait(driver, 10)
-    try:
-        df = chrome_driver_get_research_areas_ISI(driver)
-        if df is None:
-            print("fail to get df, call again...")
-            df = chrome_driver_get_research_areas_ISI(driver)
-    
-        driver.quit()
-        ######### Save to DB
+    # path = """importDB"""
+   
+    try: 
+        sql_cmd =  """ select research_areas, year from importdb_psuswatch_v_grt_wk_publication """
         con_string = getConstring('sql')
-        pm.save_to_db('research_areas_isi', con_string, df) 
-
+        df = pm.execute_query(sql_cmd, con_string)
+       
         if not os.path.exists("mydj1/static/csv"):
                 os.mkdir("mydj1/static/csv")
         # save to csv        
-        df[:20].to_csv ("""mydj1/static/csv/research_areas_20_isi.csv""", index = False, header=True)
-                    
+        df.to_csv ("""mydj1/static/csv/isi_research_areas.csv""", index = False, header=True)
+        
         print ("Data is saved")
         print("Ending Query#11 ...")
 
@@ -2466,49 +2468,6 @@ def query11(): # ISI Research Areas
     except Exception as e :
         checkpoint = False
         print('At Query#11: Something went wrong :', e)
-        return checkpoint
- 
-def query12(): # ISI catagories
-    print("-"*20)
-    print("Starting Query#12 ...")
-    checkpoint = True
-    os.environ["NLS_LANG"] = ".UTF8"  # ทำให้แสดงข้อความเป็น ภาษาไทยได้
-    path = """importDB"""
-
-    try:
-        driver = webdriver.Chrome(path+'/chromedriver.exe')  # เปิด chromedriver
-    except Exception as e:
-        print(e,"โปรดทำการ update เวอร์ชั่นใหม่ของ File chromedriver.exe")
-        print("https://chromedriver.chromium.org/downloads")
-        return None
-
-    WebDriverWait(driver, 10)
-    
-    try: 
-        df = chrome_driver_get_catagories_ISI(driver)
-        if df is None:
-            print("fail to get df, call again...")
-            df = chrome_driver_get_catagories_ISI(driver)    
-
-        driver.quit()
-        ######### Save to DB
-        con_string = getConstring('sql')
-        pm.save_to_db('categories_isi', con_string, df) 
-
-
-        if not os.path.exists("mydj1/static/csv"):
-                os.mkdir("mydj1/static/csv")
-        # save to csv        
-        df[:20].to_csv ("""mydj1/static/csv/categories_20_isi.csv""", index = False, header=True)
-        
-        print ("Data is saved")
-        print("Ending Query#12 ...")
-
-        return checkpoint
-
-    except Exception as e :
-        checkpoint = False
-        print('At Query#12: Something went wrong :', e)
         return checkpoint
 
 def query13(): # Citation ISI and H-index and avg_per_item
@@ -3668,7 +3627,7 @@ def pageRevenues(request): # page รายได้งานวิจัย
     return render(request, 'importDB/revenues.html', context)
 
 @login_required(login_url='login')
-def revenues_graph(request, value):  # รับค่า value มาจาก url
+def revenues_graph(request, value): # รับค่า value มาจาก url
 
     def moneyformat(x):  # เอาไว้เปลี่ยน format เป็นรูปเงิน
         return "{:,.2f}".format(x)
@@ -4071,10 +4030,20 @@ def pageExFund(request): # page รายได้จากทุนภายน
 @login_required(login_url='login')
 def pageRanking(request): # page Ranking ISI/SCOPUS/TCI
 
-    def get_head_page(): # 
+    selected_year = "-- ทุกปี --"
+    # selected_year = datetime.now().year+543
+    def get_head_page(): # get 
         df = pd.read_csv("""mydj1/static/csv/head_page.csv""")
         return df.iloc[0].astype(int)
 
+    if request.method == "POST":
+        filter_year =  request.POST["year"]   #รับ ปี จาก dropdown 
+        print("post = ",request.POST )
+        if(filter_year == "-- ทุกปี --"):
+            selected_year = "-- ทุกปี --"
+        else:
+            selected_year = int(filter_year)      # ตัวแปร selected_year เพื่อ ให้ใน dropdown หน้าต่อไป แสดงในปีที่เลือกไว้ก่อนหน้า(จาก year)
+    
     def tree_map():
 
         df = pd.read_csv("""mydj1/static/csv/categories_20_isi.csv""")
@@ -4092,11 +4061,29 @@ def pageRanking(request): # page Ranking ISI/SCOPUS/TCI
         plot_div = plot(fig, output_type='div', include_plotlyjs=False,)
         return  plot_div
     
-    def bar_chart1(): #categories
+    def bar_chart(): #isi_research_areas
 
-        df = pd.read_csv("""mydj1/static/csv/categories_20_isi.csv""")
-        
-        fig = px.bar(df[:10].sort_values(by=['count'] ), y = 'categories', x = "count" , text = 'count', orientation='h')
+        df = pd.read_csv("""mydj1/static/csv/isi_research_areas.csv""")
+         
+        ##### ปรับ df ให้เหมาะสมกับ การ plot graph ###
+        df = df.fillna(0)
+        df.year = df.year.astype('int')
+        df_research_areas = []
+        if  selected_year == "-- ทุกปี --":
+            df_research_areas = [i.split(";") for i in df.research_areas]
+        else: 
+            df_research_areas = [i.split(";") for i in df[df.year == selected_year].research_areas] 
+
+        df_research_areas = [j.strip().replace(',', '') for i in df_research_areas  for j in i]
+
+        ##### นับค่าใน dataframe 
+        count_research_areas = Counter(df_research_areas)
+        ##### เอาเฉพาะ 20 อันดับแรก
+        top10_research_areas = count_research_areas.most_common(10)
+        pd_top10 = pd.DataFrame(top10_research_areas)
+        pd_top10 = pd_top10.rename(columns={0: 'research_areas', 1: 'count'})
+
+        fig = px.bar(pd_top10.sort_values(by=['count'] ), y = 'research_areas', x = "count" , text = 'count', orientation='h')
         fig.update_traces(texttemplate = "%{text:,f}", textposition= 'inside' )
         fig.update_layout(uniformtext_minsize = 8, uniformtext_mode = 'hide')
         # fig.update_layout( xaxis_tickangle=-45)    
@@ -4115,42 +4102,35 @@ def pageRanking(request): # page Ranking ISI/SCOPUS/TCI
                 showgrid=False,
                 linecolor="#BCCCDC", 
             ),
-        )
-        fig.update_xaxes(ticks="outside")
-        
-        
-
-        plot_div = plot(fig, output_type='div', include_plotlyjs=False,)
-        return  plot_div
-
-    def bar_chart2(): #research_areas
-
-        df = pd.read_csv("""mydj1/static/csv/research_areas_20_isi.csv""")
-        
-        fig = px.bar(df[:10].sort_values(by=['count']), y = 'categories', x = "count" , text = 'count', orientation='h')
-        fig.update_traces(texttemplate = "%{text:,f}", textposition= 'inside' )
-        fig.update_layout(uniformtext_minsize = 8, uniformtext_mode = 'hide')
-        # fig.update_layout( xaxis_tickangle=-45)    
-        fig.update_layout(
-            xaxis_title="",
-            yaxis_title="",
-        )
-        fig.update_layout(
-            plot_bgcolor="#FFF",
-            margin=dict(t=30),
-            xaxis = dict(
-                showgrid=False,
-                linecolor="#BCCCDC", 
-            ),
-            yaxis = dict(
-                showgrid=False,
-                linecolor="#BCCCDC", 
-            ),
+            xaxis_title="จำนวนการตีพิมพ์",
         )
         fig.update_xaxes(ticks="outside")
 
         plot_div = plot(fig, output_type='div', include_plotlyjs=False,)
         return  plot_div
+
+    def get_areas_selecter():
+        df = pd.read_csv("""mydj1/static/csv/isi_research_areas.csv""")
+         
+        ##### ปรับ df ให้เหมาะสมกับ การ plot graph ###
+        df = df.fillna(0)
+        df.year = df.year.astype('int')
+        df_research_areas = []
+        if  selected_year == "-- ทุกปี --":
+            df_research_areas = [i.split(";") for i in df.research_areas]
+        else: 
+            df_research_areas = [i.split(";") for i in df[df.year == selected_year].research_areas] 
+
+        df_research_areas = [j.strip().replace(',', '') for i in df_research_areas  for j in i]
+
+        ##### นับค่าใน dataframe 
+        count_research_areas = Counter(df_research_areas)
+        ##### เอาเฉพาะ 20 อันดับแรก
+        top20_research_areas = count_research_areas.most_common(20)
+        pd_top20 = pd.DataFrame(top20_research_areas)
+        pd_top20 = pd_top20.rename(columns={0: 'research_areas', 1: 'count'})
+
+        return pd_top20["research_areas"]
 
     def line_chart_total_publications():
 
@@ -4273,85 +4253,6 @@ def pageRanking(request): # page Ranking ISI/SCOPUS/TCI
         plot_div = plot(fig, output_type='div', include_plotlyjs=False,)
         return  plot_div
 
-    def line_chart_cited_per_year():
-
-        score = pd.read_csv("""mydj1/static/csv/ranking_cited_score.csv""")
-        score = score.set_index('year')
-        
-        score_line = score[-10:-1]['cited'].to_frame()
-        
-        fig = go.Figure(data = go.Scatter(x=score_line.index, y=score_line["cited"],
-                    mode='lines+markers',
-                    name='ISI-WoS' ,
-                    line=dict( width=2,color='royalblue') ,
-                    showlegend=False,
-                    ) )
-
-        score_dot = score[-2:]['cited'].to_frame()
-        fig.add_trace(go.Scatter(x=score_dot.index, y=score_dot["cited"],
-                    mode='markers',
-                    name='ISI-WoS',
-                    line=dict( width=2, dash='dot',color='royalblue'),
-                    showlegend=False,
-                    ))
-
-        fig.update_traces(mode='lines+markers')
-        fig.update_layout(
-            # hovermode="x",
-            xaxis = dict(
-                tickmode = 'linear',
-                dtick = 1,
-                showgrid=False,
-                linecolor="#BCCCDC",
-                
-            ),
-            yaxis = dict(
-                showgrid=False,
-                linecolor="#BCCCDC", 
-            ),
-            margin=dict(t=50, b=10),
-            plot_bgcolor="#FFF",
-            xaxis_title="<b>Year</b>",
-            yaxis_title="<b>Sum of Times Cited</b>",
-        )
-
-        fig.update_xaxes( 
-                        ticks="outside",
-                        showspikes=True,
-                        spikethickness=2,
-                        spikedash="dot",
-                        spikecolor="#999999",)
-        fig.update_yaxes(
-                        ticks="outside",
-                        showspikes=True,
-                        spikethickness=2,
-                        spikedash="dot",
-                        spikecolor="#999999",)
-
-
-        plot_div = plot(fig, output_type='div', include_plotlyjs=False,)
-        return  plot_div
-    
-    def sum_of_cited():
-
-        score = pd.read_csv("""mydj1/static/csv/ranking_cited_score.csv""")
-        score = score.set_index('year')
-        
-        return score[-1:-11:-1].sum()
-
-    def avg_per_items():
-
-        df = pd.read_csv("""mydj1/static/csv/ranking_avg_cite_per_item.csv""")
-        
-        return df["avg"]
-    
-    def avg_per_year():
-        
-        cited_score = pd.read_csv("""mydj1/static/csv/ranking_cited_score.csv""")
-        cited_score = cited_score.set_index('year')
-        mean = np.mean(cited_score[-1:-11:-1])[0]
-        return mean
-    
     def total_publications():
         df_isi = pd.read_csv("""mydj1/static/csv/ranking_isi.csv""", index_col=0)
         df_sco = pd.read_csv("""mydj1/static/csv/ranking_scopus.csv""", index_col=0)
@@ -4380,6 +4281,11 @@ def pageRanking(request): # page Ranking ISI/SCOPUS/TCI
 
         return str(d.day)+'/'+str(d.month)+'/'+str(d.year+543)
 
+    def get_year_selecter():
+        year = [i for i in range((datetime.now().year)+543-9 ,(datetime.now().year)+543+1) ]
+        year.append("-- ทุกปี --")
+        return year
+
     context={
         ###### Head_page ########################    
         'head_page': get_head_page(),
@@ -4388,23 +4294,21 @@ def pageRanking(request): # page Ranking ISI/SCOPUS/TCI
 
         #### Graph
         # 'tree_map' : tree_map(),
-        'bar_chart1' : bar_chart1(),
-        'bar_chart2' : bar_chart2(),
+        'year' :get_year_selecter(),
+        'filter_year': selected_year,
+        'areas_selecter': get_areas_selecter(),
+        'bar_chart' : bar_chart(),
         'line_chart_publication' :line_chart_total_publications(),
-        'line_chart_cited' : line_chart_cited_per_year(),
-        'sum_cited' :sum_of_cited(),
-        'avg_per_items' :avg_per_items(),
-        'avg_per_year' :avg_per_year(),
-        'h_index' : h_index(),
         'total_publication' :total_publications(),
         'date' : get_date_file(),
         'top_bar_title': "จำนวนงานวิจัย"
     }
 
+
     return render(request,'importDB/ranking.html', context)   
 
 @login_required(login_url='login')
-def compare_ranking(request): #page เพื่อเปรียบเทียบ ranking ของ PSU CMU KKU MU
+def ranking_comparison(request): #page เพื่อเปรียบเทียบ ranking ของ PSU CMU KKU MU
     
     def line_chart_isi():
         df_isi = pd.read_csv("""mydj1/static/csv/ranking_isi.csv""", index_col=0)
@@ -4438,7 +4342,7 @@ def compare_ranking(request): #page เพื่อเปรียบเที�
                             # hoverinfo='skip',  # กำหนดว่า ไม่มีการแสดงอะไรเมื่อเอาเมาส์ ไปชี้ 
                             # showlegend=False, # กำหนดว่าจะ show legend หรือไม่
                             ))                      
-
+            print(df_line)
             fig.add_trace(go.Scatter(x=df_line.index, y=df_line['PSU'],  # วาดกราฟ PSU
                             mode='lines+markers',
                             name="PSU: Prince of Songkla University" ,
@@ -4821,7 +4725,7 @@ def compare_ranking(request): #page เพื่อเปรียบเที�
     return render(request,'importDB/ranking_comparing.html', context)   
 
 @login_required(login_url='login')
-def pridiction_ranking(request): #page เพื่อทำนาย ranking ของ PSU
+def ranking_prediction(request): #page เพื่อทำนาย ranking ของ PSU
 
     def moneyformat(x):  # เอาไว้เปลี่ยน format เป็นรูปเงิน
         return "{:,.2f}".format(x)     
@@ -5267,6 +5171,248 @@ def pridiction_ranking(request): #page เพื่อทำนาย ranking �
     return render(request,'importDB/ranking_prediction.html',context)  
 
 @login_required(login_url='login')
+def ranking_research_area_moreinfo(request): #page แสดงข้อมูลกราฟ รายปีของ area ที่เลือก
+
+    if request.method == "POST":
+        selected_ranking = request.POST["area"]
+        
+    def line_chart(selected_ranking):
+        
+        print(selected_ranking)
+
+        try:
+
+            ########################################### 
+            ############ import and clean data ########
+            ############################################
+            df = pd.read_csv("""mydj1/static/csv/isi_research_areas.csv""")
+            nowyear = datetime.now().year+543
+            years = [i for i in range(nowyear-9,nowyear+1)]
+            # print(years)
+            result_dict = {i:[] for i in years } 
+            df =  df[df.year >= nowyear-9]
+            df = df.fillna(0)
+            df.year = df.year.astype('int')
+            list_splited = [ {y: r.split(";")  } for r,y in zip(df.research_areas, df.year)]
+            temp = {result_dict[k].append(f.strip().replace(',', ''))  for i in list_splited for k,v in i.items() for f in v  if k in years}
+
+            # เก็บ ข้อมูล ที่จะเอาไป plot กราฟ
+            df_final = pd.DataFrame() 
+            for year in years:
+                cnt = Counter(result_dict[year])
+                df_final = df_final.append([cnt])
+            df_final['year'] =  years
+            df_final = df_final.set_index("year")
+
+            df_final = df_final.fillna(0)
+            df_final = df_final.astype('int')
+            # print(df_final)
+
+            ########################################### 
+            ############ plot graph ###################
+            ############################################
+            temp = 0 
+            for i, index in enumerate(df_final.index):  # temp เพื่อเก็บ ว่า ปีปัจจุบัน อยุ่ใน row ที่เท่าไร
+                if index == nowyear:
+                    temp = i+1
+
+            df_solid  = df_final[:temp-1]   # กราฟเส้นทึบ
+            df_dashed = df_final[temp-2:temp]  # กราฟเส้นประ       
+
+            fig = make_subplots(rows=1, cols=2,
+                                column_widths=[0.7, 0.3],
+                                specs=[[{"type": "scatter"},{"type": "table"}]]
+                                )
+            ### สร้าง กราฟเส้นทึบ ####        
+            fig.add_trace(go.Scatter(x=df_solid.index, y=df_solid[selected_ranking],line=dict( color='royalblue'),name='', ))
+
+            ### สร้าง กราฟเส้นประ ####
+            fig.add_trace(go.Scatter(x=df_dashed.index, y=df_dashed[selected_ranking]
+                    ,line=dict( width=2, dash='dot',color='royalblue'),
+                    name='', )
+                )
+
+            fig.update_layout(showlegend=False)
+            fig.update_layout(title_text=f"ISI-WoS Research Areas: <b> {selected_ranking} </b> ",
+                            height=500,width=1000,
+                            xaxis_title="ปี พ.ศ",
+                            yaxis_title="จำนวนการตีพิมพ์",
+                            font=dict(
+                                size=14,
+                            ))
+
+            fig.update_layout(
+                            plot_bgcolor="#FFF",
+                            xaxis = dict(
+                                tickmode = 'linear',
+                                # tick0 = 2554,
+                                dtick = 1,
+                                showgrid=False,
+                                linecolor="#BCCCDC",  # Sets color of X-axis line
+                            )
+                            ,
+                            yaxis = dict(
+                                showgrid=False,
+                                linecolor="#BCCCDC",  # Sets color of X-axis line
+                            ),
+                        )
+            fig.update_xaxes( 
+                                ticks="outside",
+                                showspikes=True,
+                                spikethickness=2,
+                                spikedash="dot",
+                                spikecolor="#999999",)
+            fig.update_yaxes(
+                                ticks="outside",
+                                showspikes=True,
+                                spikethickness=2,
+                                spikedash="dot",
+                                spikecolor="#999999",)
+
+            fig.add_trace(
+                            go.Table(
+                                columnwidth = [100,200],
+                                header=dict(values=["<b>ปี พ.ศ.</b>","<b>จำนวน\n<b>"],
+                                            fill = dict(color='#C2D4FF'),
+                                            align = ['center'] * 5),
+                                cells=dict(values=[df_final.index, df_final[selected_ranking]],
+                                        fill = dict(color='#F5F8FF'),
+                                        align = ['center','right'] * 5))
+                                , row=1, col=2)
+                            
+            fig.update_layout(autosize=True)
+            ########################################### 
+
+
+            plot_div = plot(fig, output_type='div', include_plotlyjs=False,)
+            return  plot_div
+        
+        except Exception as e:
+            print("Error : ",e )
+
+
+    context={
+        ###### Head_page ########################    
+        # 'head_page': get_head_page(),
+        'now_year' : (datetime.now().year)+543,
+        'line_chart' : line_chart(selected_ranking)
+        #########################################
+
+
+        
+        
+    }
+    return render(request,'importDB/ranking_research_area.html',context) 
+
+@login_required(login_url='login')
+def ranking_cite_info(request, value): #page แสดงข้อมูล citation
+
+    def get_date_file():
+        file_path = """mydj1/static/csv/ranking_isi.csv"""
+        t = time.strftime('%m/%d/%Y', time.gmtime(os.path.getmtime(file_path)))
+        d = datetime.strptime(t,"%m/%d/%Y").date() 
+
+        return str(d.day)+'/'+str(d.month)+'/'+str(d.year+543)
+
+
+
+    def line_chart_cited_per_year():
+
+        score = pd.read_csv("""mydj1/static/csv/ranking_cited_score.csv""")
+        score = score.set_index('year')
+        
+        score_line = score[-10:-1]['cited'].to_frame()
+        
+        fig = go.Figure(data = go.Scatter(x=score_line.index, y=score_line["cited"],
+                    mode='lines+markers',
+                    name='ISI-WoS' ,
+                    line=dict( width=2,color='royalblue') ,
+                    showlegend=False,
+                    ) )
+
+        score_dot = score[-2:]['cited'].to_frame()
+        fig.add_trace(go.Scatter(x=score_dot.index, y=score_dot["cited"],
+                    mode='markers',
+                    name='ISI-WoS',
+                    line=dict( width=2, dash='dot',color='royalblue'),
+                    showlegend=False,
+                    ))
+
+        fig.update_traces(mode='lines+markers')
+        fig.update_layout(
+            # hovermode="x",
+            xaxis = dict(
+                tickmode = 'linear',
+                dtick = 1,
+                showgrid=False,
+                linecolor="#BCCCDC",
+                
+            ),
+            yaxis = dict(
+                showgrid=False,
+                linecolor="#BCCCDC", 
+            ),
+            margin=dict(t=50, b=10),
+            plot_bgcolor="#FFF",
+            xaxis_title="<b>Year</b>",
+            yaxis_title="<b>Sum of Times Cited</b>",
+        )
+
+        fig.update_xaxes( 
+                        ticks="outside",
+                        showspikes=True,
+                        spikethickness=2,
+                        spikedash="dot",
+                        spikecolor="#999999",)
+        fig.update_yaxes(
+                        ticks="outside",
+                        showspikes=True,
+                        spikethickness=2,
+                        spikedash="dot",
+                        spikecolor="#999999",)
+
+
+        plot_div = plot(fig, output_type='div', include_plotlyjs=False,)
+        return  plot_div
+    
+    def sum_of_cited():
+
+        score = pd.read_csv("""mydj1/static/csv/ranking_cited_score.csv""")
+        score = score.set_index('year')
+        
+        return score[-1:-11:-1].sum()
+
+    def avg_per_items():
+
+        df = pd.read_csv("""mydj1/static/csv/ranking_avg_cite_per_item.csv""")
+        
+        return df["avg"]
+    
+    def avg_per_year():
+        
+        cited_score = pd.read_csv("""mydj1/static/csv/ranking_cited_score.csv""")
+        cited_score = cited_score.set_index('year')
+        mean = np.mean(cited_score[-1:-11:-1])[0]
+        return mean
+    
+    context={
+            
+        'now_year' : (datetime.now().year)+543,
+        #########################################
+
+        'line_chart_cited' : line_chart_cited_per_year(),
+        'sum_cited' :sum_of_cited(),
+        'avg_per_items' :avg_per_items(),
+        'avg_per_year' :avg_per_year(),
+        
+        'date' : get_date_file(),
+    }
+    print("------------")
+    print(value)
+
+    return render(request,'importDB/ranking_cite_info.html',context) 
+
+@login_required(login_url='login')
 def pageResearchMan(request):
     
     selected_year = datetime.now().year+543 # กำหนดให้ ปี ใน dropdown เป็นปีปัจจุบัน
@@ -5379,7 +5525,6 @@ def pageResearchMan(request):
     
     return render(request,'importDB/research_man.html',context)  
 
-
 @login_required(login_url='login')
 def test_page(request):
     context={
@@ -5389,6 +5534,7 @@ def test_page(request):
 
 
     return render(request,'importDB/test-page.html',context) 
+
 ##################################################################
 ##### " function Login ##############
 ##################################################################

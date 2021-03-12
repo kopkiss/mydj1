@@ -35,36 +35,39 @@
         {{ line_chart_publication | safe }}
       </span>
     </div>
-    <div class=" ranking-col2 ">            
-      <div class="row mb-3 ml-4 mr-2" >
-        <div class="card pretty_container" style="position: relative;width: 100%;height: 10rem;">
-          <div class="row" >
-            <div class = "col" >
-              <h5 class = "subtitle mt-3 mb-1 ml-3" >&nbsp;จำนวนการตีพิมพ์รวมในฐาน Scopus </h5> 
+    <div class=" ranking-col2 ">
+      <!-- <form target="_blank" method=POST>
+        {% csrf_token %}             -->
+        <div class="row mb-3 ml-4 mr-2" onclick="location.href= 'cite_info/sco'; target='_blank'; " id = "tab_sco"  >
+          <div class="card pretty_container red-card" style="position: relative;width: 100%;height: 10rem;">
+            <div class="row" >
+              <div class = "col" >
+                <h5 class = " subtitle mt-3 mb-1 ml-3" style="background-color :transparent">&nbsp;จำนวนการตีพิมพ์รวมในฐาน Scopus </h5> 
+              </div>
+            </div>
+            <div class="card-body h2 text-danger " style="text-align: center; font-size: 300%;" >
+                  <span>{{ total_publication.sco |intcomma }}</span>
             </div>
           </div>
-          <div class="card-body h2 text-danger " style="text-align: center; font-size: 300%;" >
-            {{ total_publication.sco |intcomma }}
-          </div>
         </div>
-      </div>
-      <div class="row mb-3 ml-4 mr-2">
-        <div class="card pretty_container" style="position: relative;width: 100%;height: 10rem;">
+      <!-- </form> -->
+      <div class="row mb-3 ml-4 mr-2" onclick="location.href= 'cite_info/isi';" id = "tab_isi" target="_blank">
+        <div class="card pretty_container blue-card" style="position: relative;width: 100%;height: 10rem;">
           <div class="row" >
             <div class = "col">
-              <h5 class = "subtitle mt-3 mb-1 ml-3 " >&nbsp;จำนวนการตีพิมพ์รวมในฐาน ISI-WoS</h5> 
+              <h5 class = "subtitle mt-3 mb-1 ml-3 " style="background-color :transparent" >&nbsp;จำนวนการตีพิมพ์รวมในฐาน ISI-WoS</h5> 
             </div>
           </div>
           <div class="card-body h2 text-primary" style="text-align: center; font-size: 300%" >
-            {{ total_publication.isi |intcomma }}
+            <span>{{ total_publication.isi |intcomma }}</span>
           </div>
         </div>
       </div>
-      <div class="row mb-3 ml-4 mr-2" >
-        <div class="card pretty_container" style="position: relative;width: 100%;height: 10rem;">
+      <div class="row mb-3 ml-4 mr-2" onclick="location.href= 'cite_info/tci';" id = "tab_tci" target="_blank">
+        <div class="card pretty_container yellow-card" style="position: relative;width: 100%;height: 10rem;">
           <div class="row" >
             <div class = "col">
-              <h5 class = "subtitle mt-3 mb-1 ml-3">&nbsp;จำนวนการตีพิมพ์รวมในฐาน TCI</h5> 
+              <h5 class = "subtitle mt-3 mb-1 ml-3" style="background-color :transparent">&nbsp;จำนวนการตีพิมพ์รวมในฐาน TCI</h5> 
             </div>
             <div class = "col-lg-2 pt-3">
               <!-- <img src="{% static 'img/bulb_2251110.png' %}" 
@@ -74,128 +77,55 @@
             </div>
           </div>
           <div class="card-body h2 text-warning" style="text-align: center; font-size: 300%" >
-            {{ total_publication.tci |intcomma }}
+            <span>{{ total_publication.tci |intcomma }}</span>
           </div>
         </div>
       </div>
     </div>
   </div>
-  <div class="row ">
-    <div class=" ranking-col1 ml-4 mb-3 mr-2 card pretty_container " > 
-      <h5 class = "subtitle mt-3 mb-0 ml-3"> &nbsp;Sum of Times Cited per Year (ISI-WoS)</h5> 
-      <!-- <h5 class = "subtitle mt-3 mb-0 ml-3"> &nbsp;จำนวนการถูกอ้างอิงต่อปี 10ปีย้อนหลัง (ISI-WoS) </h5> -->
-      <span class = "pl-2 pr-5" >
-        {{ line_chart_cited | safe }}
-      </span> 
-    </div>
-    <div class=" ranking-col2">         
-      <div class="row mb-3 ml-4 mr-2" >
-        <div class="card pretty_container" style="position: relative;width: 100%;height: 8rem;">
-          <div class="row" >
-            <div class="col-xs-12 col-md-12 col-lg-12 "  >
-              <h5 class = "subtitle mt-3 mb-3 ml-3" style="display:inline-block;">&nbsp; H-index (ISI-WoS) </h5>
-              <div class="pt-3 pr-3" style=" float: right;">
-                <img src="{% static 'img/bulb_2251110.png' %}" 
-                  title="h-index: The h-index value is based on a list of publications
-                  ranked in descending order by the Times Cited count. An
-                  index of h means that there are h papers that have each been
-                  cited at least h times. The h-index is based on the depth of
-                  years of your product subscription and your selected
-                  timespan. Source items that are not part of your subscription
-                  will not be factored into the calculation." 
-                  alt="H-index (ISI-WoS)"    
-                  style="display: block; " 
-                  width="20" height="20"/> 
-              </div> 
-            </div>
-          </div>
-          <row>
-            <div class=" h2 text-info mb-1 mt-1 ml-5"  >
-              {{ h_index |intcomma }}
-            </div>
-          </row>
-        </div>
-      </div>
-      <div class="row mb-3 ml-4 mr-2" >
-        <div class="card pretty_container" style="position: relative;width: 100%;height: 8rem;">
-          <div class="row" >
-            <div class="col-xs-12 col-md-12 col-lg-12 "  >
-              <h5 class = "subtitle mt-3 mb-3 ml-3" style="display:inline-block;">&nbsp; Sum of Times Cited (ISI-WoS) </h5> 
-              <!-- <h5 class = "subtitle mt-3 mb-3 ml-3" style="display:inline-block;">&nbsp; จำนวนการถูกอ้างอิงทั้งหมด (ISI-WoS) </h5> -->
-              <div class="pt-3 pr-3" style=" float: right;">
-                <img src="{% static 'img/bulb_2251110.png' %}" 
-                  title="Sum of Times Cited: This is the total number of citations to all
-                  items in the results set. This equals the sum of the Total
-                  column in the table below." 
-                  alt="Sum of Times Cited (ISI-WoS)"   
-                  style="display: block; margin-left: auto; margin-right: auto;" 
-                  width="20" height="20"/> 
-              </div>
-            </div>
-          </div>
-          <div class=" h2 text-info mb-1 mt-1 ml-5" >
-            {{sum_cited|intcomma}}
-          </div>
-        </div>
-      </div>
-      <div class="row mb-3 ml-4 mr-2" >
-        <div class="card pretty_container" style="position: relative;width: 100%;height: 8rem;">
-          <div class="row" >
-            <div class="col-xs-12 col-md-12 col-lg-12 "  >
-              <h5 class = "subtitle mt-3 mb-3 ml-3" style="display:inline-block;">&nbsp; Avg. Citations per Item (ISI-WoS) </h5> 
-              <div class="pt-3 pr-3" style=" float: right;">
-                <img src="{% static 'img/bulb_2251110.png' %}" 
-                  title="Average citations per item: This is the average number of
-                  citing articles for all items in the results set. It is the sum of the
-                  times cited count divided by the number of results in the set."  
-                  style="display: block; margin-left: auto; margin-right: auto;" 
-                  width="20" height="20"/> 
-              </div>
-            </div>
-          </div>
-          <div class=" h2 text-info mb-1 mt-1 ml-5 " >
-            {{avg_per_items |floatformat:2|intcomma}}
-          </div>
-        </div>
-      </div>
-      <div class="row mb-3 ml-4 mr-2" >
-        <div class="card pretty_container" style="position: relative;width: 100%;height: 8rem;">
-          <div class="row" >
-            <div class="col-xs-12 col-md-12 col-lg-12 "  >
-              <h5 class = "subtitle mt-3 mb-3 ml-3" style="display:inline-block;">&nbsp; Avg. Citations per Year (ISI-WoS)</h5> 
-              <div class="pt-3 pr-3" style=" float: right;">
-                <img src="{% static 'img/bulb_2251110.png' %}" 
-                  title="Average citations per year: This is the average number of
-                  citing articles for all years in the results set. It is the sum of the
-                  times cited count in all years divided by the number of years in the set."  
-                  style="display: block; margin-left: auto; margin-right: auto;" 
-                  width="20" height="20"/>
-              </div>
-            </div>
-          </div>
-          <div class=" h2 text-info mb-1 mt-1 ml-5" >
-            {{avg_per_year |floatformat:2|intcomma}}
-          </div>
-        </div>
-      </div>
-      
-    </div>
-  </div>
+  
   <div class="row " >
     <div class=" ml-4 mb-3 mr-3 mr-4 card pretty_container" style="width:100% ">
-      <div class ="row ml-3">
-        <h5 class = "subtitle mt-3 mb-0 ">&nbsp;Web of Science Catagories & Research Areas  </h5>    
-        &nbsp;
-        <select id="option" name="option" class="ml-3 mt-2 mb-1 btn ex2 btn-info dropdown-toggle" style=" width:auto; " >
-          <option value="categ" selected>Categories</option>
-          <option value="resea">Research Areas</option>
-        </select>
+      <div class ="row ml-3 mt-3">
+        <div class=" ranking-re-area-col1 mb-1" >
+          <form name='filter' method=POST  class="pt-1">
+            {% csrf_token %}
+            <div class="subtitle card-header-title " style="width:90% "><h5 style="display:inline-block;" > &nbsp;ISI-WoS Research Areas | ปี พ.ศ. : &nbsp;</h5>
+              <select id="year" name = "year" class=" btn ex2 btn-primary dropdown-toggle" onChange="filter.submit();">
+                  {% for y in year  %}
+                      {% if y == filter_year%} 
+                          <option value="{{ y }}" selected>{{ y }} </option>
+                      {% else %}
+                          <option value="{{ y }}" >{{ y }} </option>
+                      {%endif%}
+                  {% endfor %}
+              </select>
+            </div>  
+          </form>
+        </div>
+        <div class=" ranking-re-area-col2 " >
+          <form action="research_area_moreinfo " name='filter_area' method=POST target="_blank" style="border-style:solid;  border-radius: 30px; border-color: rgb(138, 224, 220); width:600px;" >
+            {% csrf_token %}
+            <div class="pt-1 pb-1"><h6 style="display:inline-block;"> &nbsp;&nbsp;&nbsp;&nbsp;ข้อมูลรายปี :&nbsp; </h6>
+              <select id="area" name = "area" class=" btn ex2 btn-info dropdown-toggle ">
+                <option selected="selected" disabled>- - โปรดระบุ Research Areas - -</option>
+                <!-- - - โปรดระบุ Research Areas - - -->
+                {% for area in areas_selecter  %}
+                  
+                  <option value="{{ area }}" >{{ area }} </option>
+                {% endfor %}
+              </select>
+              <input id = "btnSubmit" type="submit" value="Refine" class="btn-shadow btn btn-danger ml-2"  style="width:80px; "/>  
+              &nbsp;
+            </div>
+          </form>
+        </div>
+        <!-- <form action="comparing" target="_blank" method=GET style="display:inline-block; ">
+          <input name = Comparing type="submit" value="Comparison" class="btn-shadow btn btn-info" style="width:auto; "/>
+        </form> -->
       </div>
-      <div id="bar1" name = 'bar1'>
-        {{ bar_chart1 | safe }}
-      </div>
-      <div id="bar2" name = 'bar2'>
-        {{ bar_chart2 | safe }}
+      <div id="bar" name = 'bar'>
+        {{ bar_chart | safe }}
       </div>
     </div>
   </div>
@@ -206,23 +136,30 @@
 
 {% block js %}
 <script>
-  $(document).ready( function () {
-    $('#bar2').hide();
+  // src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js">
+  
+
+  // $('select').on('change', function() {
+  //   var value = $(this).val();
+    
+  //   if (value == "categ") {
+  //     $('#bar1').show();
+  //     $('#bar2').hide();
+  //   } else if (value == "resea") {
+  //     $('#bar2').show();
+  //     $('#bar1').hide();
+  //   }
+  // });
+  $(document).ready( function () { 
+    $("#btnSubmit").attr('disabled',true)
   } );
 
-  $('select').on('change', function() {
-    var value = $(this).val();
-    
-    if (value == "categ") {
-      $('#bar1').show();
-      $('#bar2').hide();
-    } else if (value == "resea") {
-      $('#bar2').show();
-      $('#bar1').hide();
-    }
+  $("select").on('change',function(){
+   if($(this).find('option:selected').text()=="- - โปรดระบุ Research Areas - -")
+       $("#btnSubmit").attr('disabled',true)
+   else
+       $("#btnSubmit").attr('disabled',false)
   });
-
-
 </script>
 
 {% endblock js %}
