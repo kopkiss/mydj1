@@ -36,7 +36,6 @@
       </span>
     </div>
     <div class=" ranking-col2 ">
-
       <div class="row mb-3 ml-4 mr-2">
         <input type="checkbox" id="red_flip" class="more_flip" aria-hidden="true">
         <div class="card pretty_container content_flip " style="position: relative; width: 100%; height: 10rem; ">
@@ -59,12 +58,12 @@
               </label>
             </div>
           </div>
-          <div class = "back_flip filp_shadow">
+          <div class = "back_flip">
             <div class= "inner_flip ">
               <label for="red_flip"  aria-hidden="true" style="cursor: pointer;" >
                 <div class="row mx-1 mt-1" >
                   <div class = "col">
-                    <h5 class = "subtitle my-1 " style=" background-color :transparent">&nbsp;จำนวนการอ้างอิงในฐาน <span class="text-danger">Scopus</span></h5> 
+                    <h5 class = "subtitle my-1 " style=" background-color :transparent">&nbsp;จำนวนการอ้างอิงในฐาน Scopus </h5> 
                   </div>
                 </div>
                 <hr class=" my-1">
@@ -107,66 +106,79 @@
 
       <div class="row mb-3 ml-4 mr-2">
         <input type="checkbox" id="blue_flip" class="more_flip" aria-hidden="true">
-        <div class="card pretty_container  content_flip" style="position: relative;width: 100%;height: 10rem; ">
-          <div class = "front_flip blue-card">
+        <div class="card pretty_container blue-card content_flip" style="position: relative;width: 100%;height: 10rem; ">
+          <div class = "front_flip">
             <div class= "inner_flip ">
               <label for="blue_flip"  aria-hidden="true" style="cursor: pointer;" >
-                <div class="row" >
+                <div class="row " >
                   <div class = "col">
-                    <h5 class = " subtitle mt-2 mb-1 ml-3" style=" background-color :transparent">&nbsp;จำนวนการตีพิมพ์รวมในฐาน ISI-WoS </h5> 
+                    <h5 class = "subtitle mt-2 mb-1 ml-3 " style="background-color :transparent; " >&nbsp;จำนวนการตีพิมพ์รวมในฐาน ISI-WoS</h5> 
                   </div>
                 </div>
                 <hr class=" my-1">
                 <div class="row" >
                   <div class = "col">
                     <div class="card-body h2 text-primary mx-3" style="text-align: center; font-size: 300%;   " >
-                      <span>{{ total_publication.isi |intcomma }}</span>
+                        <span>{{ total_publication.isi |intcomma }}</span>
                     </div>
                   </div>
                 </div>
               </label>
             </div>
           </div>
-          <div class = "back_flip filp_shadow">
+          <div class = "back_flip">
             <div class= "inner_flip ">
               <label for="blue_flip"  aria-hidden="true" style="cursor: pointer;" >
-                <div class="row mx-1 mt-1" >
+                <div class="row" >
                   <div class = "col">
-                    <h5 class = "subtitle my-1 " style=" background-color :transparent">&nbsp;จำนวนการอ้างอิงในฐาน <span class="text-primary">ISI-WoS</span> </h5> 
+                    <h5 class = "subtitle mt-3 ml-2" style="background-color :transparent; " >&nbsp;ISI-WoS</h5> 
+                    <hr class="mt-2 mb-0">
                   </div>
                 </div>
-                <hr class=" my-1">
-                <div class="row" >
-                  <div class = "col-sm-6 pt-1" style=" height: auto; ">
-                    <div class = "pl-3 " style="font-size: 1.2rem !important; font-weight: 400; opacity: .4 !important; text-align: right; ">
-                      Total Citations
+                <div class="row mx-2 " >
+                  <div class = "col-sm-4 pt-2 " style=" height: auto; position: relative; ">
+                    <div style="font-size: 1rem !important; font-weight: 400; opacity: .4 !important;">
+                        Total Citations
+                    </div>
+                    <div class="widget-content">
+                      <div class="widget-content-outer">
+                        <div class="widget-content-wrapper">
+                          <div class = "pl-3" style="font-size: 1.2rem !important; text-align: center; font-weight: bold; ">
+                            {{re.isi_total_cited|intcomma}}
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div class = "col-sm-6 pt-1" style=" height: auto; ">
-                    <div class = "pl-3 " style="font-size: 1.2rem !important; font-weight: bold;  text-align: lift;  ">
-                      {{re.isi_total_cited|intcomma}}
+                  <div class = "col-sm-4 pt-2 vl" style=" height: auto; position: relative; ">
+                    <div style="font-size: 1rem !important; font-weight: 400; opacity: .4 !important;">
+                        Avg. Citations / Item
+                    </div>
+                    <div class="widget-content">
+                      <div class="widget-content-outer">
+                        <div class="widget-content-wrapper">
+                          <div class="pl-3" style="font-size: 1.2rem !important; font-weight: bold; ">
+                            {{re.isi_avg_cited_per_item |floatformat:2|intcomma}}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div> 
+                  <div class = "col-sm-4 pt-2" style=" height: auto; align-items: center; position: relative;">
+                    <div style="font-size: 1rem !important; font-weight: 400; opacity: .4 !important;">
+                      Avg. Citations / Year
+                    </div>
+                    <div class="widget-content">
+                      <div class="widget-content-outer">
+                        <div class="widget-content-wrapper">
+                          <div class = "pl-3 " style="font-size: 1.2rem !important; font-weight: bold;  ">
+                            {{re.isi_avg_cited_per_year |floatformat:2|intcomma}}
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-                <hr class=" my-2 "  width="300">
-                <div class="row" >
-                  <div class = "col-sm-6 " style=" height: auto; ">
-                    <div style="font-size: 1em !important; font-weight: 400; opacity: .4 !important; text-align: center;">
-                      Avg. Citations / Item
-                    </div>
-                    <div class = "pl-3" style="font-size: 1.2rem !important; font-weight: bold; text-align: center;">
-                      {{re.isi_avg_cited_per_item |floatformat:2|intcomma}}
-                    </div>
-                  </div>
-                  <div class = "col-sm-6" style=" height: auto;  ">
-                    <div style="font-size: 1em !important; font-weight: 400; opacity: .4 !important; text-align: center;">
-                        Avg. Citations / Year
-                    </div>
-                    <div class="pl-3" style="font-size: 1.2rem !important; font-weight: bold; text-align: center; ">
-                      {{re.isi_avg_cited_per_year |floatformat:2|intcomma}}
-                    </div>
-                  </div>
-                </div> 
               </label>
             </div>
           </div>
@@ -175,13 +187,13 @@
       
       <div class="row mb-3 ml-4 mr-2">
         <input type="checkbox" id="yellow_flip" class="more_flip" aria-hidden="true">
-        <div class="card pretty_container  content_flip" style="position: relative;width: 100%;height: 10rem; ">
-          <div class = "front_flip yellow-card">
+        <div class="card pretty_container yellow-card content_flip" style="position: relative;width: 100%;height: 10rem; ">
+          <div class = "front_flip">
             <div class= "inner_flip ">
               <label for="yellow_flip"  aria-hidden="true" style="cursor: pointer;" >
-                <div class="row" >
+                <div class="row " >
                   <div class = "col">
-                    <h5 class = " subtitle mt-2 mb-1 ml-3" style=" background-color :transparent">&nbsp;จำนวนการตีพิมพ์รวมในฐาน TCI </h5> 
+                    <h5 class = "subtitle mt-2 mb-1 ml-3" style="background-color :transparent">&nbsp;จำนวนการตีพิมพ์รวมในฐาน TCI</h5> 
                   </div>
                 </div>
                 <hr class=" my-1">
@@ -195,46 +207,59 @@
               </label>
             </div>
           </div>
-          <div class = "back_flip filp_shadow">
+          <div class = "back_flip">
             <div class= "inner_flip ">
               <label for="yellow_flip"  aria-hidden="true" style="cursor: pointer;" >
-                <div class="row mx-1 mt-1" >
+                <div class="row" >
                   <div class = "col">
-                    <h5 class = "subtitle my-1 " style=" background-color :transparent">&nbsp;จำนวนการอ้างอิงในฐาน <span class="text-warning">TCI</span> </h5> 
+                    <h5 class = "subtitle mt-3 ml-2 " style="background-color :transparent; " >&nbsp;TCI</h5> 
+                    <hr class="mt-2 mb-0">
                   </div>
                 </div>
-                <hr class=" my-1">
-                <div class="row" >
-                  <div class = "col-sm-6 pt-1" style=" height: auto; ">
-                    <div class = "pl-3 " style="font-size: 1.2rem !important; font-weight: 400; opacity: .4 !important; text-align: right; ">
-                      Total Citations
+                <div class="row mx-2 " >
+                  <div class = "col-sm-4 pt-2 " style=" height: auto; position: relative; ">
+                    <div style="font-size: 1rem !important; font-weight: 400; opacity: .4 !important; ">
+                        Total Citations
+                    </div>
+                    <div class="widget-content">
+                      <div class="widget-content-outer">
+                        <div class="widget-content-wrapper">
+                          <div class = "pl-3" style="font-size: 1.2rem !important; font-weight: bold;">
+                            {{re.tci_total_cited|intcomma}}
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div class = "col-sm-6 pt-1" style=" height: auto; ">
-                    <div class = "pl-3 " style="font-size: 1.2rem !important; font-weight: bold;  text-align: lift;  ">
-                      {{re.tci_total_cited|intcomma}}
+                  <div class = "col-sm-4 pt-2 vl" style=" height: auto; position: relative; ">
+                    <div style="font-size: 1rem !important; font-weight: 400; opacity: .4 !important;">
+                        Avg. Citations / Item
+                    </div>
+                    <div class="widget-content">
+                      <div class="widget-content-outer">
+                        <div class="widget-content-wrapper">
+                          <div class="pl-3" style="font-size: 1.2rem !important; font-weight: bold;">
+                            {{re.tci_avg_cited_per_item |floatformat:2|intcomma}}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div> 
+                  <div class = "col-sm-4 pt-2" style=" height: auto; align-items: center; position: relative;">
+                    <div style="font-size: 1rem !important; font-weight: 400; opacity: .4 !important;">
+                      Avg. Citations / Year
+                    </div>
+                    <div class="widget-content">
+                      <div class="widget-content-outer">
+                        <div class="widget-content-wrapper">
+                          <div class = "pl-3 " style="font-size: 1.2rem !important; font-weight: bold; ">
+                            {{re.tci_avg_cited_per_year |floatformat:2|intcomma}}
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-                <hr class=" my-2 "  width="300">
-                <div class="row" >
-                  <div class = "col-sm-6 " style=" height: auto; ">
-                    <div style="font-size: 1em !important; font-weight: 400; opacity: .4 !important; text-align: center;">
-                      Avg. Citations / Item
-                    </div>
-                    <div class = "pl-3" style="font-size: 1.2rem !important; font-weight: bold; text-align: center;">
-                      {{re.tci_avg_cited_per_item |floatformat:2|intcomma}}
-                    </div>
-                  </div>
-                  <div class = "col-sm-6" style=" height: auto;  ">
-                    <div style="font-size: 1em !important; font-weight: 400; opacity: .4 !important; text-align: center;">
-                        Avg. Citations / Year
-                    </div>
-                    <div class="pl-3" style="font-size: 1.2rem !important; font-weight: bold; text-align: center; ">
-                      {{re.tci_avg_cited_per_year |floatformat:2|intcomma}}
-                    </div>
-                  </div>
-                </div> 
               </label>
             </div>
           </div>

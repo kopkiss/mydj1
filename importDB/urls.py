@@ -25,7 +25,7 @@ urlpatterns = [
     path('ranking/comparing', views.ranking_comparison , name = 'ranking-comparing'),
     path('ranking/prediction', views.ranking_prediction , name = 'ranking-pridiction'),
     path('ranking/research_area_moreinfo', views.ranking_research_area_moreinfo , name = 'ranking-area-moreinfo'),
-    path('ranking/cite_info/<str:value>/', views.ranking_cite_info , name = 'ranking-cite-info'),
+
 
     path('exFund/',views.pageExFund, name = 'exFund-page'),
 

@@ -2364,7 +2364,8 @@ def query10(): # ISI SCOPUS TCI
         ############################################
         #### เตรียมข้อมูลโดย Query มาเป็น df #########
         ############################################
-        print("starting Pubplicaitions update")
+        print("Starting Publications update")
+
         #### ข้อมูล publications ของมหาลัยอื่นๆ #########
         sql_cmd =  """ with temp1 as (SELECT short_name, name_eng FROM `importdb_master_ranking_university_name`),
                             temp2 as (
@@ -2384,24 +2385,27 @@ def query10(): # ISI SCOPUS TCI
         df_univs.loc[df_univs['index_source'] == 'WoS','index_source'] = "isi"
         df_univs.loc[df_univs['index_source'] == 'TCI','index_source'] = "tci"
         print(df_univs)
+
         #### ข้อมูล publications ของ PSU #########
-        sql_cmd =  """ with temp1 as ( select year, count(*) as c1
+        sql_cmd =  """ with temp1 as ( select year, count(*) as c1, sum(cited) as isi_cited
 								from importdb_psuswatch_v_grt_wk_publication
 								where year is not null
 								group by year
                                     ), 
-                            temp2 as ( select year, count(*) as c2
+                            temp2 as ( select year, count(*) as c2, count(cited) as scopus_cited
                                         from importdb_psuswatch_v_grt_sc_publication
                                         where year is not null
                                         group by year
                                     ), 
-                            temp3 as ( select year, count(*) as c3
+                            temp3 as ( select year, count(*) as c3 , count(cited) as tci_cited
                                         from importdb_psuswatch_v_grt_tc_publication
                                         where year is not null
                                         group by year
                                     )
 
-                            select temp1.year, temp1.c1 as isi, temp2.c2 as scopus, temp3.c3 as tci
+                            select temp1.year, temp1.c1 as isi, temp1.isi_cited,
+									temp2.c2 as scopus, temp2.scopus_cited,
+									temp3.c3 as tci, temp3.tci_cited
                             from temp1
                             left join temp2 on temp1.year = temp2.year
                             left join temp3 on temp1.year = temp3.year
@@ -2435,6 +2439,16 @@ def query10(): # ISI SCOPUS TCI
                 os.mkdir("mydj1/static/csv")
             results.to_csv (f"mydj1/static/csv/ranking_{s}.csv", index = False, header=True)
             print(f'finished: {s}')
+
+        #######################################################
+        ########### สร้าง ไฟล์ CSV ของ Citation #################
+        #######################################################
+        cited = df_psu[['year', 'isi_cited', 'scopus_cited', 'tci_cited']]
+        ########## save df to csv ##########
+        if not os.path.exists("mydj1/static/csv"):
+            os.mkdir("mydj1/static/csv")
+        cited.to_csv (f"mydj1/static/csv/ranking_citation.csv", index = False, header=True)
+        print('finished: citation')
 
         return checkpoint
 
@@ -4031,10 +4045,12 @@ def pageExFund(request): # page รายได้จากทุนภายน
 def pageRanking(request): # page Ranking ISI/SCOPUS/TCI
 
     selected_year = "-- ทุกปี --"
+    focus = False
     # selected_year = datetime.now().year+543
     def get_head_page(): # get 
         df = pd.read_csv("""mydj1/static/csv/head_page.csv""")
         return df.iloc[0].astype(int)
+
 
     if request.method == "POST":
         filter_year =  request.POST["year"]   #รับ ปี จาก dropdown 
@@ -4043,7 +4059,10 @@ def pageRanking(request): # page Ranking ISI/SCOPUS/TCI
             selected_year = "-- ทุกปี --"
         else:
             selected_year = int(filter_year)      # ตัวแปร selected_year เพื่อ ให้ใน dropdown หน้าต่อไป แสดงในปีที่เลือกไว้ก่อนหน้า(จาก year)
-    
+        
+        focus = True
+
+
     def tree_map():
 
         df = pd.read_csv("""mydj1/static/csv/categories_20_isi.csv""")
@@ -4268,11 +4287,27 @@ def pageRanking(request): # page Ranking ISI/SCOPUS/TCI
         return re_df.iloc[0]
 
         # return _sum
-    
-    def h_index():
-        df = pd.read_csv("""mydj1/static/csv/ranking_h_index.csv""")
+
+    def cited_info():
+        sources = ['isi','tci','scopus']
+        df_cited = pd.read_csv("C:/Users/Asus/Desktop/Learn/ranking_citation.csv")
+        results = pd.DataFrame()
+
+        for s in sources:
+            df= pd.read_csv(f"C:/Users/Asus/Desktop/Learn/ranking_{s}.csv")
+            total_cited = df_cited[f'{s}_cited'].sum()
+            total_paper = df.PSU.sum()
+            avg_per_items = total_cited/total_paper
+            
+            index = df_cited.index
+            number_of_rows = len(index)
+            avg_per_year = total_cited/number_of_rows
+            
+            results[f'{s}_total_cited'] = [total_cited]
+            results[f'{s}_avg_cited_per_item'] =[ avg_per_items]
+            results[f'{s}_avg_cited_per_year'] = [avg_per_year]
         
-        return df["h_index"]
+        return results
 
     def get_date_file():
         file_path = """mydj1/static/csv/ranking_isi.csv"""
@@ -4301,7 +4336,9 @@ def pageRanking(request): # page Ranking ISI/SCOPUS/TCI
         'line_chart_publication' :line_chart_total_publications(),
         'total_publication' :total_publications(),
         'date' : get_date_file(),
-        'top_bar_title': "จำนวนงานวิจัย"
+        'top_bar_title': "จำนวนงานวิจัย",
+        'focus' : focus, 
+        're' : cited_info(),
     }
 
 
@@ -5305,114 +5342,6 @@ def ranking_research_area_moreinfo(request): #page แสดงข้อมู�
     return render(request,'importDB/ranking_research_area.html',context) 
 
 @login_required(login_url='login')
-def ranking_cite_info(request, value): #page แสดงข้อมูล citation
-
-    def get_date_file():
-        file_path = """mydj1/static/csv/ranking_isi.csv"""
-        t = time.strftime('%m/%d/%Y', time.gmtime(os.path.getmtime(file_path)))
-        d = datetime.strptime(t,"%m/%d/%Y").date() 
-
-        return str(d.day)+'/'+str(d.month)+'/'+str(d.year+543)
-
-
-
-    def line_chart_cited_per_year():
-
-        score = pd.read_csv("""mydj1/static/csv/ranking_cited_score.csv""")
-        score = score.set_index('year')
-        
-        score_line = score[-10:-1]['cited'].to_frame()
-        
-        fig = go.Figure(data = go.Scatter(x=score_line.index, y=score_line["cited"],
-                    mode='lines+markers',
-                    name='ISI-WoS' ,
-                    line=dict( width=2,color='royalblue') ,
-                    showlegend=False,
-                    ) )
-
-        score_dot = score[-2:]['cited'].to_frame()
-        fig.add_trace(go.Scatter(x=score_dot.index, y=score_dot["cited"],
-                    mode='markers',
-                    name='ISI-WoS',
-                    line=dict( width=2, dash='dot',color='royalblue'),
-                    showlegend=False,
-                    ))
-
-        fig.update_traces(mode='lines+markers')
-        fig.update_layout(
-            # hovermode="x",
-            xaxis = dict(
-                tickmode = 'linear',
-                dtick = 1,
-                showgrid=False,
-                linecolor="#BCCCDC",
-                
-            ),
-            yaxis = dict(
-                showgrid=False,
-                linecolor="#BCCCDC", 
-            ),
-            margin=dict(t=50, b=10),
-            plot_bgcolor="#FFF",
-            xaxis_title="<b>Year</b>",
-            yaxis_title="<b>Sum of Times Cited</b>",
-        )
-
-        fig.update_xaxes( 
-                        ticks="outside",
-                        showspikes=True,
-                        spikethickness=2,
-                        spikedash="dot",
-                        spikecolor="#999999",)
-        fig.update_yaxes(
-                        ticks="outside",
-                        showspikes=True,
-                        spikethickness=2,
-                        spikedash="dot",
-                        spikecolor="#999999",)
-
-
-        plot_div = plot(fig, output_type='div', include_plotlyjs=False,)
-        return  plot_div
-    
-    def sum_of_cited():
-
-        score = pd.read_csv("""mydj1/static/csv/ranking_cited_score.csv""")
-        score = score.set_index('year')
-        
-        return score[-1:-11:-1].sum()
-
-    def avg_per_items():
-
-        df = pd.read_csv("""mydj1/static/csv/ranking_avg_cite_per_item.csv""")
-        
-        return df["avg"]
-    
-    def avg_per_year():
-        
-        cited_score = pd.read_csv("""mydj1/static/csv/ranking_cited_score.csv""")
-        cited_score = cited_score.set_index('year')
-        mean = np.mean(cited_score[-1:-11:-1])[0]
-        return mean
-    
-    context={
-            
-        'now_year' : (datetime.now().year)+543,
-        #########################################
-
-        'line_chart_cited' : line_chart_cited_per_year(),
-        'sum_cited' :sum_of_cited(),
-        'avg_per_items' :avg_per_items(),
-        'avg_per_year' :avg_per_year(),
-        
-        'date' : get_date_file(),
-    }
-    print("------------")
-    print(value)
-
-    return render(request,'importDB/ranking_cite_info.html',context) 
-
-@login_required(login_url='login')
 def pageResearchMan(request):
     
     selected_year = datetime.now().year+543 # กำหนดให้ ปี ใน dropdown เป็นปีปัจจุบัน
@@ -5593,7 +5522,8 @@ def login_2(request):
     username = ""
     passowrd = ""
     default_pass = 'pass11111' #รหัสหลอก เพื่อให้ เข้า auth ของ Django ได้
-    
+
+
     if request.method == "POST":
         username = request.POST.get('username') # RO ใช้ username = request.POST['username']
         password = request.POST.get('password')
