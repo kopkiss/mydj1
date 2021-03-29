@@ -22,6 +22,7 @@
   <!-- Custom styles for this template-->
   <link href="{% static 'css/sb-admin-2.min.css' %}" rel="stylesheet">
   <script src="{% static 'js/plotly-latest.min.js' %}"></script>
+  <script> document.createElement("ilogo"); </script>
   <script>
 
   function updateArticleDisplayResult(search_keyword) {
@@ -210,12 +211,14 @@
 
   .widget-ch2.widget-ch2-hover {
     transition: all .2s;
+    
   }
 
   .widget-ch2 {
     text-align: left;
     padding: 1rem;
     position: relative;
+    
   }
 
   .box-hover:hover {
@@ -237,6 +240,7 @@
     box-shadow: 0 0.46875rem 4.1875rem rgba(4,9,20,0.05), 0 0.9375rem 2.40625rem rgba(4,9,20,0.05), 0 0.25rem 1.3125rem rgba(4,9,20,0.06), 0 0.125rem 1.1875rem rgba(4,9,20,0.06);
     cursor: pointer;
     background: #BDEAFF;
+   
   }
 
   .reservation_fontcolor {
@@ -503,12 +507,13 @@
   }
 
   .red-card:hover {
+    background: rgb(250, 195, 202);
     box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
     box-sizing: border-box;
-    
+    transition: 0.5s;
   }
 
-  .red-card span:after {
+  /* .red-card span:after {
           content: '\00bb';
           position: absolute;
           opacity: 0;
@@ -531,29 +536,22 @@
   .red-card:hover span:after {
     opacity: 1;
     right: 0;
-  }    
+  }     */
 
   .blue-card {
-    background: transparent;
+    background: transparent
   }
 
   .blue-card:hover {
-    /* background: rgb(195, 219, 250); */
+    background: rgb(195, 219, 250);
     box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
     box-sizing: border-box;
+    transition: 0.5s;
   }
 
-  .blue-card span:after {
-          content: '\00bb';
-          /* content: '12,000'; */
-          position: absolute;
-          opacity: 0;
-          top: 0;
-          right: -20px;
-          transition: 0.5s;
-        }
+  
 
-  .blue-card span {
+  /* .blue-card span {
     cursor: pointer;
     display: inline-block;
     position: relative;
@@ -567,19 +565,20 @@
   .blue-card:hover span:after {
     opacity: 1;
     right: 0;
-  }    
+  }     */
 
   .yellow-card {
     background: transparent;
   }
 
   .yellow-card:hover {
-    /* background: rgb(246, 250, 212); */
+    background: rgb(246, 250, 212);
     box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
     box-sizing: border-box;
+    transition: 0.5s;
   }
 
-  .yellow-card span:after {
+  /* .yellow-card span:after {
           content: '\00bb';
           position: absolute;
           opacity: 0;
@@ -602,16 +601,18 @@
   .yellow-card:hover span:after {
     opacity: 100;
     right: 0;
-  }   
+  }    */
 
   .filp_shadow {
     background: transparent;
   }
 
   .filp_shadow:hover {
-    /* background: rgb(246, 250, 212); */
+    
     box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
     box-sizing: border-box;
+    transition: 0.5s;
+    
   }
 
   .filp_shadow span:after {
@@ -629,9 +630,9 @@
     transition: 0.5s;
   }
 
-  .filp_shadow:hover span {
+  /* .filp_shadow:hover span {
     padding-right: 40px;
-  }
+  } */
 
   .filp_shadow:hover span:after {
     opacity: 100;
@@ -639,12 +640,48 @@
   }    
  
 
+  .font_filp_shadow {
+    background: transparent;
+  }
+
+  .font_filp_shadow:hover {
+    background: rgb(246, 250, 212);
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+    box-sizing: border-box;
+  }
+
+  .font_filp_shadow span:after {
+          position: absolute;
+          opacity: 0;
+          top: 0;
+          right: 0px;
+          /* transition: 0.5s; */
+          font-size: 100em;
+        }
+
+  .font_filp_shadow span {
+    cursor: pointer;
+    display: inline-block;
+    position: relative;
+    transition: 0.5s;
+  }
+
+  /* .font_filp_shadow:hover span {
+    padding-right: 40px;
+  } */
+
+  .font_filp_shadow:hover span:after {
+    opacity: 100;
+    right: 0;
+  }  
 
 
 
 /* ###############################
 ######### เอาไว้ flip card #################
 ########################## */
+
+
 .content_flip {
   position: relative;
   width: 100%;
@@ -675,10 +712,20 @@
 }
 
 .front_flip .inner_flip, .back_flip .inner_flip {
-  height: 100%;
+  /* height: 100%; */
   display: grid;
   transform: translateZ(80px) ;
 }
+
+.blue-card span:after {
+          /* content: '\00bb'; */
+          content: 'citation';
+          position: absolute;
+          opacity: 0;
+          top: 0;
+          right: -20px;
+          transition: 0.5s;
+        }
 
 .front_flip:after {
   content: '';
@@ -691,18 +738,24 @@
   border-radius: 1px;
   backface-visibility: hidden;
 }
-.front_flip .inner_flip {
+/* .front_flip .inner_flip {
   grid-template-rows: 5fr 1fr 1fr 2fr 1fr;
-}
+} */
 
 .back_flip {
   transform: rotateY(180deg);
  
 }
 
+/* #####end#######
+############### */
 
- 
-  </style>
+
+
+
+
+
+</style>
 
 </head>
 

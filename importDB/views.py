@@ -4290,11 +4290,11 @@ def pageRanking(request): # page Ranking ISI/SCOPUS/TCI
 
     def cited_info():
         sources = ['isi','tci','scopus']
-        df_cited = pd.read_csv("C:/Users/Asus/Desktop/Learn/ranking_citation.csv")
+        df_cited = pd.read_csv("""mydj1/static/csv/ranking_citation.csv""")
         results = pd.DataFrame()
 
         for s in sources:
-            df= pd.read_csv(f"C:/Users/Asus/Desktop/Learn/ranking_{s}.csv")
+            df= pd.read_csv(f"mydj1/static/csv/ranking_{s}.csv")
             total_cited = df_cited[f'{s}_cited'].sum()
             total_paper = df.PSU.sum()
             avg_per_items = total_cited/total_paper
@@ -4337,7 +4337,7 @@ def pageRanking(request): # page Ranking ISI/SCOPUS/TCI
         'total_publication' :total_publications(),
         'date' : get_date_file(),
         'top_bar_title': "จำนวนงานวิจัย",
-        'focus' : focus, 
+        'focus' : focus,   # เอาไว้เช็ค เพื่อเลื่อนหน้าจอมาที่ bar graph เวลา post จาก dropdown ปี พ.ศ.
         're' : cited_info(),
     }
 

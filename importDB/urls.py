@@ -21,6 +21,7 @@ urlpatterns = [
     path('revenues/show_table', views.revenues_table, name = 'revenues-show-table-page'),
     path('revenues/more-info', views.revenues_more_info, name = 'revenues-more-info'),
 
+
     path('ranking/',views.pageRanking, name = 'ranking-page' ),
     path('ranking/comparing', views.ranking_comparison , name = 'ranking-comparing'),
     path('ranking/prediction', views.ranking_prediction , name = 'ranking-pridiction'),
