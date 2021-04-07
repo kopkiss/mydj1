@@ -413,7 +413,7 @@ def query(request): # Query ฐานข้อมูล Mysql (เป็น .csv
             col = 'q11'
             
         elif request.POST['row']=='Query12': # ISI-WoS catagories 
-            checkpoint = query12() 
+            # checkpoint = query12() 
             dt = datetime.now()
             timestamp = time.mktime(dt.timetuple()) 
             whichrows = 'row12'

@@ -53,6 +53,7 @@ INSTALLED_APPS = [  # เป็นการบอกว่า ในชั้น
     # 'werkzeug_debugger_runserver',
     # 'django_extensions',
     # 'sslserver',
+    'import_export',
 ]
 
 MIDDLEWARE = [

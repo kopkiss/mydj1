@@ -69,31 +69,66 @@
 
     <!-- Heading -->
     <div class="sidebar-heading">
-      Addons
+      Pages
     </div>
 
     <!-- Nav Item - Pages Collapse Menu -->
     <li class="nav-item">
-      <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages" aria-expanded="true" aria-controls="collapsePages">
-        <i class="fas fa-fw fa-folder"></i>
-        <span>Pages</span>
+      <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#password-pages" aria-expanded="true" aria-controls="collapsePages">
+        <i class="fas fa-fw fa-key"></i>
+        <span>Manage Passwords</span>
       </a>
-      <div id="collapsePages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
+      <div id="password-pages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
         <div class="bg-white py-2 collapse-inner rounded">
-          <h6 class="collapse-header">Login Screens:</h6>
+          <h6 class="collapse-header">จัดการรหัสผ่าน:</h6>
           <a class="collapse-item" href="https://passport.psu.ac.th/index.php?content=changepass">Change Password</a>
           <a class="collapse-item" href="https://passport.psu.ac.th/index.php?content=forgetpass">Forgot Password</a>
-          <div class="collapse-divider"></div>
+          <!-- <div class="collapse-divider"></div>
           <h6 class="collapse-header">Other Pages:</h6>
           <a class="collapse-item" href='{% url "research-man-page"%}'>จำนวนผู้วิจัย</a>
           <a class="collapse-item" href='{% url "revenues-page"%}'>รายได้งานวิจัย</a>
           <a class="collapse-item" href='{% url "ranking-page"%}'>งานวิจัย</a>
           <a class="collapse-item" href='{% url "exFund-page"%}'>แหล่งทุนภายนอก</a>
-          <a class="collapse-item" href='{% url "test-page"%}'>Test Page</a>
+          <a class="collapse-item" href='{% url "test-page"%}'>Test Page</a> -->
           <!-- <a class="collapse-item" href="blank.html">แหล่งทุนภายนอก</a> -->
         </div>
       </div>
     </li>
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#research-pages" aria-expanded="true" aria-controls="collapsePages">
+        <i class="fas fa-fw fa-book-open"></i>
+        <span>Research</span>
+      </a>
+      <div id="research-pages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
+        <div class="bg-white py-2 collapse-inner rounded">
+          <h6 class="collapse-header">งานวิจัย:</h6>
+          <div class="collapse-divider"></div>
+          <a class="collapse-item" href='{% url "research-man-page"%}'>จำนวนผู้วิจัย</a>
+          <a class="collapse-item" href='{% url "revenues-page"%}'>รายได้งานวิจัย</a>
+          <a class="collapse-item" href='{% url "ranking-page"%}'>งานวิจัย</a>
+          <a class="collapse-item" href='{% url "exFund-page"%}'>แหล่งทุนภายนอก</a>
+          <a class="collapse-item" href='{% url "test-page"%}'>Test Page</a> 
+        </div>
+      </div>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#sciencepark-pages" aria-expanded="true" aria-controls="collapsePages">
+        <i class="fas fa-fw fa-atom"></i>
+        <span>Science Park</span>
+      </a>
+      <div id="sciencepark-pages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
+        <div class="bg-white py-2 collapse-inner rounded">
+          <h6 class="collapse-header">อุทยานวิทยาศาสตร์:</h6>
+          <div class="collapse-divider"></div>
+          <a class="collapse-item" href='{% url "research-man-page"%}'>หน้าหลักอุทยานวิทยาศาสตร์</a>
+        
+        </div>
+      </div>
+    </li>
+
+
 
     <!-- Nav Item - Charts -->
     <li class="nav-item">
