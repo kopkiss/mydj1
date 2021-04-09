@@ -1,6 +1,7 @@
 {% load static %}
-<ul class="navbar-nav sidebar sidebar-dark accordion" id="accordionSidebar" style = "background-color: rgb(00, 60, 113);">
-
+<!-- <ul class="navbar-nav sidebar sidebar-dark accordion" id="accordionSidebar" style = "background-color: rgb(00, 60, 113);"> -->
+<ul class="navbar-nav sidebar sidebar-dark accordion" id="accordionSidebar" 
+  style = "background: -webkit-linear-gradient( rgb(00, 60, 113),rgb(0,133,173));">
     <!-- Sidebar - Brand -->
     <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
       <div class="sidebar-brand-icon " >
@@ -83,14 +84,6 @@
           <h6 class="collapse-header">จัดการรหัสผ่าน:</h6>
           <a class="collapse-item" href="https://passport.psu.ac.th/index.php?content=changepass">Change Password</a>
           <a class="collapse-item" href="https://passport.psu.ac.th/index.php?content=forgetpass">Forgot Password</a>
-          <!-- <div class="collapse-divider"></div>
-          <h6 class="collapse-header">Other Pages:</h6>
-          <a class="collapse-item" href='{% url "research-man-page"%}'>จำนวนผู้วิจัย</a>
-          <a class="collapse-item" href='{% url "revenues-page"%}'>รายได้งานวิจัย</a>
-          <a class="collapse-item" href='{% url "ranking-page"%}'>งานวิจัย</a>
-          <a class="collapse-item" href='{% url "exFund-page"%}'>แหล่งทุนภายนอก</a>
-          <a class="collapse-item" href='{% url "test-page"%}'>Test Page</a> -->
-          <!-- <a class="collapse-item" href="blank.html">แหล่งทุนภายนอก</a> -->
         </div>
       </div>
     </li>
@@ -104,6 +97,7 @@
         <div class="bg-white py-2 collapse-inner rounded">
           <h6 class="collapse-header">งานวิจัย:</h6>
           <div class="collapse-divider"></div>
+          <a class="collapse-item" href='{% url "home-page"%}'>หน้าหลักงานวิจัย</a>
           <a class="collapse-item" href='{% url "research-man-page"%}'>จำนวนผู้วิจัย</a>
           <a class="collapse-item" href='{% url "revenues-page"%}'>รายได้งานวิจัย</a>
           <a class="collapse-item" href='{% url "ranking-page"%}'>งานวิจัย</a>
@@ -122,7 +116,7 @@
         <div class="bg-white py-2 collapse-inner rounded">
           <h6 class="collapse-header">อุทยานวิทยาศาสตร์:</h6>
           <div class="collapse-divider"></div>
-          <a class="collapse-item" href='{% url "research-man-page"%}'>หน้าหลักอุทยานวิทยาศาสตร์</a>
+          <a class="collapse-item" href='{% url "science-park"%}'>หน้าหลักอุทยานวิทยาศาสตร์</a>
         
         </div>
       </div>

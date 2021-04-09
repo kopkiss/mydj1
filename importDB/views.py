@@ -3419,11 +3419,12 @@ def home(requests):  # หน้า homepage หน้าแรก
         'plot2': graph2(),
         'plot3': graph3(),
         'plot4' : graph4(),
-        'top_bar_title': "หน้าหลัก"
+        'top_bar_title': "หน้าหลักงานวิจัย"
 
     }
     
     return render(requests, 'importDB/welcome.html', context)
+    # return render(requests, 'importDB/science_park.html', context)
 
 @login_required(login_url='login')
 def pageRevenues(request): # page รายได้งานวิจัย
@@ -5455,6 +5456,14 @@ def pageResearchMan(request):
     return render(request,'importDB/research_man.html',context)  
 
 @login_required(login_url='login')
+def science_park(request):
+    context={
+        
+       
+    }
+    return render(request,'importDB/science_park.html',context) 
+
+@login_required(login_url='login')
 def test_page(request):
     context={
         
@@ -5463,6 +5472,7 @@ def test_page(request):
 
 
     return render(request,'importDB/test-page.html',context) 
+
 
 ##################################################################
 ##### " function Login ##############
