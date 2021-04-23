@@ -2422,10 +2422,15 @@ def query10(): # ISI SCOPUS TCI
             # df_t = pd.read_csv("""C:/Users/Asus/Desktop/Learn/univ_results.csv""").fillna(0)
             piv_df = pd.pivot_table(df_univs[df_univs["index_source"]==s], values='total', index=['year'],
                                 columns=['short_name']).reset_index()
-            results = pd.merge(df_psu[['year',s]],piv_df,left_on="year",right_on="year",how='inner')
-            results = results.rename(columns={s: 'PSU'})
-            results = results.astype(int)
 
+            results = pd.merge(df_psu[['year',s]],piv_df,left_on="year",right_on="year",how='inner')
+
+            results = results.rename(columns={s: 'PSU'})
+   
+            results = results.fillna(0)
+     
+            results = results.astype(int)
+     
             ############# ตรวจสอบว่าปี ปัจจุบัน มีค่าอยู่ใน df เเล้วหรือไม่ ถ้าไม่มี ให้เติม ปีปัจจุบัน ด้วยค่า 0 ทั้งหมด ########
             if now_year not in results['year'].values:
                 results = results.append({'year': now_year}, ignore_index=True).fillna(0)
@@ -5462,6 +5467,14 @@ def science_park(request):
        
     }
     return render(request,'importDB/science_park.html',context) 
+
+@login_required(login_url='login')
+def science_park_graph(request):
+    context={
+        
+       
+    }
+    return render(request,'importDB/science_park_graph.html',context) 
 
 @login_required(login_url='login')
 def test_page(request):

@@ -13,294 +13,463 @@
         transform: scale(1.05, 1.05);
         }
 
+  .circle-icon {
+    background: #ffc0c0;
+    /* width: 100px;
+    height: 100px; */
+    border-radius: 50%;
+    text-align: center;
+    line-height: 100px;
+    vertical-align: middle;
+    padding: 30px;
+}
+
+.circle-icon2 {
+    background: #ffc0c0;
+    vertical-align: middle;
+    padding:30px;
+    border-radius: 50%;
+}
+
+.icon-bg-1 {
+    color: #F1C40F;
+}
+
+.icon-bg-2 {
+    color: #228B22;
+}
+
+.icon-bg-3 {
+    color: #B22222;
+}
+
+.icon-bg-4 {
+    color: #2E86C1;
+}
+
+.science-park-buttons {
+        color: #e4e4e4 !important;
+        font-weight: 600;
+        /* font-weight: bold; #111e6c*/ 
+        background: slategray;
+        padding: 4px;
+        /* border: 1px solid #111e6c !important; */
+        display: inline-block;
+        transition: all 0.4s ease 0s;
+        width: 4.2rem;
+        height: 2rem;
+        }
+    
+    .science-park-buttons:hover {
+        color: #202020 !important;
+        background: #e4e4e4 ;
+        border-color: #000000 !important;
+        transition: all 0.4s ease 0s;
+        }
 
 
 </style>
-    <!-- Content Row -->
-
-
-    <!-- <div class="container-fluid m-3">
-      <button type="button" id = "tci" onclick="updateArticleDisplayResult('Prince Of Songkla University')" class = "btn btn-primary mb-3">tci</button>
-    </div> -->
     
-    
-
-    
+  
       <div class="row" >
-        <div class="col-xs-12 col-md-12 col-lg-12 "  >
+        <div class=" col-lg-12 "  >
           <div class="pr-3 " style=" float: right; ">
             <b>ข้อมูลจาก หน่วยงานอุทยานวิทยาศาสตร์</b>
             <span class = "px-2" style="font-size:15px; background-color: coral;  border-radius: 30px; "><b>Last updated: </b> 12/12/1222 {{date}}</span>
           </div> 
         </div>
       </div>
-      <div class="row">
-        <div class=" col-lg-4 col-xs-12 col-md-12 mb-3" onclick="location.href= '/research_man';" id = "tab_A" >
-          <div class="widget-ch br-br" >
-            <div class="card border-bottom-primary shadow h-100 py-2 card_sci" style="border: 1px solid #0275d8; cursor: pointer;">
-              <div class="card-body"  style="height:220px;">
-                <div class="row no-gutters align-items-center">
-                  <div class="col ">
-                    <div class="text-primary font-weight-bold mb-1" style="text-align: center;"><h6><b>จำนวนผลงานวิจัย หรือ นวัตกรรม<br/>ที่ใช้ประโยชน์เชิงพาณิชย์ </b></h6></div>
-                    <hr width=70%>
-                    <div class="row " >
-                      <div class = "col">
-                        <div class="card-body h2  text-gray-800 mx-3" style="text-align: center; font-size: 300%;   " >
-                          <span>8,000</span>
-                        </div>
-                      </div>
+      
+      <!-- row1 -->
+      <div class="row mx-3 mt-3" >
+        <div class="mb-3 card border-left-danger shadow" style="width: 100%; border: 1px  ">
+          <div class="card-header" style="background-color: white;">
+            <span class = "mt-2 " style="color: rgba(13,27,62,0.7); display: inline; font-size: 1.5rem;">
+              &nbsp; รายรับหน่วยงานอุทยานวิทยาศาสตร์
+            </span>
+          </div>
+          <div class="no-gutters row">
+            <div class="col-sm-6 col-md-6 col-xl-4" >
+              <div class="row card-body" style="margin-left: auto; margin-right: auto;">
+                <div style="display: flex; flex-direction: row; align-items: center; ">
+                  <div>
+                    <span class="fa-stack fa-lg fa-2x"  >
+                      <i class="fa fa-circle fa-stack-2x icon-bg-3"></i>
+                      <i class="fas fa-wallet fa-stack-1x" style="color: cornsilk;" ></i>
+                    </span>
+                  </div>
+                  <div class="ml-3" style="display: flex;flex-direction: column;align-content: center;flex: 1; position: relative;">
+                    <div class="widget-subheading justify-content-between" >
+                      รายรับจาก Economic Impact <span style="color: transparent;"> บัตรและทรัพย์สินทางปัญญา </span>
+                    </div>
+                    <div class=" h2  text-gray-800 " style=" font-size: 200%; ">
+                      <span>7,000</span>
+                      <span style=" font-size: 50%; ">บาท</span>  
+                    </div>
+                    <div>
+                    <form action="show_table" target="_blank" method=POST>
+                      {% csrf_token %} 
+                      <input name = {{filter_year}}/1 type="submit" value="View" class="btn science-park-buttons " 
+                              style=" border-radius : 25px;"> 
+                    </form>
+                    </div>
+                  </div> 
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6 col-md-6 col-xl-4" >
+              <div class="row card-body" style="margin-left: auto; margin-right: auto;">
+                <div style="display: flex; flex-direction: row; align-items: center; ">
+                  <div>
+                    <span class="fa-stack fa-lg fa-2x"  >
+                      <i class="fa fa-circle fa-stack-2x icon-bg-3"></i>
+                      <i class="fas fa-money-bill fa-stack-1x" style="color: cornsilk;" ></i>
+                    </span>
+                  </div>
+                  <div class="ml-3" style="display: flex;flex-direction: column;align-content: center;flex: 1; position: relative;">
+                    <div class="widget-subheading justify-content-between" >
+                      รายรับจากการขาย/ขอใช้ สิทธิบัตรและทรัพย์สินทางปัญญา
+                    </div>
+                    <div class=" h2  text-gray-800 " style=" font-size: 200%; ">
+                      <span>6,000</span>
+                      <span style=" font-size: 50%; ">บาท</span>  
+                    </div>
+                    <div>
+                      <form action="show_table" target="_blank" method=POST>
+                        {% csrf_token %} 
+                        <input name = {{filter_year}}/1 type="submit" value="View" class="btn science-park-buttons " 
+                                style=" border-radius : 25px;"> 
+                      </form>
+                    </div>
+                  </div> 
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6 col-md-6 col-xl-4" >
+              <div class="row card-body" style="margin-left: auto; margin-right: auto;">
+                <div style="display: flex; flex-direction: row; align-items: center; ">
+                  <div>
+                    <span class="fa-stack fa-lg fa-2x"  >
+                      <i class="fa fa-circle fa-stack-2x icon-bg-3"></i>
+                      <i class="fas fa-funnel-dollar fa-stack-1x" style="color: cornsilk;" ></i>
+                    </span>
+                  </div>
+                  <div class="ml-3" style="display: flex;flex-direction: column;align-content: center;flex: 1; position: relative;">
+                    <div class="widget-subheading justify-content-between" >
+                      รายรับงานวิจัย จากภาคอุตสาหกรรม และภาคเอกชน<span style="color: transparent;">ชน</span>
+                    </div>
+                    <div class=" h2  text-gray-800 " style=" font-size: 200%; ">
+                      <span>5,000</span>
+                      <span style=" font-size: 50%; ">บาท</span>     
+                    </div>
+                    <div>
+                    <form action="show_table" target="_blank" method=POST>
+                      {% csrf_token %} 
+                      <input name = {{filter_year}}/1 type="submit" value="View" class="btn science-park-buttons " 
+                              style=" border-radius : 25px;"> 
+                    </form>
+                    </div>
+                  </div> 
+                </div>
+              </div>
+            </div>
+          </div>
+        </div> 
+      </div>
+
+      <!-- row2 -->
+      <div class="row mx-3 ">
+        <div class="mb-3 card border-left-warning shadow" style="border: 1px">
+          <div class="card-header" style="background-color: white;">
+            <span class = "mt-2 " style="color: rgba(13,27,62,0.7); display: inline; font-size: 1.5rem;">
+              &nbsp; จำนวนทรัพย์สินทางปัญญา นวัตกรรม หรือ สิทธิบัตร
+            </span>
+          </div>
+          <div class="no-gutters row">
+            <div class="col-sm-6 col-md-6 col-xl-4" >
+              <div class="row card-body" style="margin-left: auto; margin-right: auto;">
+                <div style="display: flex; flex-direction: row; align-items: center; ">
+                  <div>
+                    <span class="fa-stack fa-lg fa-2x"  >
+                      <i class="fa fa-circle fa-stack-2x icon-bg-1"></i>
+                      <i class="fas fa-vial fa-stack-1x" style="color: cornsilk;" ></i>
+                    </span>
+                  </div>
+                  <div class="ml-3" style="display: flex;flex-direction: column;align-content: center;flex: 1; position: relative;">
+                    <div class="widget-subheading justify-content-between" >
+                      จำนวนผลงานวิจัย หรือ นวัตกรรมที่ใช้ประโยชน์เชิงพาณิชย์  <span style="color: transparent;">ระหว่างมหาวิทยาลัย</span>
+                    </div>
+                    <div class=" h2  text-gray-800 " style=" font-size: 200%; ">
+                      <span>7,000</span>
+                    </div>
+                    <div>
+                    <form action="show_table" target="_blank" method=POST>
+                      {% csrf_token %} 
+                      <input name = {{filter_year}}/1 type="submit" value="View" class="btn science-park-buttons " 
+                              style=" border-radius : 25px;"> 
+                    </form>
+                    </div>
+                  </div> 
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6 col-md-6 col-xl-4" >
+              <div class="row card-body" style="margin-left: auto; margin-right: auto;">
+                <div style="display: flex; flex-direction: row; align-items: center; ">
+                  <div>
+                    <span class="fa-stack fa-lg fa-2x"  >
+                      <i class="fa fa-circle fa-stack-2x icon-bg-1"></i>
+                      <i class="fas fa-scroll fa-stack-1x" style="color: cornsilk;" ></i>
+                    </span>
+                  </div>
+                  <div class="ml-3" style="display: flex;flex-direction: column;align-content: center;flex: 1; position: relative;">
+                    <div class="widget-subheading justify-content-between" >
+                      จำนวนทรัพย์สินทางปัญญา หรือ สิทธิบัตรที่ถูกนำไปใช้ประโยชน์เชิงพาณิชย์
+                    </div>
+                    <div class=" h2  text-gray-800 " style=" font-size: 200%; ">
+                      <span>6,000</span>
+                    </div>
+                    <div>
+                    <form action="show_table" target="_blank" method=POST>
+                      {% csrf_token %} 
+                      <input name = {{filter_year}}/1 type="submit" value="View" class="btn science-park-buttons " 
+                              style=" border-radius : 25px;"> 
+                    </form>
+                    </div>
+                  </div> 
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6 col-md-6 col-xl-4" >
+              <div class="row card-body" style="margin-left: auto; margin-right: auto;">
+                <div style="display: flex; flex-direction: row; align-items: center; ">
+                  <div>
+                    <span class="fa-stack fa-lg fa-2x"  >
+                      <i class="fa fa-circle fa-stack-2x icon-bg-1"></i>
+                      <i class="fas fa-file-contract fa-stack-1x" style="color: cornsilk;" ></i>
+                    </span>
+                  </div>
+                  <div class="ml-3" style="display: flex;flex-direction: column;align-content: center;flex: 1; position: relative;">
+                    <div class="widget-subheading justify-content-between" >
+                      จำนวนทรัพย์สินทางปัญญา หรือ สิทธิบัตรที่เกิดร่วมกันระหว่างมหาวิทยาลัยและเอกชน 
+                    </div>
+                    <div class=" h2  text-gray-800 " style=" font-size: 200%; ">
+                      <span>5,000</span>
+                    </div>
+                    <div>
+                    <form action="show_table" target="_blank" method=POST>
+                      {% csrf_token %} 
+                      <input name = {{filter_year}}/1 type="submit" value="View" class="btn science-park-buttons " 
+                              style=" border-radius : 25px;"> 
+                    </form>
+                    </div>
+                  </div> 
+                </div>
+              </div>
+            </div>
+          </div>
+        </div> 
+      </div>
+      
+
+      <!-- row3 -->
+      <div class="row mx-3  mt-2" >
+        <div class="col-md-12 col-xl-6 pl-0 mb-4" >
+          <div class="card border-left-primary shadow h-100 py-0" style="border: 1px; position: relative; padding:30px; ">
+            <div class="row card-body" style="margin-left: auto; margin-right: auto;">
+              <div style="display: flex; flex-direction: row; align-items: center; ">
+                <div>
+                  <span class="fa-stack fa-lg fa-2x"  >
+                    <i class="fa fa-circle fa-stack-2x icon-bg-4"></i>
+                    <i class="far fa-handshake fa-stack-1x" style="color: cornsilk;" ></i>
+                  </span>
+                </div>
+                <div class="ml-3" style="display: flex;flex-direction: column;align-content: center;flex: 1; position: relative;">
+                  <div style=" color: #4682B4;">
+                    <b>จำนวนคู่ความร่วมมือทั้งหมด</b>
+                  </div>
+                  <div class=" h2  text-gray-800 " style=" font-size: 300%; ">
+                    <span>7,000</span>
+                  </div>
+                </div> 
+              </div>
+            </div>
+            <hr class="my-0 py-0 ">
+            <div class="row card-body mb-1">
+              <div class="col-md-12 col-lg-6 ">
+                <div class="row" style="display: flex; flex-direction: row; align-items: left; ">
+                  <div>
+                    <span class="fa-stack fa-1x"  >
+                      <i class="fa fa-circle fa-stack-2x icon-bg-4"></i>
+                      <i class="fas fa-hand-holding-usd fa-stack-1x" style="color: cornsilk;" ></i>
+                    </span>
+                  </div>
+                  <div class="ml-3" style="display: flex;flex-direction: column;align-content: center;flex: 1; position: relative;">
+                    <div style=" color: #4682B4;">
+                      <b>ความร่วมมือกับบริษัท</b>
+                    </div>
+                    <div class=" h2  text-gray-800 " style=" font-size: 200%; ">
+                      <span>1,000</span>
                     </div>
                   </div>
                 </div>
+                <div class="row ml-3 mb-1">
+                  <div class="ml-3" style=" position: relative;">
+                    <div style=" color: #4682B4;">
+                      <b>(ในภูมิภาค : 
+                        <b class=" h2  text-gray-800 " style=" font-size: 150%; text-align: center;"> <span>200</span></b>
+                      )
+                      </b>
+                    </div>
+                  </div>  
+                </div>
               </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- รายได้งานวิจัย -->
-            
-        <div class=" col-lg-4 col-xs-12 col-md-12 mb-3" onclick="location.href= '/revenues';" id = "tab_B">
-          <div class="widget-ch br-br" >
-            <div class="card border-bottom-success shadow h-100 py-2 card_sci" style="border: 1px solid #5cb85c; cursor: pointer;">
-              <div class="card-body" style="height: 220px; ">
-                <div class="row no-gutters align-items-center">
-                  <div class="col ">
-                    <div class="text-success font-weight-bold mb-1" style="text-align: center;"><h6><b>จำนวนทรัพย์สินทางปัญญา หรือสิทธิบัตร<br/>ที่ใช้ประโยชน์เชิงพาณิชย์</b></h6></div>
-                    <hr width=70%>
-                    <div class="row " >
-                      <div class = "col">
-                        <div class="card-body h2 text-gray-800 mx-3" style="text-align: center; font-size: 300%;   " >
-                          <span>8,000</span>
-                        </div>
-                      </div>
+              <div class="col-md-12  col-lg-6 " >
+                <div class="row" style="display: flex; flex-direction: row; align-items: left; ">
+                  <div>
+                    <span class="fa-stack fa-1x"  >
+                      <i class="fa fa-circle fa-stack-2x icon-bg-4"></i>
+                      <i class="fas fa-hand-holding-heart fa-stack-1x" style="color: cornsilk;" ></i>
+                    </span>
+                  </div>
+                  <div class="ml-3" style="display: flex;flex-direction: column;align-content: center;flex: 1; position: relative;">
+                    <div style=" color: #4682B4;">
+                      <b>ความร่วมมือกับชุมชน</b>
+                    </div>
+                    <div class=" h2  text-gray-800 " style=" font-size: 200%; ">
+                      <span>4,000</span>
                     </div>
                   </div>
                 </div>
+                <div class="row ml-3">
+                  <div class="ml-3" style=" position: relative;">
+                    <div style=" color: #4682B4;">
+                      <b>(ในภูมิภาค : 
+                        <b class=" h2  text-gray-800 " style=" font-size: 150%; text-align: center;"> <span>300</span></b>
+                      )
+                      </b>
+                    </div>
+                  </div>  
+                </div>
               </div>
+            </div>
+            <div class="text-center card-footer" style="background-color: white;">
+              <form action="show_table" target="_blank" method=POST>
+                {% csrf_token %} 
+                <input name = {{filter_year}}/1 type="submit" value="View" class="btn science-park-buttons " 
+                        style=" border-radius : 25px;"> 
+              </form>
             </div>
           </div>
         </div>
-        
-        <div class=" col-lg-4 col-xs-12 col-md-12 mb-3 " onclick="location.href= '/ranking';" id = "tab_C" >
-          <div class="widget-ch  br-br" >
-            <div class="card border-bottom-info shadow h-100 py-2 card_sci" style="border: 1px solid #5bc0de; cursor: pointer;">
-              <div class="card-body" style="height: 220px;" >
-                <div class="row no-gutters align-items-center">
-                  <div class="col ">
-                    <div class="text-info font-weight-bold text-uppercase mb-1" style="text-align: center;"><h6><b>จำนวนทรัพย์สินทางปัญญา หรือสิทธิบัตร <br/>ที่เกิดร่วมกันระหว่างมหาวิทยาลัยและเอกชน</b></h6></div>
-                    <hr width=70%>
-                    <div class="row " >
-                      <div class = "col">
-                        <div class="card-body h2 text-gray-800 mx-3" style="text-align: center; font-size: 300%;   " >
-                          <span>8,000</span>
-                        </div>
-                      </div>
+        <div class="col-md-12 col-xl-6 pl-3 mb-3"  >
+          <div class="row">
+            <div class="card border-left-primary shadow mb-2" style=" position: relative; width: 100%;   ">
+              <div class="row card-header-title " style="display: flex; flex-direction: row; align-items: left; ">
+                <div class="ml-4">
+                  <span class="fa-stack fa-1x" style="padding: 10px;" >
+                    <i class="fa fa-circle fa-stack-2x icon-bg-4"></i>
+                    <i class="fas fa-hotel fa-stack-1x" style="color: cornsilk;" ></i>
+                  </span>
+                </div>
+                <div  style="padding: 10px; display: flex;flex-direction: column;align-content: center;flex: 1; position: relative;">
+                  <div style=" color: #4682B4;">
+                    <b>จำนวนบริษัทหรือหน่วยงานที่มา License ผลงานทรัพย์สินทางปัญญา</b>
+                  </div>
+                </div>
+              </div>
+              <hr class=" my-1">
+              <div class="row my-3" style="padding: 0px; text-align: center;">
+                <div class="col-sm-12 col-md-6">
+                  <div style=" color: #4682B4; ">
+                    <b >ทั้งหมด : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b>
+                    <b class=" h2 text-gray-800 " style=" font-size: 200%; "> 
+                      <span>300</span>
+                    </b>
+                  </div>
+                </div>
+                <div class="col-sm-12 col-md-6" >
+                  <div style=" color: #4682B4;">
+                    <b >Active ใน 3 ปี : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b>
+                    <b class=" h2 text-gray-800 " style=" font-size: 200%; "> 
+                      <span>300</span>
+                    </b>
+                  </div>
+                </div>
+              </div>
+              <div class="text-center card-footer" style="background-color: white;">
+                <form action="show_table" target="_blank" method=POST>
+                  {% csrf_token %} 
+                  <input name = {{filter_year}}/1 type="submit" value="View" class="btn science-park-buttons " 
+                          style=" border-radius : 25px;"> 
+                </form>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-xs-12 col-md-6 col-lg-12 col-xl-6 " >
+              <div class="row mr-1" style="padding: 0px;">
+                <div class="card border-left-primary shadow mb-2" style=" position: relative; width: 100%;  ">
+                  <div class="row card-header-title " style="display: flex; flex-direction: row; align-items: left; ">
+                    <div class="ml-4 ">
+                      <span class="fa-stack fa-1x" style="padding: 10px;" >
+                        <i class="fa fa-circle fa-stack-2x icon-bg-4"></i>
+                        <i class="fas fa-building fa-stack-1x" style="color: cornsilk;" ></i>
+                      </span>
+                    </div>
+                    <div class="mr-2" style="color: #4682B4; padding: 10px; display: flex;flex-direction: column;align-content: center;flex: 1; position: relative;">
+                        <b>จำนวนบริษัท Start Up ที่ดำเนินการผ่านอุทยานวิทยาศาสตร์</b>
                     </div>
                   </div>
+                  <hr class=" my-1">
+                  <div class=" h2 text-gray-800 text-center" style="padding: 0px; font-size: 200%; ">
+                    <span>1,000</span>
+                  </div>
+                  <div class="text-center card-footer" style="background-color: white;">
+                    <form action="show_table" target="_blank" method=POST>
+                      {% csrf_token %} 
+                      <input name = {{filter_year}}/1 type="submit" value="View" class="btn science-park-buttons " 
+                              style=" border-radius : 25px;"> 
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-xs-12 col-md-6 col-lg-12 col-xl-6 " >
+              <div class="row " style="padding: 0px;">
+                <div class="card border-left-primary shadow mb-2" style=" position: relative; width: 100%;  ">
+                  <div class="row card-header-title " style="display: flex; flex-direction: row; align-items: left; ">
+                    <div class="ml-4 ">
+                      <span class="fa-stack fa-1x" style="padding: 10px;" >
+                        <i class="fa fa-circle fa-stack-2x icon-bg-4"></i>
+                        <i class="fas fa-graduation-cap fa-stack-1x" style="color: cornsilk;" ></i>
+                      </span>
+                    </div>
+                    <div class="mr-2" style="color: #4682B4; padding: 10px; display: flex;flex-direction: column;align-content: center;flex: 1; position: relative;">
+                      <b>จำนวนบัณฑิตที่ก่อตั้งบริษัท โดยดำเนินการผ่านอุทยานวิทยาศาสตร์  </b>
+                    </div>
+                  </div>
+                  <hr class=" my-1">
+                  <div class=" h2 text-gray-800 text-center" style="padding: 0px; font-size: 200%; ">
+                    <span>1,000</span>
+                  </div>
+                  <div class="text-center card-footer" style="background-color: white;">
+                    <form action="graph" target="_blank" method=POST>
+                      {% csrf_token %} 
+                      <input name = 1 type="submit" value="View" class="btn science-park-buttons " 
+                              style=" border-radius : 25px;"> 
+                    </form>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        
       </div>
       
-      <div class="row">
-        <div class=" header-col mb-3" onclick="location.href= '/research_man';" id = "tab_A" >
-          <div class="widget-ch widget-ch-hover br-br" >
-            <div class="card border-left-primary shadow h-100 py-2 " >
-              <div class="card-body"  style="height: 300px;">
-                <div class="row no-gutters align-items-center">
-                  <div class="col ">
-                    <div class="text-primary font-weight-bold mb-1"><h6><b>จำนวนผู้วิจัยหลัก ปี {{now_year}}</b></h6></div>
-                    <div class=" mb-0 text-gray-800" >
-                      <h6>{{ head_page.total_of_guys }} คน 
-                        <img src="{% static 'img/bulb_2251110.png' %}" style="float:center;"
-                          title="จำนวนผู้วิจัยหลัก คือ การนับจำนวนผู้วิจัย ในตำแหน่ง อาจารย์, นักวิจัย และ นักวิจัยหลักปริญญาเอก 
-                          ที่ถูกระบุว่าเป็น First Author หรือ Corresponding Author
-                          ซึ่งงานวิจัยนั้นต้องได้รับตีพิมพ์ แบบ Publications และ Proceedings 
-                          ในฐานข้อมูล ISI-WoS หรือ Scopus เท่านั้น" 
-                          alt="จำนวนผู้วิจัยหลัก"    
-                          style="display: block; margin-left: auto; margin-right: auto;" 
-                          width="10" height="10"/> 
-                      </h6>
-                    </div>  
-                  </div>
-                  <div class="col-auto">
-                    <i class="fas fa-user-alt fa-2x text-gray-300"></i>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- รายได้งานวิจัย -->
-            
-        <div class=" header-col mb-3" onclick="location.href= '/revenues';" id = "tab_B">
-          <div class="widget-ch widget-ch-hover br-br" >
-            <div class="card border-left-success shadow h-100 py-2">
-              <div class="card-body" style="height: 300px;">
-                <div class="row no-gutters align-items-center">
-                  <div class="col ">
-                    <div class="text-success font-weight-bold text-uppercase mb-1"><h6><b>รายได้งานวิจัย ปี {{now_year}}</b></h6></div>
-                    <div class=" mb-0 text-gray-800"><h6>{{  head_page.total_of_budget| floatformat:2|intcomma }} บาท</div> 
-                  </div>
-                  <div class="col-auto ">
-                    <i class="fas fa-money-bill-alt fa-2x text-gray-300"></i>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class=" header-col mb-3 " onclick="location.href= '/ranking';" id = "tab_C" >
-          <div class="widget-ch widget-ch-hover br-br" >
-            <div class="card border-left-info shadow h-100 py-2">
-              <div class="card-body" style="height: 300px;">
-                <div class="row no-gutters align-items-center">
-                  <div class="col ">
-                    <div class="text-info font-weight-bold text-uppercase mb-1" ><h6><b>จำนวนงานวิจัย ปี {{now_year}}</b></h6></div>
-                      <div class="row ">
-                        <div class="col-auto pr-0 pl-3 "  >  
-                          <div class="mb-0 text-gray-800"><h6 style="color:red; display: inline;">Scopus : </h6><h6 style ="display: inline;"> {{head_page.num_of_pub_sco}}</h6> </div>
-                        </div>
-                        <div class="col-auto pr-0 pl-2"  >  
-                          <div class="mb-0 text-gray-800 " ><h6 style="color:royalblue; display: inline;">ISI-WoS : </h6><h6 style ="display: inline;">{{head_page.num_of_pub_isi}}</h6></div>
-                        </div>
-                        <!-- <div class="col-auto  pr-0 pl-2"  >  
-                          <div class="mb-0 text-gray-800 " ><h6 style="color:#F39C12; display: inline;">TCI : </h6><h6 style ="display: inline;">{{head_page.num_of_pub_tci}}</h6></div>
-                        </div> -->
-                      </div>
-                  </div>
-                  <div class="col-auto ">
-                    <i class="fas fa-book-open fa-2x text-gray-300"></i>    
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       
-        <div class=" header-col mb-3" onclick="location.href= '/exFund';" id = "tab_D">
-          <div class="widget-ch widget-ch-hover br-br" >
-            <div class="card border-left-warning shadow h-100 py-2">
-              <div class="card-body" style="height: 300px;">
-                <div class="row no-gutters align-items-center">
-                  <div class="col ">
-                    <div class="text-warning font-weight-bold text-uppercase mb-1"><h6><b>แหล่งทุนภายนอก</b></h6></div>
-                    <div class="h6 mb-0  text-gray-800"><h6>{{head_page.num_of_networks}} หน่วยงาน </h6></div>
-                  </div>
-                  <div class="col-auto">
-                    <i class="fas fa-hands-helping fa-2x text-gray-300"></i>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-      </div>
-      
-      <div class="row">
-        <div class=" header-col mb-3" onclick="location.href= '/research_man';" id = "tab_A" >
-          <div class="widget-ch widget-ch-hover br-br" >
-            <div class="card border-left-primary shadow h-100 py-2 " >
-              <div class="card-body"  style="height: 300px;">
-                <div class="row no-gutters align-items-center">
-                  <div class="col ">
-                    <div class="text-primary font-weight-bold mb-1"><h6><b>จำนวนผู้วิจัยหลัก ปี {{now_year}}</b></h6></div>
-                    <div class=" mb-0 text-gray-800" >
-                      <h6>{{ head_page.total_of_guys }} คน 
-                        <img src="{% static 'img/bulb_2251110.png' %}" style="float:center;"
-                          title="จำนวนผู้วิจัยหลัก คือ การนับจำนวนผู้วิจัย ในตำแหน่ง อาจารย์, นักวิจัย และ นักวิจัยหลักปริญญาเอก 
-                          ที่ถูกระบุว่าเป็น First Author หรือ Corresponding Author
-                          ซึ่งงานวิจัยนั้นต้องได้รับตีพิมพ์ แบบ Publications และ Proceedings 
-                          ในฐานข้อมูล ISI-WoS หรือ Scopus เท่านั้น" 
-                          alt="จำนวนผู้วิจัยหลัก"    
-                          style="display: block; margin-left: auto; margin-right: auto;" 
-                          width="10" height="10"/> 
-                      </h6>
-                    </div>  
-                  </div>
-                  <div class="col-auto">
-                    <i class="fas fa-user-alt fa-2x text-gray-300"></i>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- รายได้งานวิจัย -->
-            
-        <div class=" header-col mb-3" onclick="location.href= '/revenues';" id = "tab_B">
-          <div class="widget-ch widget-ch-hover br-br" >
-            <div class="card border-left-success shadow h-100 py-2">
-              <div class="card-body" style="height: 300px;">
-                <div class="row no-gutters align-items-center">
-                  <div class="col ">
-                    <div class="text-success font-weight-bold text-uppercase mb-1"><h6><b>รายได้งานวิจัย ปี {{now_year}}</b></h6></div>
-                    <div class=" mb-0 text-gray-800"><h6>{{  head_page.total_of_budget| floatformat:2|intcomma }} บาท</div> 
-                  </div>
-                  <div class="col-auto ">
-                    <i class="fas fa-money-bill-alt fa-2x text-gray-300"></i>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class=" header-col mb-3 " onclick="location.href= '/ranking';" id = "tab_C" >
-          <div class="widget-ch widget-ch-hover br-br" >
-            <div class="card border-left-info shadow h-100 py-2">
-              <div class="card-body" style="height: 300px;">
-                <div class="row no-gutters align-items-center">
-                  <div class="col ">
-                    <div class="text-info font-weight-bold text-uppercase mb-1" ><h6><b>จำนวนงานวิจัย ปี {{now_year}}</b></h6></div>
-                      <div class="row ">
-                        <div class="col-auto pr-0 pl-3 "  >  
-                          <div class="mb-0 text-gray-800"><h6 style="color:red; display: inline;">Scopus : </h6><h6 style ="display: inline;"> {{head_page.num_of_pub_sco}}</h6> </div>
-                        </div>
-                        <div class="col-auto pr-0 pl-2"  >  
-                          <div class="mb-0 text-gray-800 " ><h6 style="color:royalblue; display: inline;">ISI-WoS : </h6><h6 style ="display: inline;">{{head_page.num_of_pub_isi}}</h6></div>
-                        </div>
-                        <!-- <div class="col-auto  pr-0 pl-2"  >  
-                          <div class="mb-0 text-gray-800 " ><h6 style="color:#F39C12; display: inline;">TCI : </h6><h6 style ="display: inline;">{{head_page.num_of_pub_tci}}</h6></div>
-                        </div> -->
-                      </div>
-                  </div>
-                  <div class="col-auto ">
-                    <i class="fas fa-book-open fa-2x text-gray-300"></i>    
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      
-        <div class=" header-col mb-3" onclick="location.href= '/exFund';" id = "tab_D">
-          <div class="widget-ch widget-ch-hover br-br" >
-            <div class="card border-left-warning shadow h-100 py-2">
-              <div class="card-body" style="height: 300px;">
-                <div class="row no-gutters align-items-center">
-                  <div class="col ">
-                    <div class="text-warning font-weight-bold text-uppercase mb-1"><h6><b>แหล่งทุนภายนอก</b></h6></div>
-                    <div class="h6 mb-0  text-gray-800"><h6>{{head_page.num_of_networks}} หน่วยงาน </h6></div>
-                  </div>
-                  <div class="col-auto">
-                    <i class="fas fa-hands-helping fa-2x text-gray-300"></i>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-      </div>
-    
+
+   
     
 
     

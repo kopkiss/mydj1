@@ -30,7 +30,8 @@ urlpatterns = [
 
     path('exFund/',views.pageExFund, name = 'exFund-page'),
 
-    path('science_park', views.science_park, name = 'science-park'),
+    path('science_park/', views.science_park, name = 'science-park'),
+    path('science_park/graph', views.science_park_graph, name = 'science-park-graph-page'),
     
     path('test-page', views.test_page, name = 'test-page'),
     
