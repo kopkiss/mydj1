@@ -67,6 +67,29 @@
         transition: all 0.4s ease 0s;
         }
 
+    .todo-indicator {
+        position: absolute;
+        width: 4px;
+        height: 60%;
+        border-radius: .3rem;
+        left: .625rem;
+        top: 20%;
+        opacity: .6;
+        transition: opacity .2s;
+    }
+    .bg-warning1 {
+    background-color: #f7b924 !important;
+    }
+
+    .flex-container {
+  /* width: 30%; */
+  height: 50px;
+  background-color: rgba(42, 236, 227, 0.3);
+  /* text-align: center; */
+  border-radius: 25%;
+  
+
+}
 
 </style>
     
@@ -80,6 +103,26 @@
         </div>
       </div>
       
+     
+      <div class= "row pt-3 mx-3 " >
+        <div class="card flex-container mx-5"   >
+          <form class="mt-1 " name='filter' method=POST >
+            {% csrf_token %}
+            <b> ปี : &nbsp;</b>
+            <select id="year" name = "year" class=" mb-1 btn ex2 btn-primary dropdown-toggle" onChange="filter.submit();">
+                {% for y in year  %}
+                    {% if y == filter_year%} 
+                        <option value="{{ y }}" selected>{{ y }} </option>
+                    {% else %}
+                        <option value="{{ y }}" >{{ y }} </option>
+                    {%endif%}
+                {% endfor %}
+            </select>
+          </form>
+        </div>
+      </div>
+   
+
       <!-- row1 -->
       <div class="row mx-3 mt-3" >
         <div class="mb-3 card border-left-danger shadow" style="width: 100%; border: 1px  ">
@@ -103,15 +146,14 @@
                       รายรับจาก Economic Impact <span style="color: transparent;"> บัตรและทรัพย์สินทางปัญญา </span>
                     </div>
                     <div class=" h2  text-gray-800 " style=" font-size: 200%; ">
-                      <span>7,000</span>
+                      <span>{{sciparkinfo.13|floatformat:2|intcomma }} </span>
                       <span style=" font-size: 50%; ">บาท</span>  
                     </div>
-                    <div>
-                    <form action="show_table" target="_blank" method=POST>
-                      {% csrf_token %} 
-                      <input name = {{filter_year}}/1 type="submit" value="View" class="btn science-park-buttons " 
-                              style=" border-radius : 25px;"> 
-                    </form>
+                    <div style="background-color: white;">
+                      <a href = '{% url "science-park-graph" value="13"%}' target="_blank"> 
+                        <input  type="submit" value="Graph" class="btn science-park-buttons " 
+                        style=" border-radius : 25px;" />
+                      </a>
                     </div>
                   </div> 
                 </div>
@@ -131,15 +173,14 @@
                       รายรับจากการขาย/ขอใช้ สิทธิบัตรและทรัพย์สินทางปัญญา
                     </div>
                     <div class=" h2  text-gray-800 " style=" font-size: 200%; ">
-                      <span>6,000</span>
+                      <span>{{sciparkinfo.14|floatformat:2|intcomma }}</span>
                       <span style=" font-size: 50%; ">บาท</span>  
                     </div>
-                    <div>
-                      <form action="show_table" target="_blank" method=POST>
-                        {% csrf_token %} 
-                        <input name = {{filter_year}}/1 type="submit" value="View" class="btn science-park-buttons " 
-                                style=" border-radius : 25px;"> 
-                      </form>
+                    <div  style="background-color: white;">
+                      <a href = '{% url "science-park-graph" value="14"%}' target="_blank"> 
+                        <input  type="submit" value="Graph" class="btn science-park-buttons " 
+                        style=" border-radius : 25px;" />
+                      </a>
                     </div>
                   </div> 
                 </div>
@@ -159,15 +200,16 @@
                       รายรับงานวิจัย จากภาคอุตสาหกรรม และภาคเอกชน<span style="color: transparent;">ชน</span>
                     </div>
                     <div class=" h2  text-gray-800 " style=" font-size: 200%; ">
-                      <span>5,000</span>
+                      <span>{{sciparkinfo.15|floatformat:2|intcomma }}</span>
                       <span style=" font-size: 50%; ">บาท</span>     
                     </div>
                     <div>
-                    <form action="show_table" target="_blank" method=POST>
-                      {% csrf_token %} 
-                      <input name = {{filter_year}}/1 type="submit" value="View" class="btn science-park-buttons " 
-                              style=" border-radius : 25px;"> 
-                    </form>
+                      <div  style="background-color: white;">
+                        <a href = '{% url "science-park-graph" value="15"%}' target="_blank"> 
+                          <input  type="submit" value="Graph" class="btn science-park-buttons " 
+                          style=" border-radius : 25px;" />
+                        </a>
+                      </div>
                     </div>
                   </div> 
                 </div>
@@ -199,15 +241,17 @@
                     <div class="widget-subheading justify-content-between" >
                       จำนวนผลงานวิจัย หรือ นวัตกรรมที่ใช้ประโยชน์เชิงพาณิชย์  <span style="color: transparent;">ระหว่างมหาวิทยาลัย</span>
                     </div>
-                    <div class=" h2  text-gray-800 " style=" font-size: 200%; ">
-                      <span>7,000</span>
+                    <div class=" h2  text-gray-800 " style=" font-size: 250%; ">
+                      <span>{{sciparkinfo.1|intcomma }} </span>
                     </div>
                     <div>
-                    <form action="show_table" target="_blank" method=POST>
-                      {% csrf_token %} 
-                      <input name = {{filter_year}}/1 type="submit" value="View" class="btn science-park-buttons " 
-                              style=" border-radius : 25px;"> 
-                    </form>
+                    <hr class="mt-1 mb-2">
+                    <div  style="background-color: white;">
+                      <a href = '{% url "science-park-graph" value="1"%}' target="_blank"> 
+                        <input  type="submit" value="Graph" class="btn science-park-buttons " 
+                        style=" border-radius : 25px;" />
+                      </a>
+                    </div>
                     </div>
                   </div> 
                 </div>
@@ -224,17 +268,19 @@
                   </div>
                   <div class="ml-3" style="display: flex;flex-direction: column;align-content: center;flex: 1; position: relative;">
                     <div class="widget-subheading justify-content-between" >
-                      จำนวนทรัพย์สินทางปัญญา หรือ สิทธิบัตรที่ถูกนำไปใช้ประโยชน์เชิงพาณิชย์
+                      จำนวนทรัพย์สินทางปัญญา หรือ สิทธิบัตรที่ถูกนำไปใช้ประโยชน์เชิงพาณิชย์<span style="color: transparent;">และ</span>
                     </div>
-                    <div class=" h2  text-gray-800 " style=" font-size: 200%; ">
-                      <span>6,000</span>
+                    <div class=" h2  text-gray-800 " style=" font-size: 250%; ">
+                      <span>{{sciparkinfo.2|intcomma }} </span>
                     </div>
                     <div>
-                    <form action="show_table" target="_blank" method=POST>
-                      {% csrf_token %} 
-                      <input name = {{filter_year}}/1 type="submit" value="View" class="btn science-park-buttons " 
-                              style=" border-radius : 25px;"> 
-                    </form>
+                    <hr class="mt-1 mb-2">
+                    <div  style="background-color: white;">
+                      <a href = '{% url "science-park-graph" value="2"%}' target="_blank"> 
+                        <input  type="submit" value="Graph" class="btn science-park-buttons " 
+                        style=" border-radius : 25px;" />
+                      </a>
+                    </div>
                     </div>
                   </div> 
                 </div>
@@ -253,15 +299,17 @@
                     <div class="widget-subheading justify-content-between" >
                       จำนวนทรัพย์สินทางปัญญา หรือ สิทธิบัตรที่เกิดร่วมกันระหว่างมหาวิทยาลัยและเอกชน 
                     </div>
-                    <div class=" h2  text-gray-800 " style=" font-size: 200%; ">
-                      <span>5,000</span>
+                    <div class=" h2  text-gray-800 " style=" font-size: 250%; ">
+                      <span>{{sciparkinfo.3|intcomma }} </span>
                     </div>
                     <div>
-                    <form action="show_table" target="_blank" method=POST>
-                      {% csrf_token %} 
-                      <input name = {{filter_year}}/1 type="submit" value="View" class="btn science-park-buttons " 
-                              style=" border-radius : 25px;"> 
-                    </form>
+                    <hr class="mt-1 mb-2">
+                    <div  style="background-color: white;">
+                      <a href = '{% url "science-park-graph" value="3"%}' target="_blank"> 
+                        <input  type="submit" value="Graph" class="btn science-park-buttons " 
+                        style=" border-radius : 25px;" />
+                      </a>
+                    </div>
                     </div>
                   </div> 
                 </div>
@@ -289,7 +337,7 @@
                     <b>จำนวนคู่ความร่วมมือทั้งหมด</b>
                   </div>
                   <div class=" h2  text-gray-800 " style=" font-size: 300%; ">
-                    <span>7,000</span>
+                    <span>{{sciparkinfo.4|intcomma }} </span>
                   </div>
                 </div> 
               </div>
@@ -309,7 +357,7 @@
                       <b>ความร่วมมือกับบริษัท</b>
                     </div>
                     <div class=" h2  text-gray-800 " style=" font-size: 200%; ">
-                      <span>1,000</span>
+                      <span>{{sciparkinfo.5|intcomma }} </span>
                     </div>
                   </div>
                 </div>
@@ -317,7 +365,7 @@
                   <div class="ml-3" style=" position: relative;">
                     <div style=" color: #4682B4;">
                       <b>(ในภูมิภาค : 
-                        <b class=" h2  text-gray-800 " style=" font-size: 150%; text-align: center;"> <span>200</span></b>
+                        <b class=" h2  text-gray-800 " style=" font-size: 150%; text-align: center;"> <span>{{sciparkinfo.6|intcomma }} </span></b>
                       )
                       </b>
                     </div>
@@ -337,7 +385,7 @@
                       <b>ความร่วมมือกับชุมชน</b>
                     </div>
                     <div class=" h2  text-gray-800 " style=" font-size: 200%; ">
-                      <span>4,000</span>
+                      <span>{{sciparkinfo.7|intcomma }} </span>
                     </div>
                   </div>
                 </div>
@@ -345,7 +393,7 @@
                   <div class="ml-3" style=" position: relative;">
                     <div style=" color: #4682B4;">
                       <b>(ในภูมิภาค : 
-                        <b class=" h2  text-gray-800 " style=" font-size: 150%; text-align: center;"> <span>300</span></b>
+                        <b class=" h2  text-gray-800 " style=" font-size: 150%; text-align: center;"> <span>{{sciparkinfo.8|intcomma }} </span></b>
                       )
                       </b>
                     </div>
@@ -354,11 +402,10 @@
               </div>
             </div>
             <div class="text-center card-footer" style="background-color: white;">
-              <form action="show_table" target="_blank" method=POST>
-                {% csrf_token %} 
-                <input name = {{filter_year}}/1 type="submit" value="View" class="btn science-park-buttons " 
-                        style=" border-radius : 25px;"> 
-              </form>
+              <a href = '{% url "science-park-graph" value="4"%}' target="_blank"> 
+                <input  type="submit" value="Graph" class="btn science-park-buttons " 
+                style=" border-radius : 25px;" />
+              </a>
             </div>
           </div>
         </div>
@@ -384,7 +431,7 @@
                   <div style=" color: #4682B4; ">
                     <b >ทั้งหมด : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b>
                     <b class=" h2 text-gray-800 " style=" font-size: 200%; "> 
-                      <span>300</span>
+                      <span>{{sciparkinfo.9|intcomma }} </span>
                     </b>
                   </div>
                 </div>
@@ -392,17 +439,16 @@
                   <div style=" color: #4682B4;">
                     <b >Active ใน 3 ปี : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b>
                     <b class=" h2 text-gray-800 " style=" font-size: 200%; "> 
-                      <span>300</span>
+                      <span>{{sciparkinfo.10|intcomma }} </span>
                     </b>
                   </div>
                 </div>
               </div>
               <div class="text-center card-footer" style="background-color: white;">
-                <form action="show_table" target="_blank" method=POST>
-                  {% csrf_token %} 
-                  <input name = {{filter_year}}/1 type="submit" value="View" class="btn science-park-buttons " 
-                          style=" border-radius : 25px;"> 
-                </form>
+                <a href = '{% url "science-park-graph" value="9"%}' target="_blank"> 
+                  <input  type="submit" value="Graph" class="btn science-park-buttons " 
+                  style=" border-radius : 25px;" />
+                </a>
               </div>
             </div>
           </div>
@@ -423,14 +469,13 @@
                   </div>
                   <hr class=" my-1">
                   <div class=" h2 text-gray-800 text-center" style="padding: 0px; font-size: 200%; ">
-                    <span>1,000</span>
+                    <span>{{sciparkinfo.11|intcomma }} </span>
                   </div>
                   <div class="text-center card-footer" style="background-color: white;">
-                    <form action="show_table" target="_blank" method=POST>
-                      {% csrf_token %} 
-                      <input name = {{filter_year}}/1 type="submit" value="View" class="btn science-park-buttons " 
-                              style=" border-radius : 25px;"> 
-                    </form>
+                    <a href = '{% url "science-park-graph" value="11"%}' target="_blank"> 
+                      <input  type="submit" value="Graph" class="btn science-park-buttons " 
+                      style=" border-radius : 25px;" />
+                    </a>
                   </div>
                 </div>
               </div>
@@ -451,14 +496,13 @@
                   </div>
                   <hr class=" my-1">
                   <div class=" h2 text-gray-800 text-center" style="padding: 0px; font-size: 200%; ">
-                    <span>1,000</span>
+                    <span>{{sciparkinfo.12|intcomma }}   </span>
                   </div>
                   <div class="text-center card-footer" style="background-color: white;">
-                    <form action="graph" target="_blank" method=POST>
-                      {% csrf_token %} 
-                      <input name = 1 type="submit" value="View" class="btn science-park-buttons " 
-                              style=" border-radius : 25px;"> 
-                    </form>
+                    <a href = '{% url "science-park-graph" value="12"%}' target="_blank"> 
+                      <input  type="submit" value="Graph" class="btn science-park-buttons " 
+                      style=" border-radius : 25px;" />
+                    </a>
                   </div>
                 </div>
               </div>

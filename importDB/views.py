@@ -2804,18 +2804,37 @@ def query14(): # Query รูปกราฟ ที่จะแสดงใน �
         print('At Query#14: Something went wrong :', e) 
         return checkpoint
 
-def query15(): #  
+def query15(): # Science Park 
     print("-"*20)
     print("Starting Query#15 ...")
     checkpoint = True
     os.environ["NLS_LANG"] = ".UTF8"  # ทำให้แสดงข้อความเป็น ภาษาไทยได้
-    fiscal_year = get_fiscal_year() # ปีงบประมาณ
-    print("ปีงบประมาณ",fiscal_year)
-
+    now_year = (datetime.now().year)+543
+    print(now_year)
     try:      
-        ######## ว่าง 
         print ("Data#15 is saved")
         print("Ending Query ...")
+                
+        sql_cmd =    """ SELECT year, kpi_number, sum(number) as sum FROM `importdb_science_park_rawdata`
+                        group by 1, 2"""
+
+        con_string = getConstring('sql')
+
+        df = pm.execute_query(sql_cmd, con_string)
+        # print(df)
+        data_piv = df.pivot(index="year", columns="kpi_number", values="sum")
+        # print(data_piv)
+        
+
+        ########## save to csv ตาราง  ##########      
+        if not os.path.exists("mydj1/static/csv"):
+                os.mkdir("mydj1/static/csv")      
+        data_piv.to_csv ("""mydj1/static/csv/science_park_kpi.csv""", index = True, header=True)
+        print ("Data is saved")
+
+
+
+
         return checkpoint
 
     except Exception as e :
@@ -5462,19 +5481,495 @@ def pageResearchMan(request):
 
 @login_required(login_url='login')
 def science_park(request):
-    context={
+    
+    selected_year = datetime.now().year+543 # กำหนดให้ ปี ใน dropdown เป็นปีปัจจุบัน
+    df = pd.read_csv("""mydj1/static/csv/science_park_kpi.csv""")
+
+
+    if request.method == "POST":
+        filter_year =  request.POST["year"]   #รับ ปี จาก dropdown 
+        print("post = ",request.POST )
+        selected_year = int(filter_year)      # ตัวแปร selected_year เพื่อ ให้ใน dropdown หน้าต่อไป แสดงในปีที่เลือกไว้ก่อนหน้า(จาก year)
+    
+    def get_info(): # ข้อมูลสำหรับหน้าแรก ของอุทยานวิทย์
         
-       
+        re_df = df[df["year"]==int(selected_year)]
+        
+        return re_df
+
+    def get_year():
+        return df["year"]
+
+
+    context={
+        'now_year' : (datetime.now().year)+543,
+        'sciparkinfo' : get_info(),
+        'year' :get_year(),
+        'filter_year': selected_year,
     }
     return render(request,'importDB/science_park.html',context) 
 
 @login_required(login_url='login')
-def science_park_graph(request):
-    context={
+def science_park_graph(request, value):
+
+    def graph(source):
+
+        df = pd.read_csv("""mydj1/static/csv/science_park_kpi.csv""", index_col=0)   
+        df = df.reset_index()
+
+        df2 = df[-10:-1]   # กราฟเส้นทึบ
+        df3 = df[-2:]  # กราฟเส้นประ
+        fig = object
         
+        labels = { "1":("จำนวนผลงานวิจัย หรือ นวัตกรรมที่ใช้ประโยชน์เชิงพาณิชย์ ","จำนวน","ปี พ.ศ."),
+                "2":("จำนวนทรัพย์สินทางปัญญา หรือ สิทธิบัตรที่ถูกนำไปใช้ประโยชน์เชิงพาณิชย์","จำนวน","ปี พ.ศ."),
+                "3":("จำนวนทรัพย์สินทางปัญญา หรือ สิทธิบัตรที่เกิดร่วมกันระหว่างมหาวิทยาลัยและเอกชน","จำนวน","ปี พ.ศ."),
+                "4":("จำนวนคู่ความร่วมมือ","จำนวน","ปี พ.ศ."),
+                "5":("จำนวนคู่ความร่วมมือ กับบริษัท","กับบริษัท"),
+                "6":("จำนวนคู่ความร่วมมือ กับบริษัท ในภูมิภาค (จังหวัด)","กับบริษัทในภูมิภาค","ปี พ.ศ."),
+                "7":("จำนวนคู่ความร่วมมือ กับชุมชน","กับชุมชน","ปี พ.ศ."),
+                "8":("จำนวนคู่ความร่วมมือ กับชุมชน ในภูมิภาค  (จังหวัด)","กับชุมชน ในภูมิภาค","ปี พ.ศ."),
+                "9":("จำนวนบริษัทหรือหน่วยงานที่มา license ผลงานทรัพย์สินทางปัญญาของมหาวิทยาลัย","จำนวน","ปี พ.ศ."),
+                "10":("จจำนวนบริษัทหรือหน่วยงานที่มา license ผลงานทรัพย์สินทางปัญญาของมหาวิทยาลัย ที่ active ภายใน 3 ปีย้อนหลัง","จำนวน","ปี พ.ศ."),
+                "11":("จำนวนบริษัท Start Up ที่ดำเนินการผ่านอุทยานวิทยาศาสตร์","จำนวน","ปี พ.ศ."),
+                "12":("จำนวนบัณฑิตที่ก่อตั้งบริษัท ที่ดำเนินการผ่านอุทยานวิทยาศาสตร์","จำนวน","ปีการศึกษา"),
+                "13":("รายรับจาก Economic Impact ","จำนวนเงิน(บาท)","ปีงบประมาณ"),
+                "14":("รายรับที่เกิดจากการขาย/ขอใช้ สิทธิบัตรและทรัพย์สินทางปัญญา","จำนวนเงิน(บาท)","ปีงบประมาณ"),
+                "15":("รายได้งานวิจัย จากภาคอุตสาหกรรม และภาคเอกชน","จำนวนเงิน(บาท)","ปีงบประมาณ"),
+                }
+
+        ### สร้าง กราฟเส้นทึบ ####
+
+        if source in ("1","2","3","11","12","13","14","15"):  # สำหรับ source = 1, 2, 3, 11 ,12,13,14, 15 
+            try:
+                fig = make_subplots(rows=1, cols=2,
+                        column_widths=[0.7, 0.3],
+                        specs=[[{"type": "scatter"},{"type": "table"}]]
+                        )
+
+                ### สร้าง กราฟเส้นทึบ ####
+                fig.add_trace(go.Scatter(x=df2['year'], y=df2[source],line=dict( color='royalblue'), name= "",showlegend=False,))
+
+                ### สร้าง กราฟเส้นประ ####
+                fig.add_trace(go.Scatter(x=df3['year'], y=df3[source]
+                        ,line=dict( width=2, dash='dot',color='royalblue'), name ="",showlegend=False, )
+                    )
+
+                ### ตาราง ####
+                if source in ('13', '14', '15'):
+                    df[source] = df[source].apply(moneyformat)
+
+                fig.add_trace(
+                                go.Table(
+                                    columnwidth = [150,200],
+                                    header=dict(values=[f"<b>{labels[source][2]}</b>", f"<b>{labels[source][1]}</b>"],
+                                                fill = dict(color='#C2D4FF'),
+                                                align = ['center'] * 5),
+                                    cells=dict(values=[df['year'], df[source]],
+                                            fill = dict(color='#F5F8FF'),
+                                            align = ['center','right'] * 5))
+                                    , row=1, col=2
+                            )
+
+                fig.update_layout(title_text=f"<b>{labels[source][0]} </b> 10 ปี ย้อนหลัง",
+                                height=500,width=1000,
+                                xaxis_title=f"<b>{labels[source][2]}</b>",
+                                yaxis_title=f"<b>{labels[source][1]}</b>",
+                                font=dict(size=14,),
+                                # hovermode="x",
+                                legend=dict(x=0, y=0.5),
+                            )
+                
+                fig.update_layout(
+                            plot_bgcolor="#FFF"
+                            ,xaxis = dict(
+                                tickmode = 'linear',
+                                # tick0 = 2554,
+                                dtick = 1,
+                                showgrid=False,
+                                linecolor="#BCCCDC",
+                                showspikes=True, # Show spike line for X-axis
+                                # Format spike
+                                spikethickness=2,
+                                spikedash="dot",
+                                spikecolor="#999999",
+                                # spikemode="across",
+                            ),
+                            yaxis = dict(
+                                showgrid=False,
+                                linecolor="#BCCCDC",
+                                showspikes=True, 
+                                spikethickness=2,
+                                spikedash="dot",
+                                spikecolor="#999999",
+                            ),
+                            hoverdistance=100, # Distance to show hover label of data point
+                            spikedistance=1000, # Distance to show spike
+                            autosize=True,
+                            # legend_title="<b>Legend Title : </b> ",
+                            # legend=dict(orientation="h",bordercolor="Black", borderwidth=2,),
+                            margin=dict(t=90, ),
+                        )
+            
+            except Exception as e: 
+                print("Error on source 1, 2, 3, 11 ,12 ,13,14, 15):",e )
+
+        elif source in ("4"):  # สำหรับ source = "4" หรือ อยู่ในกลุ่ม "ความร่วมมือทั้งหมด"
+            try:
+                ### สร้าง กราฟเส้นทึบ ####
+                #เส้นทึบ 1 
+                # fig = go.Figure()
+                fig = make_subplots(rows=2, cols=2,
+                        column_widths=[1, 0],
+                        row_heights=[2, 2],
+                        vertical_spacing=0.3,
+                        specs=[[{"type": "scatter"},{}],
+                                [{"type": "table",},{}]]
+                                # [{},{}]]
+                                # [{'rowspan':1},None]]
+                        )   
+                
+                fig.add_trace(go.Scatter(x=df2['year'], y=df2[source],
+                                mode='lines+markers', # กำหนดว่า เป็นเส้นและมีจุด
+                                name="ความร่วมมือทั้งหมด", # กำหนด ชื่อเวลา hover เอา mouse ชี้บนเส้น
+                                line=dict( width=2,color='royalblue'), # กำหนดสี และความหนาของเส้น
+                                legendgroup = "A", # กำหนดกลุ่ม ของเส้น เพื่อ สามารถกด show หรือ ไม่ show กราฟได้
+                                # visible = visible, # กำหนดว่าให้ เส้นใดๆ แสดงตอนเริ่มกราฟ หรือไม่
+                                # hoverinfo='skip',  # กำหนดว่า ไม่มีการแสดงอะไรเมื่อเอาเมาส์ ไปชี้ 
+                                # showlegend=True, # กำหนดว่าจะ show legend หรือไม่
+                                ), row=1, col=1)  
+
+        
+                #เส้นทึบ 2
+                fig.add_trace(go.Scatter(x=df2['year'], y=df2["5"],
+                                mode='lines+markers', # กำหนดว่า เป็นเส้นและมีจุด
+                                name="ความร่วมมือกับบริษัท", # กำหนด ชื่อเวลา hover เอา mouse ชี้บนเส้น
+                                line=dict( width=2,color='green'), # กำหนดสี และความหนาของเส้น
+                                legendgroup = "B", # กำหนดกลุ่ม ของเส้น เพื่อ สามารถกด show หรือ ไม่ show กราฟได้
+                                ))  
+
+                #เส้นทึบ 3
+                fig.add_trace(go.Scatter(x=df2['year'], y=df2["6"],
+                                mode='lines+markers', # กำหนดว่า เป็นเส้นและมีจุด
+                                name="ความร่วมมือ กับบริษัท ในภูมิภาค (จังหวัด)", # กำหนด ชื่อเวลา hover เอา mouse ชี้บนเส้น
+                                line=dict( width=2,color='red'), # กำหนดสี และความหนาของเส้น
+                                legendgroup = "C", # กำหนดกลุ่ม ของเส้น เพื่อ สามารถกด show หรือ ไม่ show กราฟได้
+                                ))  
+
+                #เส้นทึบ 4
+                fig.add_trace(go.Scatter(x=df2['year'], y=df2["7"],
+                                mode='lines+markers', # กำหนดว่า เป็นเส้นและมีจุด
+                                name="จำนวนคู่ความร่วมมือ กับชุมชน", # กำหนด ชื่อเวลา hover เอา mouse ชี้บนเส้น
+                                line=dict( width=2,color='yellow'), # กำหนดสี และความหนาของเส้น
+                                legendgroup = "D", # กำหนดกลุ่ม ของเส้น เพื่อ สามารถกด show หรือ ไม่ show กราฟได้
+                                )) 
+
+                #เส้นทึบ 5  
+                fig.add_trace(go.Scatter(x=df2['year'], y=df2["8"],
+                                mode='lines+markers', # กำหนดว่า เป็นเส้นและมีจุด
+                                name="ความร่วมมือกับชุมชน ในภูมิภาค (จังหวัด)", # กำหนด ชื่อเวลา hover เอา mouse ชี้บนเส้น
+                                line=dict( width=2,color='pink'), # กำหนดสี และความหนาของเส้น
+                                legendgroup = "E", # กำหนดกลุ่ม ของเส้น เพื่อ สามารถกด show หรือ ไม่ show กราฟได้
+                                ))  
+
+                
+                ### สร้าง กราฟเส้นประ ####
+                #เส้นประ 1 
+                fig.add_trace(go.Scatter(x=df3['year'], y=df3[source],  # วาดกราฟ เส้นประ 
+                            mode='lines',
+                            name="ความร่วมมือทั้งหมด" ,
+                            line=dict( width=2, dash='dot',color='royalblue'),
+                            showlegend=False,
+                            hoverinfo='skip', 
+                            legendgroup = "A",
+                            ))
+
+                fig.add_trace(go.Scatter(x=df3['year'][-1::], y=df3[source][-1::],
+                            mode='markers',
+                            name="ความร่วมมือทั้งหมด" ,
+                            line=dict(color="royalblue"),
+                            showlegend=False,
+                            legendgroup = "A",
+                            ))
+
+                #เส้นประ 2
+                fig.add_trace(go.Scatter(x=df3['year'], y=df3["5"],
+                            mode='lines',
+                            name="ความร่วมมือกับบริษัท",
+                            line=dict( width=2, dash='dot',color="green",),
+                            showlegend=False,
+                            hoverinfo='skip', 
+                            legendgroup = "B",
+                            ))
+
+                fig.add_trace(go.Scatter(x=df3['year'][-1::], y=df3["5"][-1::],
+                            mode='markers',
+                            name="ความร่วมมือกับบริษัท" ,
+                            line=dict(color="green"),
+                            showlegend=False,
+                            legendgroup = "B"
+                            ))
+                
+                #เส้นประ 3
+                fig.add_trace(go.Scatter(x=df3['year'], y=df3["6"],
+                            mode='lines',
+                            # name=item+": "+df_names[item][0] ,
+                            line=dict( width=2, dash='dot',color="red",),
+                            showlegend=False,
+                            hoverinfo='skip', 
+                            legendgroup = "C",
+                            ))
+
+                fig.add_trace(go.Scatter(x=df3['year'][-1::], y=df3["6"][-1::],
+                            mode='markers',
+                            name="" ,
+                            line=dict(color="red"),
+                            showlegend=False,
+                            legendgroup = "C"))
+
+                # เส้นประ 4
+                fig.add_trace(go.Scatter(x=df3['year'], y=df3["7"],
+                            mode='lines',
+                            # name=item+": "+df_names[item][0] ,
+                            line=dict( width=2, dash='dot',color="yellow",),
+                            showlegend=False,
+                            hoverinfo='skip', 
+                            legendgroup = "D",
+                            ))
+
+                fig.add_trace(go.Scatter(x=df3['year'][-1::], y=df3["7"][-1::],
+                            mode='markers',
+                            name="" ,
+                            line=dict(color="yellow"),
+                            showlegend=False,
+                            legendgroup = "D"))
+
+                #เส้นประ 5
+                fig.add_trace(go.Scatter(x=df3['year'], y=df3["8"],
+                            mode='lines',
+                            # name=item+": "+df_names[item][0] ,
+                            line=dict( width=2, dash='dot',color="pink",),
+                            showlegend=False,
+                            hoverinfo='skip', 
+                            legendgroup = "E",
+                            ))
+
+                fig.add_trace(go.Scatter(x=df3['year'][-1::], y=df3["8"][-1::],
+                            mode='markers',
+                            name="" ,
+                            line=dict(color="pink"),
+                            showlegend=False,
+                            legendgroup = "E"))
+
+                ##ตาราง
+                fig.add_trace(
+                                go.Table(
+                                    columnwidth = [100,150,100,150,150,150],
+                                    header=dict(values=[f"<b>ปี พ.ศ.</b>",
+                                                    f"<b>ความร่วมมือทั้งหมด</b>", 
+                                                    f"<b>กับบริษัท</b>",
+                                                    f"<b>กับบริษัทในภูมิภาค</b>",
+                                                    f"<b>กับในชุมชน</b>",
+                                                    f"<b>กับชุมชนในภูมิภาค</b>",
+                                                    ],
+                                                fill = dict(color='#C2D4FF'),
+                                                align = ['center'] * 2,
+                                                height=40),
+                                    cells=dict(values=[df['year'], 
+                                                    df['4'],
+                                                    df['5'],
+                                                    df['6'],
+                                                    df['7'],
+                                                    df['8'],],
+                                            fill = dict(color='#F5F8FF'),
+                                            align = ['center','right'] * 5)
+                                )
+                                    , row=2,col=1
+                    )
+                
+                fig.update_layout(title_text=f"<b>{labels[source][0]} </b> 10 ปี ย้อนหลัง",
+                                height=950,width=1000,
+                                xaxis_title=f"<b>{labels[source][2]}</b>",
+                                yaxis_title=f"<b>{labels[source][1]}</b>",
+                                font=dict(size=14,),
+                                hovermode="x",
+                                legend=dict(x=0, y=0.5),
+                            )
+
+                fig.update_layout(
+                    plot_bgcolor="#FFF"
+                    ,xaxis = dict(
+                        tickmode = 'linear',
+                        # tick0 = 2554,
+                        dtick = 1,
+                        showgrid=False,
+                        linecolor="#BCCCDC",
+                        showspikes=True, # Show spike line for X-axis
+                        # Format spike
+                        spikethickness=2,
+                        spikedash="dot",
+                        spikecolor="#999999",
+                        spikemode="across",
+                    ),
+                    yaxis = dict(
+                        showgrid=False,
+                        linecolor="#BCCCDC", 
+                    ),
+                    hoverdistance=100, # Distance to show hover label of data point
+                    spikedistance=1000, # Distance to show spike
+                    autosize=True,
+                    legend_title="<b>Legend Title : </b> ",
+                    legend=dict(orientation="h",bordercolor="Black", borderwidth=2,),
+                    margin=dict(t=90, ),
+                )
+            
+            except Exception as e:
+                print("Error on source 4 :",e )
+            
+        elif source in ("9"):  # สำหรับ source = "9" หรือ อยู่ในกลุ่ม "จำนวนบริษัทหรือหน่วยงานที่มา license"
+            try:
+                ### สร้าง กราฟเส้นทึบ ####
+                #เส้นทึบ 1 
+                # fig = go.Figure()
+                fig = make_subplots(rows=2, cols=2,
+                        column_widths=[1, 0],
+                        row_heights=[2, 2],
+                        vertical_spacing=0.15,
+                        specs=[[{"type": "scatter"},{}],
+                                [{"type": "table",},{}]]
+                                # [{},{}]]
+                                # [{'rowspan':1},None]]
+                        )   
+                
+                fig.add_trace(go.Scatter(x=df2['year'], y=df2[source],
+                                mode='lines+markers', # กำหนดว่า เป็นเส้นและมีจุด
+                                name="บริษัททั้งหมด", # กำหนด ชื่อเวลา hover เอา mouse ชี้บนเส้น
+                                line=dict( width=2,color='royalblue'), # กำหนดสี และความหนาของเส้น
+                                legendgroup = "A", # กำหนดกลุ่ม ของเส้น เพื่อ สามารถกด show หรือ ไม่ show กราฟได้
+                                # visible = visible, # กำหนดว่าให้ เส้นใดๆ แสดงตอนเริ่มกราฟ หรือไม่
+                                # hoverinfo='skip',  # กำหนดว่า ไม่มีการแสดงอะไรเมื่อเอาเมาส์ ไปชี้ 
+                                # showlegend=True, # กำหนดว่าจะ show legend หรือไม่
+                                ), row=1, col=1)  
+
+        
+                #เส้นทึบ 2
+                fig.add_trace(go.Scatter(x=df2['year'], y=df2["10"],
+                                mode='lines+markers', # กำหนดว่า เป็นเส้นและมีจุด
+                                name="Active ใน 3 ปี", # กำหนด ชื่อเวลา hover เอา mouse ชี้บนเส้น
+                                line=dict( width=2,color='green'), # กำหนดสี และความหนาของเส้น
+                                legendgroup = "B", # กำหนดกลุ่ม ของเส้น เพื่อ สามารถกด show หรือ ไม่ show กราฟได้
+                                ))  
+
+
+                
+                ### สร้าง กราฟเส้นประ ####
+                #เส้นประ 1 
+                fig.add_trace(go.Scatter(x=df3['year'], y=df3[source],  # วาดกราฟ เส้นประ 
+                            mode='lines',
+                            line=dict( width=2, dash='dot',color='royalblue'),
+                            showlegend=False,
+                            hoverinfo='skip', 
+                            legendgroup = "A",
+                            ))
+
+                fig.add_trace(go.Scatter(x=df3['year'][-1::], y=df3[source][-1::],
+                            mode='markers',
+                            line=dict(color="royalblue"),
+                            showlegend=False,
+                            legendgroup = "A",
+                            ))
+
+                #เส้นประ 2
+                fig.add_trace(go.Scatter(x=df3['year'], y=df3["10"],
+                            mode='lines',
+                            line=dict( width=2, dash='dot',color="green",),
+                            showlegend=False,
+                            hoverinfo='skip', 
+                            legendgroup = "B",
+                            ))
+
+                fig.add_trace(go.Scatter(x=df3['year'][-1::], y=df3["10"][-1::],
+                            mode='markers',
+                            line=dict(color="green"),
+                            showlegend=False,
+                            legendgroup = "B"
+                            ))
+                
+                ##ตาราง
+                fig.add_trace(
+                                go.Table(
+                                    columnwidth = [100,120,120],
+                                    header=dict(values=[f"<b>ปี พ.ศ.</b>",
+                                                    f"<b>บริษัททั้งหมด</b>", 
+                                                    f"<b>Active ใน3ปี</b>",
+                                                    ],
+                                                fill = dict(color='#C2D4FF'),
+                                                align = ['center'] * 2,
+                                                height=40),
+                                    cells=dict(values=[df['year'], 
+                                                    df['9'],
+                                                    df['10']],
+                                            fill = dict(color='#F5F8FF'),
+                                            align = ['center','right'] * 3)
+                                )
+                                    , row=2,col=1
+                )
+                
+                fig.update_layout(title_text=f"<b>{labels[source][0]} </b> 10 ปี ย้อนหลัง",
+                                height=950,width=1000,
+                                xaxis_title=f"<b>{labels[source][2]}</b>",
+                                yaxis_title=f"<b>{labels[source][1]}</b>",
+                                font=dict(size=14,),
+                                hovermode="x",
+                                legend=dict(x=0, y=1),
+                            )
+
+                fig.update_layout(
+                    plot_bgcolor="#FFF"
+                    ,xaxis = dict(
+                        tickmode = 'linear',
+                        # tick0 = 2554,
+                        dtick = 1,
+                        showgrid=False,
+                        linecolor="#BCCCDC",
+                        showspikes=True, # Show spike line for X-axis
+                        # Format spike
+                        spikethickness=2,
+                        spikedash="dot",
+                        spikecolor="#999999",
+                        spikemode="across",
+                    ),
+                    yaxis = dict(
+                        showgrid=False,
+                        linecolor="#BCCCDC", 
+                    ),
+                    hoverdistance=100, # Distance to show hover label of data point
+                    spikedistance=1000, # Distance to show spike
+                    autosize=True,
+                    legend=dict(orientation="v",bordercolor="gray", borderwidth=2,),
+                    margin=dict(t=90, ),
+                )
+            
+            except Exception as e:
+                print("Error on source 4 :",e )
+   
+        fig.update_xaxes(ticks="outside")
+        fig.update_yaxes(ticks="outside")
+
+        plot_div = plot(fig, output_type='div', include_plotlyjs=False,)
        
+        return plot_div
+
+    
+    source = value
+
+    context={
+        'plot1' : graph(source)
+        
     }
     return render(request,'importDB/science_park_graph.html',context) 
+
+
 
 @login_required(login_url='login')
 def test_page(request):
