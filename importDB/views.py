@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect    # หมายถึง เป�
 from django.http import HttpResponse   # หมายถึง เป็นการ วาด HTML เอง
 import pandas as pd
 import numpy as np
+
 import os
 import json
 import requests
@@ -60,6 +61,10 @@ from subprocess import check_output
 
 # นับค่า ใน dataframe 
 from collections import Counter
+
+# update every night
+from celery.schedules import crontab
+from celery.task import periodic_task
 
 # Create your views here.
 
@@ -5480,25 +5485,598 @@ def pageResearchMan(request):
     return render(request,'importDB/research_man.html',context)  
 
 @login_required(login_url='login')
-def science_park(request):
+def science_park_money(request):
     
-    selected_year = datetime.now().year+543 # กำหนดให้ ปี ใน dropdown เป็นปีปัจจุบัน
-    df = pd.read_csv("""mydj1/static/csv/science_park_kpi.csv""")
+    try:
+        df = pd.read_csv("""mydj1/static/csv/science_park_kpi.csv""")
+        selected_year = df.year.max() # กำหนดให้ ปี ใน dropdown เป็นปีที่มากที่สุดจาก csv
+        header_year = df.year.max()
+        first_year= df.year.min()
+
+        make_color_growth_rate = pd.DataFrame() # สร้างเป็น globle var เก็บค่า growth rate เพื่อไปแยกสี ในการเเสดงผลบนหน้าจอ
 
 
-    if request.method == "POST":
-        filter_year =  request.POST["year"]   #รับ ปี จาก dropdown 
-        print("post = ",request.POST )
-        selected_year = int(filter_year)      # ตัวแปร selected_year เพื่อ ให้ใน dropdown หน้าต่อไป แสดงในปีที่เลือกไว้ก่อนหน้า(จาก year)
+        if request.method == "POST":
+            filter_year =  request.POST["year"]   #รับ ปี จาก dropdown 
+            selected_year = int(filter_year)      # ตัวแปร selected_year เพื่อ ให้ใน dropdown หน้าต่อไป แสดงในปีที่เลือกไว้ก่อนหน้า(จาก year)
     
+    except Exception as e: 
+            return print(e)
+
+    def get_date_file():
+        file_path = """mydj1/static/csv/science_park_kpi.csv"""
+        t = time.strftime('%m/%d/%Y', time.gmtime(os.path.getmtime(file_path)))
+        d = datetime.strptime(t,"%m/%d/%Y").date() 
+
+        return str(d.day)+'/'+str(d.month)+'/'+str(d.year+543)
+
     def get_info(): # ข้อมูลสำหรับหน้าแรก ของอุทยานวิทย์
-        
-        re_df = df[df["year"]==int(selected_year)]
-        
-        return re_df
+        try:
+            re_df = df[df["year"]==int(selected_year)]
+            return re_df
+
+        except Exception as e: 
+            return None
 
     def get_year():
         return df["year"]
+
+    def get_growth_rate():
+    
+        from numpy import array
+
+        try:
+            if selected_year != first_year:
+                newdf = df[(df.year==selected_year) | (df.year==selected_year-1)]
+                
+                now_year_df = newdf[newdf.year==selected_year].iloc[:,1:]
+                list_n = now_year_df.values.tolist()[0]
+
+                prev_year_df = newdf[newdf.year==selected_year-1].iloc[:,1:]
+                list_p = prev_year_df.values.tolist()[0]
+
+                growth_rate = []
+                for i in range(len(list_n)):
+                    if (list_n[i] == 0 and list_p[i] == 0):
+                        growth_rate.append(0)
+                    elif (list_n[i] > 0 and list_p[i] == 0):
+                        growth_rate.append(100)
+                    else:
+                        growth_rate.append((list_n[i] - list_p[i] )/list_p[i]*100)
+                
+                # growth_rate_df = pd.DataFrame(growth_rate)
+
+                
+                a = array(growth_rate)
+                b = a.reshape(1, 15)
+                growth_rate_df = pd.DataFrame(b)
+                # print(growth_rate_df)
+                # print(growth_rate_df.iloc[0])
+                # print(type(growth_rate_df))
+                print(growth_rate_df.iloc[0])
+                return (growth_rate_df.iloc[0])
+
+            else: 
+                return None
+        
+        except Exception as e: 
+            # return None
+            print(e)
+
+    def get_color_growth_rate():
+        
+        from numpy import array
+
+        try:
+            color = pd.DataFrame()
+            if selected_year != first_year:
+                newdf = df[(df.year==selected_year) | (df.year==selected_year-1)]
+                
+                now_year_df = newdf[newdf.year==selected_year].iloc[:,1:]
+                list_n = now_year_df.values.tolist()[0]
+
+                prev_year_df = newdf[newdf.year==selected_year-1].iloc[:,1:]
+                list_p = prev_year_df.values.tolist()[0]
+
+                growth_rate = []
+                for i in range(len(list_n)):
+                    if (list_n[i] == 0 and list_p[i] == 0):
+                        growth_rate.append(0)
+                    elif (list_n[i] > 0 and list_p[i] == 0):
+                        growth_rate.append(100)
+                    else:
+                        growth_rate.append((list_n[i] - list_p[i] )/list_p[i]*100)
+                
+                # growth_rate_df = pd.DataFrame(growth_rate)
+                
+                
+                a = array(growth_rate)
+                b = a.reshape(1, 15)
+               
+                color = [get_color(i)  for i in b[0]]
+                return color
+
+            else: 
+                return None
+        
+        except Exception as e: 
+            # return None
+            print(e)
+
+    def get_color(data):
+        if(data >=21):
+            return "Green"
+        elif data >=0:
+            return "GoldenRod"
+        else:
+            return 'Red'
+
+    def get_show_growth_rate():  # จะแสดง growth rate ในปี ที่ไม่ใช่ปี ปัจจุบัน และ ปีเก่าสุดใน list
+        show=True
+        if (selected_year == df.year.max()) or (selected_year == df.year.min()):
+            show = False
+        return show
+
+    def graph1():  # แสดงกราฟโดนัด ของจำนวน เงินทั้ง 11 หัวข้อ
+        try:
+            raw_df = pd.read_csv("""mydj1/static/csv/science_park_kpi.csv""")
+            df = raw_df[raw_df["year"]==int(selected_year)]
+            new_df = df[["13",'14', '15']]
+
+            data = {    "type":["Economic Impact", "ขายสิทธิบัตร", "งานวิจัย"],
+                        'budget' :  [new_df.iloc[0]['13'], new_df.iloc[0]['14'], new_df.iloc[0]['15'] ],
+                    }
+
+            final_df = pd.DataFrame(data,)
+        
+            fig = px.pie(final_df, values='budget', names='type',
+                    color_discrete_sequence=px.colors.sequential.RdBu,
+                    # color_discrete_map={'Economic Impact':'lightcyan',
+                    #                  'ขายสิทธิบัตร':'cyan',
+                    #                  'งานวิจัย':'royalblue',
+                                    #  'Sun':'darkblue'}
+                    ) #jet
+                
+            fig.update_traces(textposition='inside', textfont_size=14)
+
+            fig.update_layout(uniformtext_minsize=12 , uniformtext_mode='hide')  #  ถ้าเล็กกว่า 12 ให้ hide 
+            fig.update_layout(legend=dict(orientation="h", yanchor="bottom", y=1, xanchor="right", x=0.7))  # แสดง legend ด้านล่างของกราฟ
+            fig.update_layout( height=460)
+            fig.update_layout( margin=dict(l=30, r=30, t=60, b=0))
+
+            # fig.update_layout( annotations=[dict(text="<b> &#3647; {:,.2f}</b>".format(newdf.budget.sum()), x=0.50, y=0.5,  font_color = "black", showarrow=False)]) ##font_size=20,
+
+
+            plot_div = plot(fig, output_type='div', include_plotlyjs=False)
+            
+            return plot_div
+
+        except Exception as e: 
+            return None
+
+    def get_head_page_data(): 
+        try:
+            re_df = df[df["year"]==int(header_year)]
+     
+            a = int(re_df.iloc[:,13:].sum(axis=1).iloc[0])
+            b = int(re_df.iloc[:,1:4].sum(axis=1).iloc[0])
+            c = int(re_df.iloc[:,5:8:2].sum(axis=1).iloc[0])
+    
+            re_df = pd.DataFrame({'money': [a], 'invention': [b], 'cooperation':[c]})
+
+            return re_df.iloc[0]
+        
+        except Exception as e: 
+            re_df = pd.DataFrame({'money': [0], 'invention': [0], 'cooperation':[0]}) # 
+
+            return re_df.iloc[0]
+
+    context={
+        'now_year' : (datetime.now().year)+543,
+        'sciparkinfo' : get_info(),
+        'year' :get_year(),
+        'filter_year': selected_year,
+        'growth_rate': get_growth_rate(),
+        'color':get_color_growth_rate(),
+        'show_growth' : get_show_growth_rate(),
+        'graph1' :graph1(),
+        'date' : get_date_file(),
+        'header' :get_head_page_data(),
+        
+    }
+
+
+    
+    return render(request,'importDB/science_park_money.html',context) 
+
+@login_required(login_url='login')
+def science_park_inventions(request):
+    
+    try:
+        df = pd.read_csv("""mydj1/static/csv/science_park_kpi.csv""")
+        selected_year = df.year.max() # กำหนดให้ ปี ใน dropdown เป็นปีที่มากที่สุดจาก csv
+        header_year = df.year.max()
+        first_year= df.year.min()
+
+        make_color_growth_rate = pd.DataFrame() # สร้างเป็น globle var เก็บค่า growth rate เพื่อไปแยกสี ในการเเสดงผลบนหน้าจอ
+
+
+        if request.method == "POST":
+            filter_year =  request.POST["year"]   #รับ ปี จาก dropdown 
+            selected_year = int(filter_year)      # ตัวแปร selected_year เพื่อ ให้ใน dropdown หน้าต่อไป แสดงในปีที่เลือกไว้ก่อนหน้า(จาก year)
+    
+    except Exception as e: 
+            return print(e)
+
+    def get_date_file():
+        file_path = """mydj1/static/csv/science_park_kpi.csv"""
+        t = time.strftime('%m/%d/%Y', time.gmtime(os.path.getmtime(file_path)))
+        d = datetime.strptime(t,"%m/%d/%Y").date() 
+
+        return str(d.day)+'/'+str(d.month)+'/'+str(d.year+543)
+
+    
+
+    def get_info(): # ข้อมูลสำหรับหน้าแรก ของอุทยานวิทย์
+        try:
+            re_df = df[df["year"]==int(selected_year)]
+            # print(re_df)
+            return re_df
+
+        except Exception as e: 
+            return None
+
+    def get_year():
+        return df["year"]
+
+    def get_growth_rate():
+    
+        from numpy import array
+
+        try:
+            if selected_year != first_year:
+                newdf = df[(df.year==selected_year) | (df.year==selected_year-1)]
+                
+                now_year_df = newdf[newdf.year==selected_year].iloc[:,1:]
+                list_n = now_year_df.values.tolist()[0]
+
+                prev_year_df = newdf[newdf.year==selected_year-1].iloc[:,1:]
+                list_p = prev_year_df.values.tolist()[0]
+
+                growth_rate = []
+                for i in range(len(list_n)):
+                    if (list_n[i] == 0 and list_p[i] == 0):
+                        growth_rate.append(0)
+                    elif (list_n[i] > 0 and list_p[i] == 0):
+                        growth_rate.append(100)
+                    else:
+                        growth_rate.append((list_n[i] - list_p[i] )/list_p[i]*100)
+                
+                # growth_rate_df = pd.DataFrame(growth_rate)
+
+                
+                a = array(growth_rate)
+                b = a.reshape(1, 15)
+                growth_rate_df = pd.DataFrame(b)
+                
+                return (growth_rate_df.iloc[0])
+
+            else: 
+                return None
+        
+        except Exception as e: 
+            # return None
+            print(e)
+
+    def get_color_growth_rate():
+        
+        from numpy import array
+
+        try:
+            color = pd.DataFrame()
+            if selected_year != first_year:
+                newdf = df[(df.year==selected_year) | (df.year==selected_year-1)]
+                
+                now_year_df = newdf[newdf.year==selected_year].iloc[:,1:]
+                list_n = now_year_df.values.tolist()[0]
+
+                prev_year_df = newdf[newdf.year==selected_year-1].iloc[:,1:]
+                list_p = prev_year_df.values.tolist()[0]
+
+                growth_rate = []
+                for i in range(len(list_n)):
+                    if (list_n[i] == 0 and list_p[i] == 0):
+                        growth_rate.append(0)
+                    elif (list_n[i] > 0 and list_p[i] == 0):
+                        growth_rate.append(100)
+                    else:
+                        growth_rate.append((list_n[i] - list_p[i] )/list_p[i]*100)
+                
+                # growth_rate_df = pd.DataFrame(growth_rate)
+                
+                
+                a = array(growth_rate)
+                b = a.reshape(1, 15)
+               
+                color = [get_color(i)  for i in b[0]]
+                return color
+
+            else: 
+                return None
+        
+        except Exception as e: 
+            # return None
+            print(e)
+
+    def get_color(data):
+        if(data >=21):
+            return "Green"
+        elif data >=0:
+            return "GoldenRod"
+        else:
+            return 'Red'
+
+    def get_show_growth_rate():  # จะแสดง growth rate ในปี ที่ไม่ใช่ปี ปัจจุบัน และ ปีเก่าสุดใน list
+        show=True
+        if (selected_year == df.year.max()) or (selected_year == df.year.min()):
+            show = False
+        return show
+
+    def graph1():  # แสดงกราฟโดนัด 
+        raw_df = pd.read_csv("""mydj1/static/csv/science_park_kpi.csv""")
+        df = raw_df[raw_df["year"]==int(selected_year)]
+        new_df = df[["1",'2', '3']]
+
+        data = {    "type":["งานวิจัย หรือนวัตกรรมที่ใช้ประโยชน์เชิงพาณิชย์",
+                             "ทรัพย์สินทางปัญญา หรือสิทธิบัตร <br>ที่ถูกนำไปใช้ประโยชน์เชิงพาณิชย์",
+                              "ทรัพย์สินทางปัญญา หรือสิทธิบัตร <br>ที่เกิดร่วมกันระหว่างมหาวิทยาลัยและเอกชน"],
+                    'number' :  [new_df.iloc[0]['1'], new_df.iloc[0]['2'], new_df.iloc[0]['3'] ],
+                }
+
+        final_df = pd.DataFrame(data,)
+    
+        fig = px.pie(final_df, values='number', names='type',
+                color_discrete_sequence=px.colors.sequential.RdBu,
+                # color_discrete_map={'Economic Impact':'lightcyan',
+                #                  'ขายสิทธิบัตร':'cyan',
+                #                  'งานวิจัย':'royalblue',
+                                #  'Sun':'darkblue'}
+                ) #jet
+            
+        fig.update_traces(textposition='inside', textfont_size=14)
+
+        fig.update_layout(uniformtext_minsize=12 , uniformtext_mode='hide')  #  ถ้าเล็กกว่า 12 ให้ hide 
+        fig.update_layout(legend=dict(orientation="h", yanchor="bottom", y=1, xanchor="right", x=0.7))  # แสดง legend ด้านล่างของกราฟ
+        fig.update_layout( height=460)
+        fig.update_layout( margin=dict(l=30, r=30, t=60, b=0))
+        # fig.update_layout(legend = dict(font = dict(family = "Courier", size = 12, color = "black")))
+        # fig.update_layout( annotations=[dict(text="<b> &#3647; {:,.2f}</b>".format(newdf.budget.sum()), x=0.50, y=0.5,  font_color = "black", showarrow=False)]) ##font_size=20,
+
+
+        plot_div = plot(fig, output_type='div', include_plotlyjs=False)
+        
+        return plot_div
+
+    def get_head_page_data(): 
+        try:
+            re_df = df[df["year"]==int(header_year)]
+ 
+            a = int(re_df.iloc[:,13:].sum(axis=1).iloc[0])
+            b = int(re_df.iloc[:,1:4].sum(axis=1).iloc[0])
+            c = int(re_df.iloc[:,5:8:2].sum(axis=1).iloc[0])
+    
+            re_df = pd.DataFrame({'money': [a], 'invention': [b], 'cooperation':[c]})
+
+            return re_df.iloc[0]
+        
+        except Exception as e: 
+            re_df = pd.DataFrame({'money': [0], 'invention': [0], 'cooperation':[0]}) # 
+            return re_df.iloc[0]
+
+    context={
+        'now_year' : (datetime.now().year)+543,
+        'sciparkinfo' : get_info(),
+        'year' :get_year(),
+        'filter_year': selected_year,
+        'growth_rate': get_growth_rate(),
+        'color':get_color_growth_rate(),
+        'show_growth' : get_show_growth_rate(),
+        'graph1' :graph1(),
+        'date' : get_date_file(),
+        'header' :get_head_page_data(),
+        
+    }
+
+    return render(request,'importDB/science_park_inventions.html',context) 
+    # return render(request,'importDB/science_park_copy.html',context) 
+
+@login_required(login_url='login')
+def science_park_cooperations(request):
+    
+    try:
+        df = pd.read_csv("""mydj1/static/csv/science_park_kpi.csv""")
+        selected_year = df.year.max() # กำหนดให้ ปี ใน dropdown เป็นปีที่มากที่สุดจาก csv
+        header_year = df.year.max()
+        first_year= df.year.min()
+
+        make_color_growth_rate = pd.DataFrame() # สร้างเป็น globle var เก็บค่า growth rate เพื่อไปแยกสี ในการเเสดงผลบนหน้าจอ
+
+
+        if request.method == "POST":
+            filter_year =  request.POST["year"]   #รับ ปี จาก dropdown 
+            selected_year = int(filter_year)      # ตัวแปร selected_year เพื่อ ให้ใน dropdown หน้าต่อไป แสดงในปีที่เลือกไว้ก่อนหน้า(จาก year)
+    
+    except Exception as e: 
+            return print(e)
+
+    def get_date_file():
+        file_path = """mydj1/static/csv/science_park_kpi.csv"""
+        t = time.strftime('%m/%d/%Y', time.gmtime(os.path.getmtime(file_path)))
+        d = datetime.strptime(t,"%m/%d/%Y").date() 
+
+        return str(d.day)+'/'+str(d.month)+'/'+str(d.year+543)
+
+    def get_info(): # ข้อมูลสำหรับหน้าแรก ของอุทยานวิทย์
+        try:
+            re_df = df[df["year"]==int(selected_year)]
+            # print(re_df)
+            return re_df
+
+        except Exception as e: 
+            return None
+
+    def get_year():
+        return df["year"]
+
+    def get_growth_rate():
+    
+        from numpy import array
+
+        try:
+            if selected_year != first_year:
+                newdf = df[(df.year==selected_year) | (df.year==selected_year-1)]
+                
+                now_year_df = newdf[newdf.year==selected_year].iloc[:,1:]
+                list_n = now_year_df.values.tolist()[0]
+
+                prev_year_df = newdf[newdf.year==selected_year-1].iloc[:,1:]
+                list_p = prev_year_df.values.tolist()[0]
+
+                growth_rate = []
+                for i in range(len(list_n)):
+                    if (list_n[i] == 0 and list_p[i] == 0):
+                        growth_rate.append(0)
+                    elif (list_n[i] > 0 and list_p[i] == 0):
+                        growth_rate.append(100)
+                    else:
+                        growth_rate.append((list_n[i] - list_p[i] )/list_p[i]*100)
+                
+                # growth_rate_df = pd.DataFrame(growth_rate)
+
+                
+                a = array(growth_rate)
+                b = a.reshape(1, 15)
+                growth_rate_df = pd.DataFrame(b)
+
+
+                return (growth_rate_df.iloc[0])
+
+            else: 
+                return None
+        
+        except Exception as e: 
+            # return None
+            print(e)
+
+    def get_color_growth_rate():
+        
+        from numpy import array
+
+        try:
+            color = pd.DataFrame()
+            if selected_year != first_year:
+                newdf = df[(df.year==selected_year) | (df.year==selected_year-1)]
+                
+                now_year_df = newdf[newdf.year==selected_year].iloc[:,1:]
+                list_n = now_year_df.values.tolist()[0]
+
+                prev_year_df = newdf[newdf.year==selected_year-1].iloc[:,1:]
+                list_p = prev_year_df.values.tolist()[0]
+
+                growth_rate = []
+                for i in range(len(list_n)):
+                    if (list_n[i] == 0 and list_p[i] == 0):
+                        growth_rate.append(0)
+                    elif (list_n[i] > 0 and list_p[i] == 0):
+                        growth_rate.append(100)
+                    else:
+                        growth_rate.append((list_n[i] - list_p[i] )/list_p[i]*100)
+                
+                # growth_rate_df = pd.DataFrame(growth_rate)
+                
+                
+                a = array(growth_rate)
+                b = a.reshape(1, 15)
+               
+                color = [get_color(i)  for i in b[0]]
+                return color
+
+            else: 
+                return None
+        
+        except Exception as e: 
+            # return None
+            print(e)
+
+    def get_color(data):
+        if(data >=21):
+            return "Green"
+        elif data >=0:
+            return "GoldenRod"
+        else:
+            return 'Red'
+
+    def get_show_growth_rate():  # จะแสดง growth rate ในปี ที่ไม่ใช่ปี ปัจจุบัน และ ปีเก่าสุดใน list
+        show=True
+        if (selected_year == df.year.max()) or (selected_year == df.year.min()):
+            show = False
+        return show
+
+    def graph1():  # แสดงกราฟโดนัด 
+        raw_df = pd.read_csv("""mydj1/static/csv/science_park_kpi.csv""")
+        df = raw_df[raw_df["year"]==int(selected_year)]
+        new_df = df[["5",'7']]
+
+        data = {    "type":["ความร่วมมือกับบริษัททั้งหมด","ความร่วมมือกับชุมชนทั้งหมด"],
+                    'number' :  [new_df.iloc[0]['5'], new_df.iloc[0]['7'] ],
+                }
+
+        final_df = pd.DataFrame(data,)
+    
+        fig = px.pie(final_df, values='number', names='type',
+                color_discrete_sequence=px.colors.sequential.RdBu,
+                # color_discrete_map={'Economic Impact':'lightcyan',
+                #                  'ขายสิทธิบัตร':'cyan',
+                #                  'งานวิจัย':'royalblue',
+                                #  'Sun':'darkblue'}
+                ) #jet
+            
+        fig.update_traces(textposition='inside', textfont_size=14)
+
+        fig.update_layout(uniformtext_minsize=12 , uniformtext_mode='hide')  #  ถ้าเล็กกว่า 12 ให้ hide 
+        fig.update_layout(legend=dict(orientation="h", 
+                    yanchor="bottom", 
+                    y=1, 
+                    xanchor="right",
+                    x=0.7, 
+                   )
+                )  # แสดง legend ด้านล่างของกราฟ
+        # fig.update_layout(legend = dict(font = dict(family = "Courier", size = 50, color = "black")))
+        fig.update_layout( height=460)
+        fig.update_layout( margin=dict(l=30, r=30, t=60, b=0))
+
+        # fig.update_layout( annotations=[dict(text="<b> &#3647; {:,.2f}</b>".format(newdf.budget.sum()), x=0.50, y=0.5,  font_color = "black", showarrow=False)]) ##font_size=20,
+
+
+        plot_div = plot(fig, output_type='div', include_plotlyjs=False)
+        
+        return plot_div
+    
+    def get_head_page_data(): 
+        try:
+            re_df = df[df["year"]==int(header_year)]
+    
+            a = int(re_df.iloc[:,13:].sum(axis=1).iloc[0])
+            b = int(re_df.iloc[:,1:4].sum(axis=1).iloc[0])
+            c = int(re_df.iloc[:,5:8:2].sum(axis=1).iloc[0])
+    
+            re_df = pd.DataFrame({'money': [a], 'invention': [b], 'cooperation':[c]})
+
+            return re_df.iloc[0]
+        
+        except Exception as e: 
+            re_df = pd.DataFrame({'money': [0], 'invention': [0], 'cooperation':[0]}) # 
+            return re_df.iloc[0]
 
 
     context={
@@ -5506,22 +6084,31 @@ def science_park(request):
         'sciparkinfo' : get_info(),
         'year' :get_year(),
         'filter_year': selected_year,
+        'growth_rate': get_growth_rate(),
+        'color':get_color_growth_rate(),
+        'show_growth' : get_show_growth_rate(),
+        'graph1' :graph1(),
+        'date' : get_date_file(),
+        'header' :get_head_page_data(),
+        
     }
-    return render(request,'importDB/science_park.html',context) 
+
+    return render(request,'importDB/science_park_cooperations.html',context) 
+
 
 @login_required(login_url='login')
 def science_park_graph(request, value):
 
     def graph(source):
+        try: 
+            df = pd.read_csv("""mydj1/static/csv/science_park_kpi.csv""", index_col=0)   
+            df = df.reset_index()
 
-        df = pd.read_csv("""mydj1/static/csv/science_park_kpi.csv""", index_col=0)   
-        df = df.reset_index()
-
-        df2 = df[-10:-1]   # กราฟเส้นทึบ
-        df3 = df[-2:]  # กราฟเส้นประ
-        fig = object
-        
-        labels = { "1":("จำนวนผลงานวิจัย หรือ นวัตกรรมที่ใช้ประโยชน์เชิงพาณิชย์ ","จำนวน","ปี พ.ศ."),
+            df2 = df[-10:-1]   # กราฟเส้นทึบ
+            df3 = df[-2:]  # กราฟเส้นประ
+            fig = object
+            
+            labels = { "1":("จำนวนผลงานวิจัย หรือ นวัตกรรมที่ใช้ประโยชน์เชิงพาณิชย์ ","จำนวน","ปี พ.ศ."),
                 "2":("จำนวนทรัพย์สินทางปัญญา หรือ สิทธิบัตรที่ถูกนำไปใช้ประโยชน์เชิงพาณิชย์","จำนวน","ปี พ.ศ."),
                 "3":("จำนวนทรัพย์สินทางปัญญา หรือ สิทธิบัตรที่เกิดร่วมกันระหว่างมหาวิทยาลัยและเอกชน","จำนวน","ปี พ.ศ."),
                 "4":("จำนวนคู่ความร่วมมือ","จำนวน","ปี พ.ศ."),
@@ -5538,6 +6125,8 @@ def science_park_graph(request, value):
                 "15":("รายได้งานวิจัย จากภาคอุตสาหกรรม และภาคเอกชน","จำนวนเงิน(บาท)","ปีงบประมาณ"),
                 }
 
+        except Exception as e: 
+            return None
         ### สร้าง กราฟเส้นทึบ ####
 
         if source in ("1","2","3","11","12","13","14","15"):  # สำหรับ source = 1, 2, 3, 11 ,12,13,14, 15 
@@ -5849,6 +6438,7 @@ def science_park_graph(request, value):
                                 # visible = visible, # กำหนดว่าให้ เส้นใดๆ แสดงตอนเริ่มกราฟ หรือไม่
                                 # hoverinfo='skip',  # กำหนดว่า ไม่มีการแสดงอะไรเมื่อเอาเมาส์ ไปชี้ 
                                 # showlegend=True, # กำหนดว่าจะ show legend หรือไม่
+                                line_shape='spline',
                                 ), row=1, col=1)  
 
         
@@ -5858,6 +6448,7 @@ def science_park_graph(request, value):
                                 name="Active ใน 3 ปี", # กำหนด ชื่อเวลา hover เอา mouse ชี้บนเส้น
                                 line=dict( width=2,color='green'), # กำหนดสี และความหนาของเส้น
                                 legendgroup = "B", # กำหนดกลุ่ม ของเส้น เพื่อ สามารถกด show หรือ ไม่ show กราฟได้
+                                line_shape='spline',
                                 ))  
 
 
@@ -5870,6 +6461,7 @@ def science_park_graph(request, value):
                             showlegend=False,
                             hoverinfo='skip', 
                             legendgroup = "A",
+                            line_shape='spline',
                             ))
 
                 fig.add_trace(go.Scatter(x=df3['year'][-1::], y=df3[source][-1::],
@@ -5877,6 +6469,7 @@ def science_park_graph(request, value):
                             line=dict(color="royalblue"),
                             showlegend=False,
                             legendgroup = "A",
+
                             ))
 
                 #เส้นประ 2
@@ -5886,6 +6479,7 @@ def science_park_graph(request, value):
                             showlegend=False,
                             hoverinfo='skip', 
                             legendgroup = "B",
+                            line_shape='spline',
                             ))
 
                 fig.add_trace(go.Scatter(x=df3['year'][-1::], y=df3["10"][-1::],
@@ -5969,7 +6563,9 @@ def science_park_graph(request, value):
     }
     return render(request,'importDB/science_park_graph.html',context) 
 
-
+# @periodic_task(run_every=crontab(hour=9, minute=10,))
+# def every_monday_morning():
+#     print("This is run every Monday morning at 7:30")
 
 @login_required(login_url='login')
 def test_page(request):

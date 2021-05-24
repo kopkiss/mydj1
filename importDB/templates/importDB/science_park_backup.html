@@ -6,6 +6,45 @@
 
 
 <style type="text/css">
+
+    @media screen and (min-width: 1px) and (max-width: 992px)  {
+    .sci-park-col{
+        width:100% !important;
+        }
+    }
+
+    @media screen and (min-width: 993px) and (max-width: 1199px)   {
+    .sci-park-col{
+        width:50% !important;
+        }
+    }
+
+    @media screen and (min-width: 1200px)   {
+    .sci-park-col{
+        width:33% !important;
+        }
+    }
+
+/* 
+    @media screen and (min-width: 1px) and (max-width: 985px)  {
+    .header-col{
+        width:100% !important;
+        }
+    }
+
+    @media screen and (min-width: 986px) and (max-width: 1493px)  {
+    .header-col{
+        width:50% !important;
+        }
+    }
+
+    @media screen and (min-width: 1494px) {
+    .header-col{
+        width:25% !important;
+        }
+    } */
+
+
   .card_sci{
         transition: 0.4s;
         }
@@ -48,24 +87,24 @@
 }
 
 .science-park-buttons {
-        color: #e4e4e4 !important;
+        color: #ffffff !important;
         font-weight: 600;
         /* font-weight: bold; #111e6c*/ 
-        background: slategray;
+        background: rgb(6, 86, 167);
         padding: 4px;
         /* border: 1px solid #111e6c !important; */
         display: inline-block;
         transition: all 0.4s ease 0s;
-        width: 4.2rem;
+        width: 10rem;
         height: 2rem;
         }
     
-    .science-park-buttons:hover {
-        color: #202020 !important;
-        background: #e4e4e4 ;
-        border-color: #000000 !important;
-        transition: all 0.4s ease 0s;
-        }
+  .science-park-buttons:hover {
+      color: #202020 !important;
+      background: #fcfafa ;
+      border-color: #000000 !important;
+      transition: all 0.4s ease 0s;
+      }
 
     .todo-indicator {
         position: absolute;
@@ -94,31 +133,36 @@
 </style>
     
   
-      <div class="row" >
+      <!-- <div class="row" >
         <div class=" col-lg-12 "  >
           <div class="pr-3 " style=" float: right; ">
             <b>ข้อมูลจาก หน่วยงานอุทยานวิทยาศาสตร์</b>
             <span class = "px-2" style="font-size:15px; background-color: coral;  border-radius: 30px; "><b>Last updated: </b> 12/12/1222 {{date}}</span>
           </div> 
         </div>
-      </div>
+      </div> -->
       
      
-      <div class= "row pt-3 mx-3 " >
-        <div class="card flex-container mx-5"   >
-          <form class="mt-1 " name='filter' method=POST >
+      <div class= "row mx-3 my-3" >
+        <div class="col-lg-8 "  >
+          <form class="mt-1 " name='filter' method=POST  >
             {% csrf_token %}
-            <b> ปี : &nbsp;</b>
-            <select id="year" name = "year" class=" mb-1 btn ex2 btn-primary dropdown-toggle" onChange="filter.submit();">
-                {% for y in year  %}
-                    {% if y == filter_year%} 
-                        <option value="{{ y }}" selected>{{ y }} </option>
-                    {% else %}
-                        <option value="{{ y }}" >{{ y }} </option>
-                    {%endif%}
-                {% endfor %}
-            </select>
+            <div class="pt-1 pb-1"><h4 style="display:inline-block;"> &nbsp;&nbsp;ข้อมูลอุทยานวิทยาศาสตร์ ปี :&nbsp; </h4>
+              <select id="year" name = "year" class=" mb-1 btn ex2 btn-info dropdown-toggle" onChange="filter.submit();">
+                  {% for y in year  %}
+                      {% if y == filter_year%} 
+                          <option value="{{ y }}" selected>{{ y }} </option>
+                      {% else %}
+                          <option value="{{ y }}" >{{ y }} </option>
+                      {%endif%}
+                  {% endfor %}
+              </select>
+            </div>
           </form>
+        </div>
+        <div class="col-lg-4 pt-3" style=" float:right;text-align:right; ">
+          <!-- <b>ข้อมูลจาก หน่วยงานอุทยานวิทยาศาสตร์</b> -->
+          <span class = "px-2" style="font-size:15px; background-color: coral;  border-radius: 30px; "><b>Last updated: </b> 12/12/1222 {{date}}</span>
         </div>
       </div>
    
@@ -128,11 +172,11 @@
         <div class="mb-3 card border-left-danger shadow" style="width: 100%; border: 1px  ">
           <div class="card-header" style="background-color: white;">
             <span class = "mt-2 " style="color: rgba(13,27,62,0.7); display: inline; font-size: 1.5rem;">
-              &nbsp; รายรับหน่วยงานอุทยานวิทยาศาสตร์
+              &nbsp; รายรับหน่วยงานอุทยานวิทยาศาสตร์ <span style="font-size: 65%;">( ปีงบประมาณ {{filter_year}} ) </span>
             </span>
           </div>
           <div class="no-gutters row">
-            <div class="col-sm-6 col-md-6 col-xl-4" >
+            <div class="sci-park-col">
               <div class="row card-body" style="margin-left: auto; margin-right: auto;">
                 <div style="display: flex; flex-direction: row; align-items: center; ">
                   <div>
@@ -145,13 +189,22 @@
                     <div class="widget-subheading justify-content-between" >
                       รายรับจาก Economic Impact <span style="color: transparent;"> บัตรและทรัพย์สินทางปัญญา </span>
                     </div>
-                    <div class=" h2  text-gray-800 " style=" font-size: 200%; ">
-                      <span>{{sciparkinfo.13|floatformat:2|intcomma }} </span>
-                      <span style=" font-size: 50%; ">บาท</span>  
+                    <div class=" text-gray-800 mb-2" >
+                      <div class="h2 mt-2">
+                        <span>{{sciparkinfo.13|floatformat:2|intcomma }} </span>
+                        <span style=" font-size: 50%; ">บาท</span>  
+                      </div>
+                      {% if show_growth %}
+                      <div  style=" font-size: 90%; "> 
+                          Growth Rate 
+                            <span style="color:{{color.12}}">{{growth_rate.12|floatformat:2}}%</span>
+                      </div>
+                      {% endif %}
                     </div>
                     <div style="background-color: white;">
+                      <hr class="mt-0 mb-2" >
                       <a href = '{% url "science-park-graph" value="13"%}' target="_blank"> 
-                        <input  type="submit" value="Graph" class="btn science-park-buttons " 
+                        <input  type="submit" value="View Graph" class="btn science-park-buttons " 
                         style=" border-radius : 25px;" />
                       </a>
                     </div>
@@ -159,7 +212,7 @@
                 </div>
               </div>
             </div>
-            <div class="col-sm-6 col-md-6 col-xl-4" >
+            <div class="sci-park-col" >
               <div class="row card-body" style="margin-left: auto; margin-right: auto;">
                 <div style="display: flex; flex-direction: row; align-items: center; ">
                   <div>
@@ -172,13 +225,23 @@
                     <div class="widget-subheading justify-content-between" >
                       รายรับจากการขาย/ขอใช้ สิทธิบัตรและทรัพย์สินทางปัญญา
                     </div>
-                    <div class=" h2  text-gray-800 " style=" font-size: 200%; ">
-                      <span>{{sciparkinfo.14|floatformat:2|intcomma }}</span>
-                      <span style=" font-size: 50%; ">บาท</span>  
+                    <div class=" text-gray-800 mb-2" >
+                      <div class="h2 mt-2">
+                        <span>{{sciparkinfo.14|floatformat:2|intcomma }} </span>
+                        <span style=" font-size: 50%; ">บาท</span>  
+                      </div>
+                      {% if show_growth %}
+                      <div  style=" font-size: 90%; "> 
+                          Growth Rate 
+                            <!-- <span style="color: green">{{growth_rate.5|intcomma}}%</span> -->
+                            <span style="color:{{color.13}}">{{growth_rate.13|floatformat:2}}%</span>
+                      </div>
+                      {% endif %}
                     </div>
                     <div  style="background-color: white;">
+                      <hr class="mt-0 mb-2" >
                       <a href = '{% url "science-park-graph" value="14"%}' target="_blank"> 
-                        <input  type="submit" value="Graph" class="btn science-park-buttons " 
+                        <input  type="submit" value="View Graph" class="btn science-park-buttons " 
                         style=" border-radius : 25px;" />
                       </a>
                     </div>
@@ -186,7 +249,7 @@
                 </div>
               </div>
             </div>
-            <div class="col-sm-6 col-md-6 col-xl-4" >
+            <div class="sci-park-col" >
               <div class="row card-body" style="margin-left: auto; margin-right: auto;">
                 <div style="display: flex; flex-direction: row; align-items: center; ">
                   <div>
@@ -199,14 +262,24 @@
                     <div class="widget-subheading justify-content-between" >
                       รายรับงานวิจัย จากภาคอุตสาหกรรม และภาคเอกชน<span style="color: transparent;">ชน</span>
                     </div>
-                    <div class=" h2  text-gray-800 " style=" font-size: 200%; ">
-                      <span>{{sciparkinfo.15|floatformat:2|intcomma }}</span>
-                      <span style=" font-size: 50%; ">บาท</span>     
+                    <div class=" text-gray-800 mb-2" >
+                      <div class="h2 mt-2">
+                        <span>{{sciparkinfo.15|floatformat:2|intcomma }} </span>
+                        <span style=" font-size: 50%; ">บาท</span>  
+                      </div>
+                      {% if show_growth %}
+                      <div  style=" font-size: 90%; "> 
+                          Growth Rate 
+                            <!-- <span style="color: green">{{growth_rate.5|intcomma}}%</span> -->
+                            <span style="color:{{color.14}}">{{growth_rate.14|floatformat:2}}%</span>
+                      </div>
+                      {% endif %}
                     </div>
                     <div>
+                      <hr class="mt-0 mb-2" >
                       <div  style="background-color: white;">
                         <a href = '{% url "science-park-graph" value="15"%}' target="_blank"> 
-                          <input  type="submit" value="Graph" class="btn science-park-buttons " 
+                          <input  type="submit" value="View Graph" class="btn science-park-buttons " 
                           style=" border-radius : 25px;" />
                         </a>
                       </div>
@@ -224,11 +297,11 @@
         <div class="mb-3 card border-left-warning shadow" style="border: 1px">
           <div class="card-header" style="background-color: white;">
             <span class = "mt-2 " style="color: rgba(13,27,62,0.7); display: inline; font-size: 1.5rem;">
-              &nbsp; จำนวนทรัพย์สินทางปัญญา นวัตกรรม หรือ สิทธิบัตร
+              &nbsp; จำนวนทรัพย์สินทางปัญญา นวัตกรรม หรือ สิทธิบัตร <span style="font-size: 65%;">( ปีพ.ศ. {{filter_year}} ) </span>
             </span>
           </div>
           <div class="no-gutters row">
-            <div class="col-sm-6 col-md-6 col-xl-4" >
+            <div class="sci-park-col" >
               <div class="row card-body" style="margin-left: auto; margin-right: auto;">
                 <div style="display: flex; flex-direction: row; align-items: center; ">
                   <div>
@@ -241,23 +314,31 @@
                     <div class="widget-subheading justify-content-between" >
                       จำนวนผลงานวิจัย หรือ นวัตกรรมที่ใช้ประโยชน์เชิงพาณิชย์  <span style="color: transparent;">ระหว่างมหาวิทยาลัย</span>
                     </div>
-                    <div class=" h2  text-gray-800 " style=" font-size: 250%; ">
-                      <span>{{sciparkinfo.1|intcomma }} </span>
+
+                    <div class="text-gray-800 my-1" >
+                      <span class= "h2">{{sciparkinfo.1|intcomma }} </span>
+                      {% if show_growth %}
+                        <span style=" font-size: 90%;"> 
+                          Growth Rate 
+                            <!-- <span style="color: green">{{growth_rate.5|intcomma}}%</span> -->
+                            <span style="color:{{color.0}}">{{growth_rate.0|floatformat:2}}%</span>
+                        </span>
+                      {% endif %}
                     </div>
                     <div>
-                    <hr class="mt-1 mb-2">
-                    <div  style="background-color: white;">
-                      <a href = '{% url "science-park-graph" value="1"%}' target="_blank"> 
-                        <input  type="submit" value="Graph" class="btn science-park-buttons " 
-                        style=" border-radius : 25px;" />
-                      </a>
-                    </div>
+                      <hr class="mt-2 mb-2">
+                      <div  style="background-color: white;">
+                        <a href = '{% url "science-park-graph" value="1"%}' target="_blank"> 
+                          <input  type="submit" value="View Graph" class="btn science-park-buttons " 
+                          style=" border-radius : 25px;" />
+                        </a>
+                      </div>
                     </div>
                   </div> 
                 </div>
               </div>
             </div>
-            <div class="col-sm-6 col-md-6 col-xl-4" >
+            <div class="sci-park-col" >
               <div class="row card-body" style="margin-left: auto; margin-right: auto;">
                 <div style="display: flex; flex-direction: row; align-items: center; ">
                   <div>
@@ -270,23 +351,41 @@
                     <div class="widget-subheading justify-content-between" >
                       จำนวนทรัพย์สินทางปัญญา หรือ สิทธิบัตรที่ถูกนำไปใช้ประโยชน์เชิงพาณิชย์<span style="color: transparent;">และ</span>
                     </div>
-                    <div class=" h2  text-gray-800 " style=" font-size: 250%; ">
+                    <!-- <div class=" h2  text-gray-800 " style=" font-size: 250%; ">
                       <span>{{sciparkinfo.2|intcomma }} </span>
+                      {% if show_growth %}
+                      <span style=" font-size: 32%; "> 
+                        Growth Rate 
+                          <span style="color:{{color.1}}">{{growth_rate.1|floatformat:2}}%</span>
+                      </span>
+                      {% endif %}
                     </div>
                     <div>
-                    <hr class="mt-1 mb-2">
-                    <div  style="background-color: white;">
-                      <a href = '{% url "science-park-graph" value="2"%}' target="_blank"> 
-                        <input  type="submit" value="Graph" class="btn science-park-buttons " 
-                        style=" border-radius : 25px;" />
-                      </a>
+                    <hr class="mt-1 mb-2"> -->
+                    <div class="text-gray-800 my-1" >
+                      <span class= "h2">{{sciparkinfo.2|intcomma }} </span>
+                      {% if show_growth %}
+                        <span style=" font-size: 90%;"> 
+                          Growth Rate 
+                            <!-- <span style="color: green">{{growth_rate.5|intcomma}}%</span> -->
+                            <span style="color:{{color.1}}">{{growth_rate.1|floatformat:2}}%</span>
+                        </span>
+                      {% endif %}
                     </div>
+                    <div>
+                      <hr class="mt-2 mb-2">
+                      <div  style="background-color: white;">
+                        <a href = '{% url "science-park-graph" value="2"%}' target="_blank"> 
+                          <input  type="submit" value="View Graph" class="btn science-park-buttons " 
+                          style=" border-radius : 25px;" />
+                        </a>
+                      </div>
                     </div>
                   </div> 
                 </div>
               </div>
             </div>
-            <div class="col-sm-6 col-md-6 col-xl-4" >
+            <div class="sci-park-col" >
               <div class="row card-body" style="margin-left: auto; margin-right: auto;">
                 <div style="display: flex; flex-direction: row; align-items: center; ">
                   <div>
@@ -299,14 +398,21 @@
                     <div class="widget-subheading justify-content-between" >
                       จำนวนทรัพย์สินทางปัญญา หรือ สิทธิบัตรที่เกิดร่วมกันระหว่างมหาวิทยาลัยและเอกชน 
                     </div>
-                    <div class=" h2  text-gray-800 " style=" font-size: 250%; ">
-                      <span>{{sciparkinfo.3|intcomma }} </span>
+                    <div class="text-gray-800 my-1" >
+                      <span class= "h2">{{sciparkinfo.3|intcomma }} </span>
+                      {% if show_growth %}
+                        <span style=" font-size: 90%;"> 
+                          Growth Rate 
+                            <!-- <span style="color: green">{{growth_rate.5|intcomma}}%</span> -->
+                            <span style="color:{{color.2}}">{{growth_rate.2|floatformat:2}}%</span>
+                        </span>
+                      {% endif %}
                     </div>
                     <div>
-                    <hr class="mt-1 mb-2">
+                    <hr class="mt-2 mb-2">
                     <div  style="background-color: white;">
                       <a href = '{% url "science-park-graph" value="3"%}' target="_blank"> 
-                        <input  type="submit" value="Graph" class="btn science-park-buttons " 
+                        <input  type="submit" value="View Graph" class="btn science-park-buttons " 
                         style=" border-radius : 25px;" />
                       </a>
                     </div>
@@ -319,7 +425,6 @@
         </div> 
       </div>
       
-
       <!-- row3 -->
       <div class="row mx-3  mt-2" >
         <div class="col-md-12 col-xl-6 pl-0 mb-4" >
@@ -333,19 +438,26 @@
                   </span>
                 </div>
                 <div class="ml-3" style="display: flex;flex-direction: column;align-content: center;flex: 1; position: relative;">
-                  <div style=" color: #4682B4;">
-                    <b>จำนวนคู่ความร่วมมือทั้งหมด</b>
+                  <div  style=" color: #4682B4;">
+                    <b>จำนวนคู่ความร่วมมือทั้งหมด</b>  <span style="font-size:90%;">&nbsp;( ปีพ.ศ. {{filter_year}} ) </span>
                   </div>
-                  <div class=" h2  text-gray-800 " style=" font-size: 300%; ">
-                    <span>{{sciparkinfo.4|intcomma }} </span>
-                  </div>
+
+                  <div class=" text-gray-800 ">
+                    <div class= "h2 my-2">{{sciparkinfo.4|intcomma }} </div>
+                    {% if show_growth %}
+                    <div style=" font-size: 90%;"> 
+                      Growth Rate
+                        <span style="color:{{color.3}}">{{growth_rate.3|floatformat:2}}%</span>
+                    </div>
+                    {% endif %}
+                  </div>  
                 </div> 
               </div>
             </div>
             <hr class="my-0 py-0 ">
-            <div class="row card-body mb-1">
-              <div class="col-md-12 col-lg-6 ">
-                <div class="row" style="display: flex; flex-direction: row; align-items: left; ">
+            <div class="row card-body mb-1" >
+              <div class="col-md-12 col-lg-6 " >
+                <div class="row" style="margin: auto; margin-top: 30px;  ">
                   <div>
                     <span class="fa-stack fa-1x"  >
                       <i class="fa fa-circle fa-stack-2x icon-bg-4"></i>
@@ -353,27 +465,30 @@
                     </span>
                   </div>
                   <div class="ml-3" style="display: flex;flex-direction: column;align-content: center;flex: 1; position: relative;">
-                    <div style=" color: #4682B4;">
-                      <b>ความร่วมมือกับบริษัท</b>
+                    <div class="widget-subheading justify-content-between">
+                      ความร่วมมือกับบริษัท
                     </div>
-                    <div class=" h2  text-gray-800 " style=" font-size: 200%; ">
-                      <span>{{sciparkinfo.5|intcomma }} </span>
+                    <div class="text-gray-800 my-1" >
+                      <span class= "h2">{{sciparkinfo.5|intcomma }} </span>
+                      {% if show_growth %}
+                        <div style=" font-size: 90%;"> 
+                          Growth Rate 
+        
+                            <span style="color:{{color.4}}">{{growth_rate.4|floatformat:2}}%</span>
+                        </div>
+                      {% endif %}
+                    </div>
+                    <div>
+                      <span class="widget-subheading justify-content-between">( ในภูมิภาค : </span>
+                      <span class="h2 text-gray-800" style=" font-size: 150%; text-align: center; color:rgb(12, 12, 12)">{{sciparkinfo.6|intcomma }} </span>
+                      <span class="widget-subheading justify-content-between">  ) </span>
                     </div>
                   </div>
                 </div>
-                <div class="row ml-3 mb-1">
-                  <div class="ml-3" style=" position: relative;">
-                    <div style=" color: #4682B4;">
-                      <b>(ในภูมิภาค : 
-                        <b class=" h2  text-gray-800 " style=" font-size: 150%; text-align: center;"> <span>{{sciparkinfo.6|intcomma }} </span></b>
-                      )
-                      </b>
-                    </div>
-                  </div>  
-                </div>
               </div>
-              <div class="col-md-12  col-lg-6 " >
-                <div class="row" style="display: flex; flex-direction: row; align-items: left; ">
+              
+              <div class="col-md-12  col-lg-6 "  >
+                <div class="row" style="margin: auto; margin-top: 30px; ">
                   <div>
                     <span class="fa-stack fa-1x"  >
                       <i class="fa fa-circle fa-stack-2x icon-bg-4"></i>
@@ -381,29 +496,31 @@
                     </span>
                   </div>
                   <div class="ml-3" style="display: flex;flex-direction: column;align-content: center;flex: 1; position: relative;">
-                    <div style=" color: #4682B4;">
-                      <b>ความร่วมมือกับชุมชน</b>
+                    <div class="widget-subheading justify-content-between">
+                      ความร่วมมือกับชุมชน
                     </div>
-                    <div class=" h2  text-gray-800 " style=" font-size: 200%; ">
-                      <span>{{sciparkinfo.7|intcomma }} </span>
+                    <div class="text-gray-800 my-1" >
+                      <span class= "h2">{{sciparkinfo.7|intcomma }} </span>
+                      {% if show_growth %}
+                        <div style=" font-size: 90%;"> 
+                          Growth Rate 
+                            <span style="color:{{color.6}}">{{growth_rate.6|floatformat:2}}%</span>
+                        </div>
+                      {% endif %}
+                    </div>
+                    <div>
+                      <span class="widget-subheading justify-content-between">( ในภูมิภาค : </span>
+                      <span class="h2 text-gray-800" style=" font-size: 150%; text-align: center; color:rgb(12, 12, 12)">{{sciparkinfo.8|intcomma }} </span>
+                      <span class="widget-subheading justify-content-between">  ) </span>
                     </div>
                   </div>
                 </div>
-                <div class="row ml-3">
-                  <div class="ml-3" style=" position: relative;">
-                    <div style=" color: #4682B4;">
-                      <b>(ในภูมิภาค : 
-                        <b class=" h2  text-gray-800 " style=" font-size: 150%; text-align: center;"> <span>{{sciparkinfo.8|intcomma }} </span></b>
-                      )
-                      </b>
-                    </div>
-                  </div>  
-                </div>
+
               </div>
             </div>
             <div class="text-center card-footer" style="background-color: white;">
               <a href = '{% url "science-park-graph" value="4"%}' target="_blank"> 
-                <input  type="submit" value="Graph" class="btn science-park-buttons " 
+                <input  type="submit" value="View Graph" class="btn science-park-buttons " 
                 style=" border-radius : 25px;" />
               </a>
             </div>
@@ -421,38 +538,73 @@
                 </div>
                 <div  style="padding: 10px; display: flex;flex-direction: column;align-content: center;flex: 1; position: relative;">
                   <div style=" color: #4682B4;">
-                    <b>จำนวนบริษัทหรือหน่วยงานที่มา License ผลงานทรัพย์สินทางปัญญา</b>
+                    <b>จำนวนบริษัทหรือหน่วยงานที่มา License ผลงานทรัพย์สินทางปัญญา</b><div style="font-size: 90%;">&nbsp;( ปีพ.ศ. {{filter_year}} ) </div>
                   </div>
+
                 </div>
               </div>
               <hr class=" my-1">
               <div class="row my-3" style="padding: 0px; text-align: center;">
                 <div class="col-sm-12 col-md-6">
-                  <div style=" color: #4682B4; ">
-                    <b >ทั้งหมด : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b>
-                    <b class=" h2 text-gray-800 " style=" font-size: 200%; "> 
-                      <span>{{sciparkinfo.9|intcomma }} </span>
-                    </b>
+
+                  <!-- <div class="text-gray-800 my-1" >
+                    ทั้งหมด : &nbsp;
+                    <span class=" h2 text-gray-800 " style=" font-size: 200%; ">{{sciparkinfo.9|intcomma }} </span>
+                    {% if show_growth %}
+                      <span style=" font-size: 90%;"> 
+                        Growth Rate 
+                          <span style="color:{{color.8}}">{{growth_rate.8|floatformat:2}}%</span>
+                      </span>
+                    {% endif %}
+                  </div> -->
+
+                  <div class=" text-gray-800  " style="padding: 0px;">
+                    <span class="widget-subheading justify-content-between">ทั้งหมด</span>
+                    <div class= "h2 mb-0">{{sciparkinfo.9|intcomma }} </div>
+                    {% if show_growth %}
+                    <div class="mb-1" style=" font-size: 90%;"> 
+                      Growth Rate
+                        <span style="color:{{color.8}}">{{growth_rate.8|floatformat:2}}%</span>
+                    </div>
+                    {% endif %}
                   </div>
+
+
                 </div>
                 <div class="col-sm-12 col-md-6" >
-                  <div style=" color: #4682B4;">
-                    <b >Active ใน 3 ปี : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b>
-                    <b class=" h2 text-gray-800 " style=" font-size: 200%; "> 
-                      <span>{{sciparkinfo.10|intcomma }} </span>
-                    </b>
+                  <!-- <div class="text-gray-800 my-1" >
+                    Active ใน 3 ปี : &nbsp;
+                    <span class=" h2 text-gray-800 " style=" font-size: 200%; ">{{sciparkinfo.10|intcomma }} </span>
+                    {% if show_growth %}
+                      <span style=" font-size: 90%;"> 
+                        Growth Rate 
+                          <span style="color:{{color.9}}">{{growth_rate.9|floatformat:2}}%</span>
+                      </span>
+                    {% endif %}
+                  </div>   -->
+                  <div class=" text-gray-800  " style="padding: 0px;">
+                    <span class="widget-subheading justify-content-between"> Active ใน 3 ปี</span>
+                    <div class= "h2 mb-0">{{sciparkinfo.10|intcomma }} </div>
+                    {% if show_growth %}
+                    <div class="mb-1" style=" font-size: 90%;"> 
+                      Growth Rate
+                        <span style="color:{{color.9}}">{{growth_rate.9|floatformat:2}}%</span>
+                    </div>
+                    {% endif %}
                   </div>
+
+
                 </div>
               </div>
               <div class="text-center card-footer" style="background-color: white;">
                 <a href = '{% url "science-park-graph" value="9"%}' target="_blank"> 
-                  <input  type="submit" value="Graph" class="btn science-park-buttons " 
+                  <input  type="submit" value="View Graph" class="btn science-park-buttons " 
                   style=" border-radius : 25px;" />
                 </a>
               </div>
             </div>
           </div>
-          <div class="row">
+          <div class="row ">
             <div class="col-xs-12 col-md-6 col-lg-12 col-xl-6 " >
               <div class="row mr-1" style="padding: 0px;">
                 <div class="card border-left-primary shadow mb-2" style=" position: relative; width: 100%;  ">
@@ -464,16 +616,24 @@
                       </span>
                     </div>
                     <div class="mr-2" style="color: #4682B4; padding: 10px; display: flex;flex-direction: column;align-content: center;flex: 1; position: relative;">
-                        <b>จำนวนบริษัท Start Up ที่ดำเนินการผ่านอุทยานวิทยาศาสตร์</b>
+                        <b>จำนวนบริษัท Start Up ที่ดำเนินการผ่านอุทยานวิทยาศาสตร์</b><span style="font-size: 90%;">( ปีพ.ศ. {{filter_year}} ) </span>
                     </div>
                   </div>
                   <hr class=" my-1">
-                  <div class=" h2 text-gray-800 text-center" style="padding: 0px; font-size: 200%; ">
-                    <span>{{sciparkinfo.11|intcomma }} </span>
+                 
+                  <div class=" text-gray-800 text-center " style="padding: 0px;">
+                    <div class= "h2 mb-0">{{sciparkinfo.11|intcomma }} </div>
+                    {% if show_growth %}
+                    <div class="mb-1" style=" font-size: 90%;"> 
+                      Growth Rate
+                        <span style="color:{{color.10}}">{{growth_rate.10|floatformat:2}}%</span>
+                    </div>
+                    {% endif %}
                   </div>
+
                   <div class="text-center card-footer" style="background-color: white;">
                     <a href = '{% url "science-park-graph" value="11"%}' target="_blank"> 
-                      <input  type="submit" value="Graph" class="btn science-park-buttons " 
+                      <input  type="submit" value="View Graph" class="btn science-park-buttons " 
                       style=" border-radius : 25px;" />
                     </a>
                   </div>
@@ -491,16 +651,22 @@
                       </span>
                     </div>
                     <div class="mr-2" style="color: #4682B4; padding: 10px; display: flex;flex-direction: column;align-content: center;flex: 1; position: relative;">
-                      <b>จำนวนบัณฑิตที่ก่อตั้งบริษัท โดยดำเนินการผ่านอุทยานวิทยาศาสตร์  </b>
+                      <b>จำนวนบัณฑิตที่ก่อตั้งบริษัท โดยดำเนินการผ่านอุทยานวิทยาศาสตร์  </b><span style="font-size: 90%;">( ปีการศึกษา {{filter_year}} ) </span>
                     </div>
                   </div>
                   <hr class=" my-1">
-                  <div class=" h2 text-gray-800 text-center" style="padding: 0px; font-size: 200%; ">
-                    <span>{{sciparkinfo.12|intcomma }}   </span>
-                  </div>
+                  <div class=" text-gray-800 text-center " style="padding: 0px;">
+                    <div class= "h2 mb-0">{{sciparkinfo.12|intcomma }} </div>
+                    {% if show_growth %}
+                    <div class="mb-1" style=" font-size: 90%;"> 
+                      Growth Rate
+                        <span style="color:{{color.11}}">{{growth_rate.11|floatformat:2}}%</span>
+                    </div>
+                    {% endif %}
+                  </div>    
                   <div class="text-center card-footer" style="background-color: white;">
                     <a href = '{% url "science-park-graph" value="12"%}' target="_blank"> 
-                      <input  type="submit" value="Graph" class="btn science-park-buttons " 
+                      <input  type="submit" value="View Graph" class="btn science-park-buttons " 
                       style=" border-radius : 25px;" />
                     </a>
                   </div>

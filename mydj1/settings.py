@@ -96,7 +96,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'mydj1.wsgi.application'
 
 CORS_ORIGIN_ALLOW_ALL = False
-CORS_ORIGIN_WHITELIST = ('http://127.0.0.1:8000','https://ess.psu.ac.th:8081',)
+CORS_ORIGIN_WHITELIST = ('http://127.0.0.1:8000','https://ess.psu.ac.th:8081',"http://192.168.116.58:8000")
 
 # CORS_ALLOW_METHODS = [
 #     'DELETE',

@@ -98,6 +98,31 @@
   <link rel="stylesheet" href="{% static 'css/all.css' %}">   
   <style type="text/css">
 
+    /* @media screen and (min-width: 1px) and (max-width: 985px)  {
+    .header-col{
+        width:100% !important;
+        }
+    }
+
+    @media screen and (min-width: 986px) and (max-width: 1493px)  {
+    .header-col{
+        width:33.33% !important;
+        }
+    } */
+
+    @media screen and (min-width: 1494px) {
+    .header-col{
+        width:33% !important;
+        }
+
+    .invention-col{
+        width:100% !important;
+    }
+    }
+
+
+
+
     @media screen and (min-width: 1px) and (max-width: 957px)  {
       .science-park-col{
         width:1000% !important;
@@ -781,15 +806,81 @@
 
           <div class='row' >
             <div class="container-fluid" >
-              <!-- Page Heading -->
-              <div class="d-sm-flex align-items-center justify-content-between my-4 " >
-                <a href="/" class = "btnn2 ml-3" >
-                  <h1 class="f-f2 h3 px-3 mb-0 pt-1 pb-1 "  style="color: rgb(250, 250, 250); background-color: rgb(0,133,173); border-radius: 30px;  "><b >Dashboard :</b> อุทยานวิทยาศาสตร์ </h1>
-                  <h1 class="f-b2 h3 px-3 mb-0 pt-1 pb-1 "  style="color: rgb(250, 250, 250); background-color: rgb(0,60,113); border-radius: 30px"><b >Dashboard :</b> หน้าหลักงานวิจัย </h1>
-                 </a>
-               </div>
+              <div class="d-sm-flex  ml-3 my-1 ">
+                <h1 class="h3 px-3 mb-0 pt-1 pb-1 " style="justify-content: center;color: rgb(255, 255, 255); background-color: rgb(0,133,173); display: flex;  border-radius: 30px; height: 47px; width: 500px; "><b >Dashboard : อุทยานวิทยาศาสตร์</b> </h1>
+                
+              </div>
             </div> 
           </div> 
+
+          <div class="row mx-2" >
+            <!-- รายรับ -->
+            <div class=" science-park-col mb-3" onclick="location.href= '/science_park_money';" id = "tab_A" >
+              <div class="widget-ch widget-ch-hover br-br" >
+                <div class="card  border-left-success  shadow h-100 py-2" >
+                  <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                      <div class="col ">
+                        <div class="text-success font-weight-bold text-uppercase mb-1 " ><h6><b>รายรับผ่านบริการของอุทยานฯ ปี {{now_year}}</b></h6></div>
+                        <div class=" mb-0 text-gray-800" >
+                          <h6>{{ header.money|floatformat:2|intcomma }} บาท
+                            
+                          </h6>
+                        </div>  
+                      </div>
+                      <div class="col-auto">
+                        <i class="fas fa-money-bill-alt fa-2x text-gray-300"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- รายได้งานวิจัย -->   
+            <div class=" science-park-col mb-3" onclick="location.href= '/science_park_inventions';" id = "tab_B">
+              <div class="widget-ch widget-ch-hover br-br" >
+                <div class="card shadow h-100 py-2" style="border-style: solid;
+                border-left-style: outset;
+                border-left-color: #f2c80f;
+                border-left-width: 4px;">
+                  
+                  <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                      <div class="col ">
+                        <div class=" font-weight-bold text-uppercase mb-1" style="color:#f2c80f"><h6><b>นวัตกรรมเชิงพาณิชย์ ปี {{now_year}}</b></h6></div>
+                        <div class=" mb-0 text-gray-800"><h6>{{  header.invention|intcomma }} นวัตกรรม</div> 
+                      </div>
+                      <div class="col-auto ">
+                        <i class="fas fa-vial fa-2x text-gray-300"></i> 
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- จำนวนงานวิจัย -->
+            <div class=" science-park-col mb-3" onclick="location.href= '/science_park_cooperations';" id = "tab_C">
+              <div class="widget-ch widget-ch-hover br-br" >
+                <div class="card border-left-info shadow h-100 py-2">
+                  <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                      <div class="col ">
+                        <div class="text-info font-weight-bold text-uppercase mb-1"><h6><b>หน่วยงาน และความร่วมมือ ปี {{now_year}}</b></h6></div>
+                        <div class=" mb-0 text-gray-800"><h6>{{  header.cooperation }} ความร่วมมือ</div> 
+                      </div>
+                      <div class="col-auto ">
+                        <i class="fas fa-handshake fa-2x text-gray-300"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          
+          </div>
+
             {% block content %}
 
             {% endblock content %}
