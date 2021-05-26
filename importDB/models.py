@@ -110,4 +110,3 @@ class Science_park_rawdata(models.Model):
         return super(Science_park_rawdata, self).save(*args, **kwargs)
 
 
-
