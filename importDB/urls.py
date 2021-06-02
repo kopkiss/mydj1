@@ -30,6 +30,8 @@ urlpatterns = [
 
     path('exFund/',views.pageExFund, name = 'exFund-page'),
 
+
+    path('science_park_home/', views.science_park_home, name = 'science-park-home'),
     path('science_park_money/', views.science_park_money, name = 'science-park-money'),
     path('science_park_inventions/', views.science_park_inventions, name = 'science-park-inventions'),
     path('science_park_cooperations/', views.science_park_cooperations, name = 'science-park-cooperations'),

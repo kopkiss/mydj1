@@ -97,21 +97,11 @@
     border-radius: 50%;
 }
 
-.icon-bg-1 {
-    color: #F1C40F;
+.icon-bg {
+    color: #424242;
 }
 
-.icon-bg-2 {
-    color: #228B22;
-}
 
-.icon-bg-3 {
-    color: rgb(248, 248, 248);
-}
-
-.icon-bg-4 {
-    color: #2E86C1;
-}
 
 .science-park-buttons {
         color: #ffffff !important;
@@ -183,7 +173,7 @@
                   <form class="mt-1 " name='filter' method=POST  >
                     {% csrf_token %}
                     <div class="font-size-lg">
-                      <b style="display:inline-block; color: rgb(255, 255, 255);"> &nbsp;&nbsp;จำนวนคู่ความร่วมมือ ปี :&nbsp; </b>
+                      <b style="display:inline-block; color: rgb(255, 255, 255);"> &nbsp;&nbsp;จำนวนคู่ความร่วมมือ | ปี :&nbsp; </b>
                       <select id="year" name = "year" class=" btn ex2 btn-info dropdown-toggle" onChange="filter.submit();" style="background-color: #ffffff; color:rgb(46, 45, 45)">
                           {% for y in year  %}
                               {% if y == filter_year%} 
@@ -193,6 +183,12 @@
                               {%endif%}
                           {% endfor %}
                       </select>
+                      <img src="{% static 'img/question-mark-logo.png' %}" style="float:right;"
+                      title="หน่วยงานและความร่วมมือ คือ เครือข่ายความร่วมมือของนักวิจัย ผู้ประกอบการ และมหาวิทยาลัย 
+                      เพื่อผลักดันให้เกิดการคิดค้น สร้างสรรค์ และพัฒนา Social Innovation ด้วยการวิจัยและนวัตกรรม
+                      โดยมุ่งเน้นบริษัท/ชุมชนที่มีศักยภาพ และมีความได้เปรียบเชิงพื้นที่ วิธีชีวิต และวัฒนธรรม"    
+                      style="display: block; margin-left: auto; margin-right: auto; " 
+                      width="15" height="15"/> 
                     </div>
                   </form>
                 </div>
@@ -217,7 +213,7 @@
                 <tr >
                   <td class=" text-center" rowspan="3">
                     <div class="fa-stack fa-lg fa-2x" >
-                      <i class="fa fa-circle fa-stack-2x icon-bg-4"></i>
+                      <i class="fa fa-circle fa-stack-2x icon-bg"></i>
                       <i class="fas fa-hand-holding-usd fa-stack-1x" style="color: cornsilk;" ></i>
                     </div>
                   </td>
@@ -229,7 +225,7 @@
                   <td rowspan="6" class="text-center " style="padding-top: 192px;padding-bottom: 192px; border-left:1px solid rgb(201, 201, 201)">
                     <a href = '{% url "science-park-graph" value="4"%}' target="_blank"> 
                       <input  type="submit" value="View Graph" class="btn science-park-buttons " 
-                      style=" border-radius : 25px; " />
+                      style=" border-radius : 25px; background-color: #333333; " />
                     </a>
                   </td>
                 </tr>
@@ -285,7 +281,7 @@
                       <b class="mt-2">1</b>
                     </div> -->
                     <div class="fa-stack fa-lg fa-2x" >
-                      <i class="fa fa-circle fa-stack-2x icon-bg-4"></i>
+                      <i class="fa fa-circle fa-stack-2x icon-bg"></i>
                       <i class="fas fa-hand-holding-heart fa-stack-1x" style="color: cornsilk;" ></i>
           
                     </div>
@@ -370,12 +366,12 @@
     <!-- จำนวนบริษัทหรือหน่วยงานที่มา License ผลงานทรัพย์สินทางปัญญา -->   
     <div class=" scipark-col-row2 d-flex mb-3" >
       <div class="card mb-3" >
-        <div class="card-header " style="background-color: rgb(0,133,173);">
+        <div class="card-header " style="background-color: rgba(170, 229, 247, 0.514);">
           <span class="fa-stack fa-1x" >
-            <i class="fa fa-circle fa-stack-2x icon-bg-3"></i>
-            <i class="fas fa-hotel fa-stack-1x" style="color: rgb(0,133,173);" ></i>
+            <i class="fa fa-circle fa-stack-2x icon-bg"></i>
+            <i class="fas fa-hotel fa-stack-1x" style="color: white;" ></i>
           </span>
-          <b style="color:rgb(253, 253, 253);">จำนวนบริษัท/หน่วยงานที่มา License ทรัพย์สินทางปัญญา</b>
+          <b style="color:black;">จำนวนบริษัท/หน่วยงานที่มา License ทรัพย์สินทางปัญญา</b>
         </div>
         <div class="card-body text-gray-800">
           <div class="row my-3" style="padding: 0px; text-align: center;" >
@@ -404,7 +400,7 @@
         <div class="card-footer bg-transparent text-center ">
           <a href = '{% url "science-park-graph" value="9"%}' target="_blank"> 
             <input  type="submit" value="View Graph" class="btn science-park-buttons " 
-            style=" border-radius : 25px;" />
+            style=" border-radius : 25px; background-color: #333333;" />
           </a>
         </div>
       </div>
@@ -413,12 +409,12 @@
     <!-- จำนวนบริษัท Start Up ที่ดำเนินการผ่านอุทยานวิทยาศาสตร์ -->   
     <div class=" scipark-col-row2 d-flex mb-3" >
       <div class="card  mb-3 text-gray-800" >
-        <div class="card-header " style="background-color: rgb(0,133,173);">
+        <div class="card-header " style="background-color: rgba(170, 229, 247, 0.514);">
           <span class="fa-stack fa-1x" >
-            <i class="fa fa-circle fa-stack-2x icon-bg-3"></i>
-            <i class="fas fa-building fa-stack-1x" style="color: rgb(0,133,173);" ></i>
+            <i class="fa fa-circle fa-stack-2x icon-bg"></i>
+            <i class="fas fa-building fa-stack-1x" style="color: white;" ></i>
           </span>
-          <b style="color:rgb(253, 253, 253);">จำนวนบริษัท Start Up ที่ดำเนินการผ่านอุทยานวิทยาศาสตร์</b>
+          <b style="color:black;">จำนวนบริษัท Start Up ที่ดำเนินการผ่านอุทยานวิทยาศาสตร์</b>
         </div>
         <div class="card-body ">
           <div class="row my-3" style="padding: 0px; text-align: center;" >
@@ -437,7 +433,7 @@
         <div class="card-footer bg-transparent text-center ">
           <a href = '{% url "science-park-graph" value="11"%}' target="_blank"> 
             <input  type="submit" value="View Graph" class="btn science-park-buttons " 
-            style=" border-radius : 25px;" />
+            style=" border-radius : 25px; background-color: #333333;" />
           </a>
         </div>
       </div>
@@ -446,12 +442,12 @@
     <!-- จำนวนบัณฑิตที่ก่อตั้งบริษัท โดยดำเนินการผ่านอุทยานวิทยาศาสตร์  -->   
     <div class=" scipark-col-row2 d-flex mb-3 " >
       <div class="card  mb-3 text-gray-800" >
-        <div class="card-header " style="background-color: rgb(0,133,173);">
+        <div class="card-header " style="background-color: rgba(170, 229, 247, 0.514)">
           <span class="fa-stack fa-1x" >
-            <i class="fa fa-circle fa-stack-2x icon-bg-3"></i>
-            <i class="fas fa-graduation-cap fa-stack-1x" style="color: rgb(0,133,173);" ></i>
+            <i class="fa fa-circle fa-stack-2x icon-bg"></i>
+            <i class="fas fa-graduation-cap fa-stack-1x" style="color: white;" ></i>
           </span>
-          <b style="color:rgb(253, 253, 253);">จำนวนบัณฑิตที่ก่อตั้งบริษัท โดยดำเนินการผ่านอุทยานวิทยาศาสตร์</b>
+          <b style="color:black;">จำนวนบัณฑิตที่ก่อตั้งบริษัท โดยดำเนินการผ่านอุทยานวิทยาศาสตร์</b>
         </div>
         <div class="card-body ">
           <div class="row my-3" style="padding: 0px; text-align: center;" >
@@ -470,7 +466,7 @@
         <div class="card-footer bg-transparent text-center ">
           <a href = '{% url "science-park-graph" value="12"%}' target="_blank"> 
             <input  type="submit" value="View Graph" class="btn science-park-buttons " 
-            style=" border-radius : 25px;" />
+            style=" border-radius : 25px; background-color: #333333;" />
           </a>
         </div>
       </div>

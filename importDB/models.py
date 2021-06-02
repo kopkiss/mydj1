@@ -110,3 +110,11 @@ class Science_park_rawdata(models.Model):
         return super(Science_park_rawdata, self).save(*args, **kwargs)
 
 
+class Science_park_PITI(models.Model):
+    request_no = models.CharField(max_length = 100)
+    title = models.CharField(max_length = 1000)
+    rcv_date = models.CharField(max_length = 2)
+    type_group = models.CharField(max_length = 15)
+
+    def __str__(self):  # def นี้ ทำให้ ชื่อของ model ไปแสดงในหน้า /admin 
+        return str(self.request_no)+" "+self.title 

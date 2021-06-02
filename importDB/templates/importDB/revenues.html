@@ -116,6 +116,15 @@
                                                     </form>
                                                 </td>
                                             </div>
+                                            {% else %}
+                                            <div class="col-auto px-0"  style="display: flex; justify-content: center; align-items: center; ">
+                                                <td class="text-center" >
+                                                    <form action="more-info" target="_blank" method=POST>
+                                                        {% csrf_token %}
+                                                        <input title="สามารถดูรายละเอียด Research Funds ในปีงบประมาณก่อน ปี {{now_year}}" name = {{filter_year}} type="submit" value="Research Funds" class="btn-shadow btn btn-success " style="width:auto;" disabled/>
+                                                    </form>
+                                                </td>
+                                            </div>
                                             {% endif %}
                                         </span>
                                     </div>

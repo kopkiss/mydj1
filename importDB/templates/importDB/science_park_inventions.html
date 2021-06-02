@@ -78,20 +78,8 @@
     border-radius: 50%;
 }
 
-.icon-bg-1 {
-    color: #F1C40F;
-}
-
-.icon-bg-2 {
-    color: rgb(35, 141, 100);
-}
-
-.icon-bg-3 {
-  color: #eca129;
-}
-
-.icon-bg-4 {
-    color: #2E86C1;
+.icon-bg {
+    color: #424242;
 }
 
 .science-park-buttons {
@@ -157,14 +145,14 @@
         <!-- เลือกปี -->
         <div class="row" >
           <div class = "col " style="width: 100%;">
-            <div class="card-header pt-2 " style="width:100%; background-color: #f0af48;" >
+            <div class="card-header pt-2 " style="width:100%; background-color: #ffeac9a9;" >
               <div class= "row pt-1 ">
                 <div class="col-xs-12 col-md-12 col-lg-12 "  >
                   <form class="mt-1 " name='filter' method=POST  >
                     {% csrf_token %}
                     <div class="font-size-lg">
-                      <b style="display:inline-block; color: rgb(255, 255, 255);"> &nbsp;&nbsp;นวัตกรรมเชิงพาณิชย์ ปี :&nbsp; </b>
-                      <select id="year" name = "year" class=" btn ex2 dropdown-toggle" onChange="filter.submit();" style="background-color: #ffffff; color:rgb(46, 45, 45)">
+                      <b style="display:inline-block; color: black;"> &nbsp;&nbsp;นวัตกรรมเชิงพาณิชย์ | ปีพ.ศ. :&nbsp; </b>
+                      <select id="year" name = "year" class=" btn ex2 dropdown-toggle" onChange="filter.submit();" style="background-color: rgb(46, 45, 45); color:#ffffff;">
                           {% for y in year  %}
               
                               {% if y == filter_year%} 
@@ -175,6 +163,12 @@
                           {% endfor %}
                 
                       </select>
+                      <img src="{% static 'img/question-mark-logo.png' %}" style="float:right;"
+                      title="นวัตกรรมเชิงพาณิชย์ คือ ผลงานวิจัยนวัตกรรมที่ใช้ประโยชน์เชิงพาณิชย์กับบริษัทต่างๆ 
+                      หรือบริษัทที่เปิด Spin off หรือเกิดการระดมทุนในต่างประเทศ 
+                      เพื่อตอบประเด็นยุทธศาสตร์: Increase technology-transfer ability at the international level. " 
+                      style="display: block; margin-left: auto; margin-right: auto; " 
+                      width="15" height="15" /> 
                     </div>
                   </form>
                 </div>
@@ -200,7 +194,7 @@
                 <tr class="pt-5">
                   <td>
                     <div class="fa-stack fa-lg fa-2x my-4"  >
-                      <i class="fa fa-circle fa-stack-2x icon-bg-3"></i>
+                      <i class="fa fa-circle fa-stack-2x icon-bg"></i>
                       <i class="fas fa-vial fa-stack-1x" style="color: cornsilk;" ></i>
                     </div>
                   </td>
@@ -234,7 +228,7 @@
                 <tr class="pt-5">
                   <td>
                     <div class="fa-stack fa-lg fa-2x my-4"  >
-                      <i class="fa fa-circle fa-stack-2x icon-bg-3"></i>
+                      <i class="fa fa-circle fa-stack-2x icon-bg"></i>
                       <i class="fas fa-scroll fa-stack-1x" style="color: cornsilk;" ></i>
                     </div>
                   </td>
@@ -269,7 +263,7 @@
                 <tr class="pt-5">
                   <td>
                     <div class="fa-stack fa-lg fa-2x my-4"  >
-                      <i class="fa fa-circle fa-stack-2x icon-bg-3"></i>
+                      <i class="fa fa-circle fa-stack-2x icon-bg"></i>
                       <i class="fas fa-file-contract fa-stack-1x" style="color: cornsilk;" ></i>
                     </div>
                   </td>
@@ -308,8 +302,8 @@
     <div class=" sci-park-col2 mb-2 d-flex">  
       <div class="row mx-2 " style="width: 100%;">
         <div class="card pretty_container " style="width: 100%;">
-            <div class="card-header pt-3 pb-4" style=" color:rgb(255, 255, 255); width:100%; background-color: #f0af48;" >
-                <b>แผนภูมิวงกลม | ปี : {{filter_year}} </b>
+            <div class="card-header pt-3 pb-4" style=" color:black; width:100%; background-color: #ffeac9a9;" >
+                <b>แผนภูมิวงกลมนวัตกรรมเชิงพาณิชย์ | ปี : {{filter_year}} </b>
             </div>
             <div class="card-body"  style="width:100%; " > 
                 {{ graph1 | safe }}

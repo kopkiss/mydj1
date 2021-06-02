@@ -295,6 +295,13 @@ def dump(request):  # ดึงข้อมูล จาก Oracle เข้า�
             whichrows = 'row8'
             col = 'd8'
 
+        elif request.POST['row']=='Dump9':  #Science-park จากระบบ PITI
+            checkpoint = dump9()
+            dt = datetime.now()
+            timestamp = time.mktime(dt.timetuple()) 
+            whichrows = 'row9'
+            col = 'd9'
+
 
         if checkpoint:  #ไว้เพื่อบันทึกเวลา และ แสดงผลลัพธ์ เมื่อกดปุ่ม "นำเข้า" 
             result = 'นำเข้าสำเร็จ'
@@ -438,7 +445,7 @@ def query(request): # Query ฐานข้อมูล Mysql (เป็น .csv
             whichrows = 'row14'
             col = 'q14'
 
-        elif request.POST['row']=='Query15': #test
+        elif request.POST['row']=='Query15': #Science Park 
             checkpoint = query15() 
             dt = datetime.now()
             timestamp = time.mktime(dt.timetuple())
@@ -835,6 +842,59 @@ def dump8():  ## University Publication อื่นๆ จาก PSUSWatch
             print("Ending DUMP#8...")
         else:
             print("Ending DUMP#8 ... with ERROR!")
+            checkpoint = False
+        ########################################################
+        
+        return checkpoint
+
+    except Exception as e :
+        checkpoint = False
+        print('Something went wrong :', e)
+        return checkpoint
+
+def dump9():  ## Science-Park จาก PITI
+    print("-"*20)
+    print("Starting DUMP#9 ...")
+    checkpoint = True
+    os.environ["NLS_LANG"] = ".UTF8"  # ทำให้แสดงข้อความเป็น ภาษาไทยได้
+    try:
+        #####################################################
+        ################# Science Park DUMP #################
+        #####################################################
+
+        sql_cmd =  """SELECT  REQUEST_NO, TITLE, Document_RCV_Date,'PATENT' as type
+                        FROM IPOP.PATENT
+                        union all
+                        SELECT  REQUEST_NO, TITLE, Document_RCV_Date,'PETTY_PATENT' as type
+                        FROM IPOP.PETTY_PATENT
+                        union all
+                        SELECT  REQUEST_NO, TITLE, Document_RCV_Date ,'PRODUCT_DESIGN' as type
+                        FROM IPOP.PRODUCT_DESIGN
+                    """
+
+
+        con_string = getConstring('oracle_hrims')  # return ค่า config ของฐาน hrims
+
+        engine = create_engine(con_string, encoding="latin1" ,max_identifier_length=128)
+
+        df = pd.read_sql_query(sql_cmd, engine)
+
+        ################ save to db ##########################
+        con_string = getConstring('sql') # return ค่า config ของฐาน sql
+        result = pm.save_to_db('importdb_science_park_piti', con_string, df)
+        print("Science-park-PITI is finished")
+
+        ########## save to csv ##########      
+        if not os.path.exists("mydj1/static/csv"):
+                os.mkdir("mydj1/static/csv")
+
+        df.to_csv("""mydj1/static/csv/sp_piti.csv""", index = True, header=True)
+
+
+        if result:
+            print("Ending DUMP#9...")
+        else:
+            print("Ending DUMP#9 ... with ERROR!")
             checkpoint = False
         ########################################################
         
@@ -2809,7 +2869,7 @@ def query14(): # Query รูปกราฟ ที่จะแสดงใน �
         print('At Query#14: Something went wrong :', e) 
         return checkpoint
 
-def query15(): # Science Park 
+def query15(): # Science Park from excel 
     print("-"*20)
     print("Starting Query#15 ...")
     checkpoint = True
@@ -2829,23 +2889,37 @@ def query15(): # Science Park
         # print(df)
         data_piv = df.pivot(index="year", columns="kpi_number", values="sum")
         # print(data_piv)
-        
+
+        #### สร้าง csv เก็บวันที่ update ข้อมูลใหม่ จาก excel ล่าสุด #### 
+        sql_cmd = """SELECT DATE(modified) as date
+            FROM importdb_science_park_rawdata
+            group by 1
+            order by 1 DESC """
+
+        con_string = getConstring('sql')
+        qery_df = pm.execute_query(sql_cmd, con_string)
+        date = str(qery_df.iloc[0,0].day)+'/'+str(qery_df.iloc[0,0].month)+'/'+str(qery_df.iloc[0,0].year+543)
+
+        data = {"date":[date],}
+
+        date_df = pd.DataFrame(data,)
+
+        ########################################################
 
         ########## save to csv ตาราง  ##########      
         if not os.path.exists("mydj1/static/csv"):
-                os.mkdir("mydj1/static/csv")      
+                os.mkdir("mydj1/static/csv")
+        # สร้าง csv ไว้เก็บข้อมูล วันที่เพิ่มข้อมูลใหม่ของ Science park ด้วย excel    
+        date_df.to_csv ("""mydj1/static/csv/last_date_input_science_park_excel.csv""", index = True, header=True)           
         data_piv.to_csv ("""mydj1/static/csv/science_park_kpi.csv""", index = True, header=True)
         print ("Data is saved")
-
-
-
 
         return checkpoint
 
     except Exception as e :
         checkpoint = False
         print('At Query#15: Something went wrong :', e)    
-        return checkpoint
+        return checkpoint   
 
 def query16(): # ISI SCOPUS TCI  3 ปีย้อนหลัง
     print("-"*20)
@@ -3459,6 +3533,7 @@ def home(requests):  # หน้า homepage หน้าแรก
 def pageRevenues(request): # page รายได้งานวิจัย
 
     selected_year = datetime.now().year+543 # กำหนดให้ ปี ใน dropdown เป็นปีปัจจุบัน
+    
     def get_head_page(): # get 
         df = pd.read_csv("""mydj1/static/csv/head_page.csv""")
         return df.iloc[0].astype(int)
@@ -3664,7 +3739,8 @@ def pageRevenues(request): # page รายได้งานวิจัย
         'campus' : get_budget_campas(),
         'graph1' :graph1(),
         'date' : get_date_file(),
-        'top_bar_title': "รายได้งานวิจัย"
+        'top_bar_title': "รายได้งานวิจัย",
+        'homepage': True,
     
     }
     
@@ -4064,7 +4140,8 @@ def pageExFund(request): # page รายได้จากทุนภายน
         'df_Na_Fx_fund' : getNationalEXFUND(),
         #### tables1 
         'df_Inter_Fx_fund':getInterNationalEXFUND(),
-        'top_bar_title': "แหล่งทุนภายนอก"
+        'top_bar_title': "แหล่งทุนภายนอก",
+        'homepage': True,
 
     }
 
@@ -4369,6 +4446,7 @@ def pageRanking(request): # page Ranking ISI/SCOPUS/TCI
         'top_bar_title': "จำนวนงานวิจัย",
         'focus' : focus,   # เอาไว้เช็ค เพื่อเลื่อนหน้าจอมาที่ bar graph เวลา post จาก dropdown ปี พ.ศ.
         're' : cited_info(),
+        'homepage': True,
     }
 
 
@@ -5474,7 +5552,8 @@ def pageResearchMan(request):
         'filter_year' : selected_year,
         'num_main_research' : num_main_research(),
         'graph_revenue_research' : graph_revenue_research(),
-        'top_bar_title': "จำนวนผู้วิจัย"
+        'top_bar_title': "จำนวนผู้วิจัย",
+        'homepage': True,
         
        
     }
@@ -5482,6 +5561,280 @@ def pageResearchMan(request):
     
     
     return render(request,'importDB/research_man.html',context)  
+
+@login_required(login_url='login')
+def science_park_home(request):
+    
+    def get_head_page_data(): 
+        try:
+            df = pd.read_csv("""mydj1/static/csv/science_park_kpi.csv""")
+            header_year = df.year.max()
+
+
+            re_df = df[df["year"]==int(header_year)]
+    
+            a = int(re_df.iloc[:,13:].sum(axis=1).iloc[0])
+            b = int(re_df.iloc[:,1:4].sum(axis=1).iloc[0])
+            c = int(re_df.iloc[:,5:8:2].sum(axis=1).iloc[0])
+    
+            re_df = pd.DataFrame({'money': [a], 'invention': [b], 'cooperation':[c]})
+
+            return re_df.iloc[0]
+        
+        except Exception as e: 
+            re_df = pd.DataFrame({'money': [0], 'invention': [0], 'cooperation':[0]}) # 
+            return re_df.iloc[0]
+
+    def fiscal_year(date): # ปีงบประมาณ
+        return int(((date.year+1)+543) if (date.month >= 10) else ((date.year)+543))
+
+    def graph1():  # จำนวนทรัพย์สินทางปัญญา ตามปีงบประมาณ
+        try:
+            df = pd.read_csv("""mydj1/static/csv/sp_piti.csv""", index_col=0)
+            df["document_rcv_date"] = pd.to_datetime(df["document_rcv_date"], format='%Y-%m-%d')
+            df = df.dropna(axis=0)
+            df["document_rcv_date"] = df["document_rcv_date"].apply(fiscal_year)
+
+            # df_cleaned = df[df["document_rcv_date"]>=2553]
+            df_groupby = df[['document_rcv_date','type','request_no']].groupby(['document_rcv_date','type']).count()
+
+            f_df = df_groupby.unstack("type")
+            f_df = f_df[-15:].fillna(0)  ## เอาเฉพาะ 10 ปีย้อนหลัง
+            f_df = f_df.astype(int)
+
+            f_df["sum"] = f_df.sum(axis=1)
+
+            ##### วาดกราฟ #####
+            fig = go.Figure([go.Bar(x=f_df.index.values[:-1] , y=f_df['sum'].values[:-1],
+                    name="รวม", # กำหนด ชื่อเวลา hover เอา mouse ชี้บนเส้น
+                    legendgroup = "A", # กำหนดกลุ่ม ของเส้น เพื่อ สามารถกด show หรือ ไม่ show กราฟได้
+                    textposition="inside",
+                    textfont_color="white",
+                    textangle=0,
+                    texttemplate="%{y}",
+                    hoverinfo='skip',
+                    marker_color='#04849C', marker_line_color='rgb(8,48,107)',
+                    marker_line_width=1.5, opacity=1,)])
+
+            fig.add_trace(go.Bar(x=f_df.index.values[-1:] , y=f_df['sum'].values[-1:],
+                            name="รวม", # กำหนด ชื่อเวลา hover เอา mouse ชี้บนเส้น
+                            legendgroup = "A", # กำหนดกลุ่ม ของเส้น เพื่อ สามารถกด show หรือ ไม่ show กราฟได้
+                            textposition="inside",
+                            textfont_color="black",
+                            textangle=0,
+                            texttemplate="%{y}",
+                            hoverinfo='skip',
+                            showlegend=False,
+                            marker_color='rgb(158,202,225)', marker_line_color='rgb(8,48,107)',
+                            marker_line_width=1.5, opacity=1)
+                        )
+
+            ##########  Yellow ##############
+            fig.add_trace(go.Scatter(x=f_df.index.values[:-1], y=f_df.iloc[:,2].values[:-1],
+                            mode='lines', # กำหนดว่า เป็นเส้นและมีจุด
+            #                  mode='lines+markers', # กำหนดว่า เป็นเส้นและมีจุด
+                            name="สิทธิบัตรการออกแบบผลิตภัณฑ์", # กำหนด ชื่อเวลา hover เอา mouse ชี้บนเส้น
+                            line=dict( width=2,color='gold'), # กำหนดสี และความหนาของเส้น
+                            legendgroup = "D", # กำหนดกลุ่ม ของเส้น เพื่อ สามารถกด show หรือ ไม่ show กราฟได้
+            #                 line_shape='spline',
+                            ))  
+            fig.add_trace(go.Scatter(x=f_df.index.values[-2:], y=f_df.iloc[:,2].values[-2:],
+                        mode='lines',
+                        # name=item+": "+df_names[item][0] ,
+                        line=dict( width=2, dash='dot',color="gold",),
+                        showlegend=False,
+                        hoverinfo='skip', 
+                        legendgroup = "D",
+                        ))
+
+            fig.add_trace(go.Scatter(x=f_df.index.values[-1::], y=f_df.iloc[:,2].values[-1::],
+                        mode='markers',
+                        name="สิทธิบัตรการออกแบบผลิตภัณฑ์",
+                        line=dict(color="gold"),
+                        showlegend=False,
+                        legendgroup = "D"))
+            ###############################
+
+            ##########  Blue ##############
+            fig.add_trace(go.Scatter(x=f_df.index.values[:-1], y=f_df.iloc[:,1].values[:-1],
+                            mode='lines', # กำหนดว่า เป็นเส้นและมีจุด
+            #                  mode='lines+markers', # กำหนดว่า เป็นเส้นและมีจุด
+                            name="อนุสิทธิบัตร", # กำหนด ชื่อเวลา hover เอา mouse ชี้บนเส้น
+                            line=dict( width=2,color='blue'), # กำหนดสี และความหนาของเส้น
+                            legendgroup = "C", # กำหนดกลุ่ม ของเส้น เพื่อ สามารถกด show หรือ ไม่ show กราฟได้
+            #                 line_shape='spline',
+                            ))  
+            fig.add_trace(go.Scatter(x=f_df.index.values[-2:], y=f_df.iloc[:,1].values[-2:],
+                        mode='lines',
+                        # name=item+": "+df_names[item][0] ,
+                        line=dict( width=2, dash='dot',color="blue",),
+                        showlegend=False,
+                        hoverinfo='skip', 
+                        legendgroup = "C",
+                        ))
+
+            fig.add_trace(go.Scatter(x=f_df.index.values[-1::], y=f_df.iloc[:,1].values[-1::],
+                        mode='markers',
+                        name="สิทธิบัตร",
+                        line=dict(color="blue"),
+                        showlegend=False,
+                        legendgroup = "C"))
+            ###############################
+
+
+            ##########  RED ##############
+            fig.add_trace(go.Scatter(x=f_df.index.values[:-1], y=f_df.iloc[:,0].values[:-1],
+                            mode='lines', # กำหนดว่า เป็นเส้นและมีจุด
+            #                  mode='lines+markers', # กำหนดว่า เป็นเส้นและมีจุด
+                            name="สิทธิบัตร", # กำหนด ชื่อเวลา hover เอา mouse ชี้บนเส้น
+                            line=dict( width=2,color='red'), # กำหนดสี และความหนาของเส้น
+                            legendgroup = "B", # กำหนดกลุ่ม ของเส้น เพื่อ สามารถกด show หรือ ไม่ show กราฟได้
+            #                 line_shape='spline',
+                            ))  
+            fig.add_trace(go.Scatter(x=f_df.index.values[-2:], y=f_df.iloc[:,0].values[-2:],
+                        mode='lines',
+                        # name=item+": "+df_names[item][0] ,
+                        line=dict( width=2, dash='dot',color="red",),
+                        showlegend=False,
+                        hoverinfo='skip', 
+                        legendgroup = "B",
+                        ))
+
+            fig.add_trace(go.Scatter(x=f_df.index.values[-1::], y=f_df.iloc[:,0].values[-1::],
+                        mode='markers',
+                        name="สิทธิบัตร",
+                        line=dict(color="red"),
+                        showlegend=False,
+                        legendgroup = "B"))
+            ###############################
+
+
+            fig.update_layout(
+            #                  title_text=f"<b>{labels[source][0]} </b> 10 ปี ย้อนหลัง",
+            #                 height=950,width=1000,
+                            xaxis_title=f"<b>ปีงบประมาณ</b>",
+                            yaxis_title=f"<b>จำนวน</b>",
+                            font=dict(size=14,),
+                            hovermode="x",
+                            legend=dict(x=0.005, y=1),
+                        )
+
+            fig.update_layout(
+                plot_bgcolor="#FFF"
+                ,xaxis = dict(
+                    tickmode = 'linear',
+                    # tick0 = 2554,
+                    dtick = 1,
+                    showgrid=False,
+                    linecolor="#BCCCDC", 
+
+                ),
+                yaxis = dict(
+                    showgrid=False,
+                    linecolor="#BCCCDC", 
+                ),
+                hoverdistance=100, # Distance to show hover label of data point
+                spikedistance=1000, # Distance to show spike
+                autosize=True,
+                legend=dict(orientation="v"),
+                margin=dict(t=30, )
+                ,
+            )
+
+
+            fig.update_xaxes(ticks="outside")
+            fig.update_yaxes(ticks="outside")
+
+
+            plot_div = plot(fig, output_type='div', include_plotlyjs=False,)
+        
+            return plot_div
+        
+        except Exception as e: 
+            print(e)
+            return None
+
+    def graph2():  # ทรัพย์สินทางปัญญาทั้งหมด
+        try:
+            df = pd.read_csv("""mydj1/static/csv/sp_piti.csv""", index_col=0)
+            df["document_rcv_date"] = pd.to_datetime(df["document_rcv_date"], format='%Y-%m-%d')
+            df = df.dropna(axis=0)
+            df["document_rcv_date"] = df["document_rcv_date"].apply(fiscal_year)
+
+            df_groupby = df[['document_rcv_date','type','request_no']].groupby(['document_rcv_date','type']).count()
+
+            f_df = df_groupby.unstack("type")
+            f_df = f_df.fillna(0)
+            f_df = f_df.astype(int)
+
+            f_df["sum"] = f_df.sum(axis=1)
+
+            patent = f_df.iloc[:,0].sum()
+            petty_patent = f_df.iloc[:,1].sum()
+            product_design = f_df.iloc[:,2].sum()
+            overall = f_df.iloc[:,3].sum()
+
+            ## วาดกราฟ โดนัท ####
+
+            newdf = pd.DataFrame( {'ประเภท' : ["สิทธิบัตร","อนุสิทธิบัตร","สิทธิบัตรการออกแบบผลิตภัณฑ์"],
+                                  'จำนวน':[patent, petty_patent, product_design]
+                      }
+                    )
+
+            fig = px.pie(newdf, values='จำนวน', names='ประเภท' ,
+                    color_discrete_sequence=px.colors.qualitative.T10,
+                    hole=0.5 ,
+                    
+            )
+
+
+            fig.update_traces(textposition='inside', textfont_size=14)
+
+            fig.update_layout(uniformtext_minsize=12 , 
+            #                   uniformtext_mode='hide' #  ถ้าเล็กกว่า 12 ให้ hide
+                            )   
+            fig.update_layout(legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1,
+                font = dict(size = 16),
+            ))
+            # fig.update_layout( height=600)
+            fig.update_layout( margin=dict(l=30, r=30, t=70, b=5))
+
+            fig.update_layout( annotations=[dict(text="ทั้งหมด<br><b>{:,}</b>".format(overall), x=0.50, y=0.5, 
+                                                font_color = "black", showarrow=False,
+                                                font_size=30,)]) ##f
+
+            plot_div = plot(fig, output_type='div', include_plotlyjs=False,)
+
+            return plot_div
+
+        
+        except Exception as e: 
+            print(e)
+            return None
+    
+    def get_date_file():
+        file_path = """mydj1/static/csv/sp_piti.csv"""
+        t = time.strftime('%m/%d/%Y', time.gmtime(os.path.getmtime(file_path)))
+        d = datetime.strptime(t,"%m/%d/%Y").date() 
+
+        return str(d.day)+'/'+str(d.month)+'/'+str(d.year+543)
+
+    context={
+        'now_year' : (datetime.now().year)+543,
+        'plot1' : graph1(),
+        'plot2' : graph2(),
+        'header' :get_head_page_data(),
+        'date' : get_date_file(),
+        'top_bar_title': "หน้าหลักอุทยานวิทยาศาสตร์",
+        
+        
+    }
+    return render(request,'importDB/science_park_home.html',context) 
 
 @login_required(login_url='login')
 def science_park_money(request):
@@ -5503,12 +5856,15 @@ def science_park_money(request):
             return print(e)
 
     def get_date_file():
-        file_path = """mydj1/static/csv/science_park_kpi.csv"""
-        t = time.strftime('%m/%d/%Y', time.gmtime(os.path.getmtime(file_path)))
-        d = datetime.strptime(t,"%m/%d/%Y").date() 
+        try:
+            file_path = """mydj1/static/csv/last_date_input_science_park_excel.csv"""
+            df = pd.read_csv(file_path)
+            return df.date.values[0]
 
-        return str(d.day)+'/'+str(d.month)+'/'+str(d.year+543)
-
+        except Exception as e:
+            print(e)
+            return None
+  
     def get_info(): # ข้อมูลสำหรับหน้าแรก ของอุทยานวิทย์
         try:
             re_df = df[df["year"]==int(selected_year)]
@@ -5616,7 +5972,7 @@ def science_park_money(request):
             show = False
         return show
 
-    def graph1():  # แสดงกราฟโดนัด ของจำนวน เงินทั้ง 11 หัวข้อ
+    def graph1():  #pie 
         try:
             raw_df = pd.read_csv("""mydj1/static/csv/science_park_kpi.csv""")
             df = raw_df[raw_df["year"]==int(selected_year)]
@@ -5629,17 +5985,14 @@ def science_park_money(request):
             final_df = pd.DataFrame(data,)
         
             fig = px.pie(final_df, values='budget', names='type',
-                    color_discrete_sequence=px.colors.sequential.RdBu,
-                    # color_discrete_map={'Economic Impact':'lightcyan',
-                    #                  'ขายสิทธิบัตร':'cyan',
-                    #                  'งานวิจัย':'royalblue',
-                                    #  'Sun':'darkblue'}
+                    color_discrete_sequence=px.colors.qualitative.Prism[2:],
+      
                     ) #jet
                 
             fig.update_traces(textposition='inside', textfont_size=14)
 
             fig.update_layout(uniformtext_minsize=12 , uniformtext_mode='hide')  #  ถ้าเล็กกว่า 12 ให้ hide 
-            fig.update_layout(legend=dict(orientation="h", yanchor="bottom", y=1, xanchor="right", x=0.7))  # แสดง legend ด้านล่างของกราฟ
+            fig.update_layout(legend=dict(orientation="h", yanchor="bottom", y=1, xanchor="right", x=0.9,  font = dict(size = 16),))  # แสดง legend ด้านล่างของกราฟ
             fig.update_layout( height=460)
             fig.update_layout( margin=dict(l=30, r=30, t=60, b=0))
 
@@ -5681,6 +6034,8 @@ def science_park_money(request):
         'graph1' :graph1(),
         'date' : get_date_file(),
         'header' :get_head_page_data(),
+        'top_bar_title': "รายรับผ่านบริการของอุทยานวิทยาศาสตร์",
+        'homepage': True,
         
     }
 
@@ -5708,13 +6063,14 @@ def science_park_inventions(request):
             return print(e)
 
     def get_date_file():
-        file_path = """mydj1/static/csv/science_park_kpi.csv"""
-        t = time.strftime('%m/%d/%Y', time.gmtime(os.path.getmtime(file_path)))
-        d = datetime.strptime(t,"%m/%d/%Y").date() 
+        try:
+            file_path = """mydj1/static/csv/last_date_input_science_park_excel.csv"""
+            df = pd.read_csv(file_path)
+            return df.date.values[0]
 
-        return str(d.day)+'/'+str(d.month)+'/'+str(d.year+543)
-
-    
+        except Exception as e:
+            print(e)
+            return None
 
     def get_info(): # ข้อมูลสำหรับหน้าแรก ของอุทยานวิทย์
         try:
@@ -5835,17 +6191,15 @@ def science_park_inventions(request):
         final_df = pd.DataFrame(data,)
     
         fig = px.pie(final_df, values='number', names='type',
-                color_discrete_sequence=px.colors.sequential.RdBu,
-                # color_discrete_map={'Economic Impact':'lightcyan',
-                #                  'ขายสิทธิบัตร':'cyan',
-                #                  'งานวิจัย':'royalblue',
-                                #  'Sun':'darkblue'}
+                color_discrete_sequence=px.colors.qualitative.Pastel[1:],
                 ) #jet
             
         fig.update_traces(textposition='inside', textfont_size=14)
 
         fig.update_layout(uniformtext_minsize=12 , uniformtext_mode='hide')  #  ถ้าเล็กกว่า 12 ให้ hide 
-        fig.update_layout(legend=dict(orientation="h", yanchor="bottom", y=1, xanchor="right", x=0.7))  # แสดง legend ด้านล่างของกราฟ
+        fig.update_layout(legend=dict(orientation="h", yanchor="bottom", y=1, xanchor="right", x=0.7,
+                                 font = dict(size = 16),
+                        ))  
         fig.update_layout( height=460)
         fig.update_layout( margin=dict(l=30, r=30, t=60, b=0))
         # fig.update_layout(legend = dict(font = dict(family = "Courier", size = 12, color = "black")))
@@ -5883,6 +6237,8 @@ def science_park_inventions(request):
         'graph1' :graph1(),
         'date' : get_date_file(),
         'header' :get_head_page_data(),
+        'top_bar_title': "นวัตกรรมเชิงพาณิชย์",
+        'homepage': True,
         
     }
 
@@ -5909,11 +6265,15 @@ def science_park_cooperations(request):
             return print(e)
 
     def get_date_file():
-        file_path = """mydj1/static/csv/science_park_kpi.csv"""
-        t = time.strftime('%m/%d/%Y', time.gmtime(os.path.getmtime(file_path)))
-        d = datetime.strptime(t,"%m/%d/%Y").date() 
 
-        return str(d.day)+'/'+str(d.month)+'/'+str(d.year+543)
+        try:
+            file_path = """mydj1/static/csv/last_date_input_science_park_excel.csv"""
+            df = pd.read_csv(file_path)
+            return df.date.values[0]
+
+        except Exception as e:
+            print(e)
+            return None
 
     def get_info(): # ข้อมูลสำหรับหน้าแรก ของอุทยานวิทย์
         try:
@@ -6033,21 +6393,18 @@ def science_park_cooperations(request):
         final_df = pd.DataFrame(data,)
     
         fig = px.pie(final_df, values='number', names='type',
-                color_discrete_sequence=px.colors.sequential.RdBu,
-                # color_discrete_map={'Economic Impact':'lightcyan',
-                #                  'ขายสิทธิบัตร':'cyan',
-                #                  'งานวิจัย':'royalblue',
-                                #  'Sun':'darkblue'}
+                color_discrete_sequence=px.colors.qualitative.Safe,
                 ) #jet
             
         fig.update_traces(textposition='inside', textfont_size=14)
 
         fig.update_layout(uniformtext_minsize=12 , uniformtext_mode='hide')  #  ถ้าเล็กกว่า 12 ให้ hide 
-        fig.update_layout(legend=dict(orientation="h", 
+        fig.update_layout(legend=dict(orientation="v", 
                     yanchor="bottom", 
                     y=1, 
                     xanchor="right",
                     x=0.7, 
+                    font = dict(size = 16),
                    )
                 )  # แสดง legend ด้านล่างของกราฟ
         # fig.update_layout(legend = dict(font = dict(family = "Courier", size = 50, color = "black")))
@@ -6089,11 +6446,12 @@ def science_park_cooperations(request):
         'graph1' :graph1(),
         'date' : get_date_file(),
         'header' :get_head_page_data(),
+        'top_bar_title': "หน่วยงานและความร่วมมือ",
+        'homepage': True,
         
     }
 
     return render(request,'importDB/science_park_cooperations.html',context) 
-
 
 @login_required(login_url='login')
 def science_park_graph(request, value):
@@ -6573,6 +6931,8 @@ def science_park_graph(request, value):
         
     }
     return render(request,'importDB/science_park_graph.html',context) 
+
+
 
 # @periodic_task(run_every=crontab(hour=9, minute=10,))
 # def every_monday_morning():
