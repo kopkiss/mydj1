@@ -497,14 +497,25 @@ def dump1():
                     WHERE psu_project_id not in ('X541090' ,'X541067','X551445')
                 """
         con_string = getConstring("oracle_prpm") # return ค่า config ของฐาน oracle
+        
+        start = time.time()
+
         engine = create_engine(con_string, encoding="latin1" ,max_identifier_length=128)
         df = pd.read_sql_query(sql_cmd, engine)
         
+        print(df.head())
+        print("-------",len(df.index),"----------")
+        print("------------------------------")
+        print('Query: It took {0:0.1f} seconds'.format(time.time() - start))
         ###################################################
         # save path
+        
         con_string = getConstring("sql") # return ค่า config ของฐาน sql
-
+        
+        start = time.time()
         result  =  pm.save_to_db('importdb_prpm_v_grt_project_eis', con_string, df)
+        print('toDB: It took {0:0.1f} seconds'.format(time.time() - start))
+
         if result:
             print("Ending DUMP#1...")
         else:
@@ -862,13 +873,13 @@ def dump9():  ## Science-Park จาก PITI
         ################# Science Park DUMP #################
         #####################################################
 
-        sql_cmd =  """SELECT  REQUEST_NO, TITLE, Document_RCV_Date,'PATENT' as type
+        sql_cmd =  """SELECT  REQUEST_NO, TITLE, Document_RCV_Date, register_date ,'PATENT' as type
                         FROM IPOP.PATENT
                         union all
-                        SELECT  REQUEST_NO, TITLE, Document_RCV_Date,'PETTY_PATENT' as type
+                        SELECT  REQUEST_NO, TITLE, Document_RCV_Date, register_date,'PETTY_PATENT' as type
                         FROM IPOP.PETTY_PATENT
                         union all
-                        SELECT  REQUEST_NO, TITLE, Document_RCV_Date ,'PRODUCT_DESIGN' as type
+                        SELECT  REQUEST_NO, TITLE, Document_RCV_Date , register_date,'PRODUCT_DESIGN' as type
                         FROM IPOP.PRODUCT_DESIGN
                     """
 
@@ -878,7 +889,6 @@ def dump9():  ## Science-Park จาก PITI
         engine = create_engine(con_string, encoding="latin1" ,max_identifier_length=128)
 
         df = pd.read_sql_query(sql_cmd, engine)
-
         ################ save to db ##########################
         con_string = getConstring('sql') # return ค่า config ของฐาน sql
         result = pm.save_to_db('importdb_science_park_piti', con_string, df)
@@ -2881,14 +2891,15 @@ def query15(): # Science Park from excel
         print("Ending Query ...")
                 
         sql_cmd =    """ SELECT year, kpi_number, sum(number) as sum FROM `importdb_science_park_rawdata`
+                        where kpi_number < 16
                         group by 1, 2"""
 
         con_string = getConstring('sql')
 
         df = pm.execute_query(sql_cmd, con_string)
-        # print(df)
+        print(df)
         data_piv = df.pivot(index="year", columns="kpi_number", values="sum")
-        # print(data_piv)
+        # print(data_piv[:,:16])
 
         #### สร้าง csv เก็บวันที่ update ข้อมูลใหม่ จาก excel ล่าสุด #### 
         sql_cmd = """SELECT DATE(modified) as date
@@ -5591,6 +5602,7 @@ def science_park_home(request):
     def graph1():  # จำนวนทรัพย์สินทางปัญญา ตามปีงบประมาณ
         try:
             df = pd.read_csv("""mydj1/static/csv/sp_piti.csv""", index_col=0)
+            df = df[[ 'request_no', 'title',  'document_rcv_date', 'type']]
             df["document_rcv_date"] = pd.to_datetime(df["document_rcv_date"], format='%Y-%m-%d')
             df = df.dropna(axis=0)
             df["document_rcv_date"] = df["document_rcv_date"].apply(fiscal_year)
@@ -5599,7 +5611,7 @@ def science_park_home(request):
             df_groupby = df[['document_rcv_date','type','request_no']].groupby(['document_rcv_date','type']).count()
 
             f_df = df_groupby.unstack("type")
-            f_df = f_df[-15:].fillna(0)  ## เอาเฉพาะ 10 ปีย้อนหลัง
+            f_df = f_df[-15:].fillna(0)  ## เอาเฉพาะ 15 ปีย้อนหลัง
             f_df = f_df.astype(int)
 
             f_df["sum"] = f_df.sum(axis=1)
@@ -5675,7 +5687,7 @@ def science_park_home(request):
 
             fig.add_trace(go.Scatter(x=f_df.index.values[-1::], y=f_df.iloc[:,1].values[-1::],
                         mode='markers',
-                        name="สิทธิบัตร",
+                        name="อนุสิทธิบัตร",
                         line=dict(color="blue"),
                         showlegend=False,
                         legendgroup = "C"))
@@ -5757,11 +5769,243 @@ def science_park_home(request):
     def graph2():  # ทรัพย์สินทางปัญญาทั้งหมด
         try:
             df = pd.read_csv("""mydj1/static/csv/sp_piti.csv""", index_col=0)
+            df = df[[ 'request_no', 'title',  'document_rcv_date', 'type']]
             df["document_rcv_date"] = pd.to_datetime(df["document_rcv_date"], format='%Y-%m-%d')
             df = df.dropna(axis=0)
             df["document_rcv_date"] = df["document_rcv_date"].apply(fiscal_year)
 
             df_groupby = df[['document_rcv_date','type','request_no']].groupby(['document_rcv_date','type']).count()
+
+            f_df = df_groupby.unstack("type")
+            f_df = f_df.fillna(0)
+            f_df = f_df.astype(int)
+
+            f_df["sum"] = f_df.sum(axis=1)
+
+            patent = f_df.iloc[:,0].sum()
+            petty_patent = f_df.iloc[:,1].sum()
+            product_design = f_df.iloc[:,2].sum()
+            overall = f_df.iloc[:,3].sum()
+
+            ## วาดกราฟ โดนัท ####
+
+            newdf = pd.DataFrame( {'ประเภท' : ["สิทธิบัตร","อนุสิทธิบัตร","สิทธิบัตรการออกแบบผลิตภัณฑ์"],
+                                  'จำนวน':[patent, petty_patent, product_design]
+                      }
+                    )
+
+            fig = px.pie(newdf, values='จำนวน', names='ประเภท' ,
+                    color_discrete_sequence=px.colors.qualitative.T10[3:],
+                    hole=0.5 ,
+                    
+            )
+
+
+            fig.update_traces(textposition='inside', textfont_size=14)
+
+            fig.update_layout(uniformtext_minsize=12 , 
+            #                   uniformtext_mode='hide' #  ถ้าเล็กกว่า 12 ให้ hide
+                            )   
+            fig.update_layout(legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1,
+                font = dict(size = 16),
+            ))
+            # fig.update_layout( height=600)
+            fig.update_layout( margin=dict(l=30, r=30, t=70, b=5))
+
+            fig.update_layout( annotations=[dict(text="ทั้งหมด<br><b>{:,}</b>".format(overall), x=0.50, y=0.5, 
+                                                font_color = "black", showarrow=False,
+                                                font_size=30,)]) ##f
+
+            plot_div = plot(fig, output_type='div', include_plotlyjs=False,)
+
+            return plot_div
+
+        
+        except Exception as e: 
+            print(e)
+            return None
+    
+    def graph3():
+        
+        try: 
+            df = pd.read_csv("""mydj1/static/csv/sp_piti.csv""", index_col=0)
+            df = df[[ 'request_no', 'title',  'register_date', 'type']]
+            df["register_date"] = pd.to_datetime(df["register_date"], format='%Y-%m-%d')
+            df = df.dropna(axis=0)
+            # df = df.fillna(0)
+            df["register_date"] = df["register_date"].apply(fiscal_year)
+            # df_cleaned = df[df["document_rcv_date"]>=2553]
+            df_groupby = df[['register_date','type','request_no']].groupby(['register_date','type']).count()
+            f_df = df_groupby.unstack("type")
+            f_df = f_df[-15:].fillna(0)  ## เอาเฉพาะ 15 ปีย้อนหลัง
+            f_df = f_df.astype(int)
+
+            f_df["sum"] = f_df.sum(axis=1)
+            
+            ##### วาดกราฟ #####
+            fig = go.Figure([go.Bar(x=f_df.index.values[:-1] , y=f_df['sum'].values[:-1],
+                    name="รวม", # กำหนด ชื่อเวลา hover เอา mouse ชี้บนเส้น
+                    legendgroup = "A", # กำหนดกลุ่ม ของเส้น เพื่อ สามารถกด show หรือ ไม่ show กราฟได้
+                    textposition="inside",
+                    textfont_color="white",
+                    textangle=0,
+                    texttemplate="%{y}",
+                    hoverinfo='skip',
+                    marker_color='rgb(29,105,150)', marker_line_color='rgb(8,48,107)',
+                    marker_line_width=1.5, opacity=1,)])
+
+            fig.add_trace(go.Bar(x=f_df.index.values[-1:] , y=f_df['sum'].values[-1:],
+                            name="รวม", # กำหนด ชื่อเวลา hover เอา mouse ชี้บนเส้น
+                            legendgroup = "A", # กำหนดกลุ่ม ของเส้น เพื่อ สามารถกด show หรือ ไม่ show กราฟได้
+                            textposition="inside",
+                            textfont_color="black",
+                            textangle=0,
+                            texttemplate="%{y}",
+                            hoverinfo='skip',
+                            showlegend=False,
+                            marker_color='rgb(158,202,225)', marker_line_color='rgb(8,48,107)',
+                            marker_line_width=1.5, opacity=1)
+                        )
+
+            ##########  Yellow ##############
+            fig.add_trace(go.Scatter(x=f_df.index.values[:-1], y=f_df.iloc[:,2].values[:-1],
+                            mode='lines', # กำหนดว่า เป็นเส้นและมีจุด
+            #                  mode='lines+markers', # กำหนดว่า เป็นเส้นและมีจุด
+                            name="สิทธิบัตรการออกแบบผลิตภัณฑ์", # กำหนด ชื่อเวลา hover เอา mouse ชี้บนเส้น
+                            line=dict( width=2,color='gold'), # กำหนดสี และความหนาของเส้น
+                            legendgroup = "D", # กำหนดกลุ่ม ของเส้น เพื่อ สามารถกด show หรือ ไม่ show กราฟได้
+            #                 line_shape='spline',
+                            ))  
+            fig.add_trace(go.Scatter(x=f_df.index.values[-2:], y=f_df.iloc[:,2].values[-2:],
+                        mode='lines',
+                        # name=item+": "+df_names[item][0] ,
+                        line=dict( width=2, dash='dot',color="gold",),
+                        showlegend=False,
+                        hoverinfo='skip', 
+                        legendgroup = "D",
+                        ))
+
+            fig.add_trace(go.Scatter(x=f_df.index.values[-1::], y=f_df.iloc[:,2].values[-1::],
+                        mode='markers',
+                        name="สิทธิบัตรการออกแบบผลิตภัณฑ์",
+                        line=dict(color="gold"),
+                        showlegend=False,
+                        legendgroup = "D"))
+            ###############################
+
+            ##########  Blue ##############
+            fig.add_trace(go.Scatter(x=f_df.index.values[:-1], y=f_df.iloc[:,1].values[:-1],
+                            mode='lines', # กำหนดว่า เป็นเส้นและมีจุด
+            #                  mode='lines+markers', # กำหนดว่า เป็นเส้นและมีจุด
+                            name="อนุสิทธิบัตร", # กำหนด ชื่อเวลา hover เอา mouse ชี้บนเส้น
+                            line=dict( width=2,color='blue'), # กำหนดสี และความหนาของเส้น
+                            legendgroup = "C", # กำหนดกลุ่ม ของเส้น เพื่อ สามารถกด show หรือ ไม่ show กราฟได้
+            #                 line_shape='spline',
+                            ))  
+            fig.add_trace(go.Scatter(x=f_df.index.values[-2:], y=f_df.iloc[:,1].values[-2:],
+                        mode='lines',
+                        # name=item+": "+df_names[item][0] ,
+                        line=dict( width=2, dash='dot',color="blue",),
+                        showlegend=False,
+                        hoverinfo='skip', 
+                        legendgroup = "C",
+                        ))
+
+            fig.add_trace(go.Scatter(x=f_df.index.values[-1::], y=f_df.iloc[:,1].values[-1::],
+                        mode='markers',
+                        name="อนุสิทธิบัตร",
+                        line=dict(color="blue"),
+                        showlegend=False,
+                        legendgroup = "C"))
+            ###############################
+
+
+            ##########  RED ##############
+            fig.add_trace(go.Scatter(x=f_df.index.values[:-1], y=f_df.iloc[:,0].values[:-1],
+                            mode='lines', # กำหนดว่า เป็นเส้นและมีจุด
+            #                  mode='lines+markers', # กำหนดว่า เป็นเส้นและมีจุด
+                            name="สิทธิบัตร", # กำหนด ชื่อเวลา hover เอา mouse ชี้บนเส้น
+                            line=dict( width=2,color='red'), # กำหนดสี และความหนาของเส้น
+                            legendgroup = "B", # กำหนดกลุ่ม ของเส้น เพื่อ สามารถกด show หรือ ไม่ show กราฟได้
+            #                 line_shape='spline',
+                            ))  
+            fig.add_trace(go.Scatter(x=f_df.index.values[-2:], y=f_df.iloc[:,0].values[-2:],
+                        mode='lines',
+                        # name=item+": "+df_names[item][0] ,
+                        line=dict( width=2, dash='dot',color="red",),
+                        showlegend=False,
+                        hoverinfo='skip', 
+                        legendgroup = "B",
+                        ))
+
+            fig.add_trace(go.Scatter(x=f_df.index.values[-1::], y=f_df.iloc[:,0].values[-1::],
+                        mode='markers',
+                        name="สิทธิบัตร",
+                        line=dict(color="red"),
+                        showlegend=False,
+                        legendgroup = "B"))
+            ###############################
+
+
+            fig.update_layout(
+            #                  title_text=f"<b>{labels[source][0]} </b> 10 ปี ย้อนหลัง",
+            #                 height=950,width=1000,
+                            xaxis_title=f"<b>ปีงบประมาณ</b>",
+                            yaxis_title=f"<b>จำนวน</b>",
+                            font=dict(size=14,),
+                            hovermode="x",
+                            legend=dict(x=0.005, y=1),
+                        )
+
+            fig.update_layout(
+                plot_bgcolor="#FFF"
+                ,xaxis = dict(
+                    tickmode = 'linear',
+                    # tick0 = 2554,
+                    dtick = 1,
+                    showgrid=False,
+                    linecolor="#BCCCDC", 
+
+                ),
+                yaxis = dict(
+                    showgrid=False,
+                    linecolor="#BCCCDC", 
+                ),
+                hoverdistance=100, # Distance to show hover label of data point
+                spikedistance=1000, # Distance to show spike
+                autosize=True,
+                legend=dict(orientation="v"),
+                margin=dict(t=30, )
+                ,
+            )
+
+
+            fig.update_xaxes(ticks="outside")
+            fig.update_yaxes(ticks="outside")
+
+
+            plot_div = plot(fig, output_type='div', include_plotlyjs=False,)
+        
+            return plot_div
+        
+        except Exception as e: 
+            print(e)
+            return None
+    
+    def graph4():
+        try:
+            df = pd.read_csv("""mydj1/static/csv/sp_piti.csv""", index_col=0)
+            df = df[[ 'request_no', 'title', 'register_date', 'type']]
+            df["register_date"] = pd.to_datetime(df["register_date"], format='%Y-%m-%d')
+            df = df.dropna(axis=0)
+            df["register_date"] = df["register_date"].apply(fiscal_year)
+
+            df_groupby = df[['register_date','type','request_no']].groupby(['register_date','type']).count()
 
             f_df = df_groupby.unstack("type")
             f_df = f_df.fillna(0)
@@ -5816,7 +6060,108 @@ def science_park_home(request):
         except Exception as e: 
             print(e)
             return None
-    
+
+    def graph5(): # Economic Impact
+        try: 
+            df = pd.read_csv("""mydj1/static/csv/science_park_kpi.csv""", index_col=0)   
+            df = df.reset_index()
+
+            df2 = df[-10:-1][['year','13']]  # กราฟเส้นทึบ
+            df3 = df[-2:][['year','13']]  # กราฟเส้นประ
+            print(df2)
+            print(df3)
+            fig = object
+            
+            labels = {
+                "13":("รายรับจาก Economic Impact ","จำนวนเงิน(บาท)","ปีงบประมาณ"),
+            }
+
+        except Exception as e: 
+            return None
+        ### สร้าง กราฟเส้นทึบ ####
+
+        source = "13"
+        try:
+            fig = make_subplots(rows=1, cols=2,
+                    column_widths=[0.7, 0.3],
+                    specs=[[{"type": "scatter"},{"type": "table"}]]
+                    )
+
+            ### สร้าง กราฟเส้นทึบ ####
+            fig.add_trace(go.Scatter(x=df2['year'], y=df2[source],line=dict( color='royalblue'), name= "",showlegend=False,))
+
+            ### สร้าง กราฟเส้นประ ####
+            fig.add_trace(go.Scatter(x=df3['year'], y=df3[source]
+                    ,line=dict( width=2, dash='dot',color='royalblue'), name ="",showlegend=False, )
+                )
+
+            ### ตาราง ####
+
+            df[source] = df[source].apply(moneyformat)
+
+            fig.add_trace(
+                            go.Table(
+                                columnwidth = [150,200],
+                                header=dict(values=[f"<b>{labels[source][2]}</b>", f"<b>{labels[source][1]}</b>"],
+                                            fill = dict(color='#C2D4FF'),
+                                            align = ['center'] * 5),
+                                cells=dict(values=[df['year'], df[source]],
+                                        fill = dict(color='#F5F8FF'),
+                                        align = ['center','right'] * 5))
+                                , row=1, col=2
+                        )
+
+            fig.update_layout(
+                            # height=500,width=1000,
+                            xaxis_title=f"<b>{labels[source][2]}</b>",
+                            yaxis_title=f"<b>{labels[source][1]}</b>",
+                            font=dict(size=14,),
+                            # hovermode="x",
+                            legend=dict(x=0, y=0.5),
+                        )
+            
+            fig.update_layout(
+                        plot_bgcolor="#FFF"
+                        ,xaxis = dict(
+                            tickmode = 'linear',
+                            # tick0 = 2554,
+                            dtick = 1,
+                            showgrid=False,
+                            linecolor="#BCCCDC",
+                            showspikes=True, # Show spike line for X-axis
+                            # Format spike
+                            spikethickness=2,
+                            spikedash="dot",
+                            spikecolor="#999999",
+                            # spikemode="across",
+                        ),
+                        yaxis = dict(
+                            showgrid=False,
+                            linecolor="#BCCCDC",
+                            showspikes=True, 
+                            spikethickness=2,
+                            spikedash="dot",
+                            spikecolor="#999999",
+                        ),
+                        hoverdistance=100, # Distance to show hover label of data point
+                        spikedistance=1000, # Distance to show spike
+                        autosize=True,
+                        # legend_title="<b>Legend Title : </b> ",
+                        # legend=dict(orientation="h",bordercolor="Black", borderwidth=2,),
+                        margin=dict(t=30, ),
+                    )
+        
+        except Exception as e: 
+            print("Error on source ECONOMIC IMPACT):",e )
+
+       
+        fig.update_xaxes(ticks="outside")
+        fig.update_yaxes(ticks="outside")
+
+        plot_div = plot(fig, output_type='div', include_plotlyjs=False,)
+       
+        return plot_div
+
     def get_date_file():
         file_path = """mydj1/static/csv/sp_piti.csv"""
         t = time.strftime('%m/%d/%Y', time.gmtime(os.path.getmtime(file_path)))
@@ -5828,6 +6173,9 @@ def science_park_home(request):
         'now_year' : (datetime.now().year)+543,
         'plot1' : graph1(),
         'plot2' : graph2(),
+        'plot3' : graph3(),
+        'plot4' : graph4(),
+        'plot5' : graph5(),
         'header' :get_head_page_data(),
         'date' : get_date_file(),
         'top_bar_title': "หน้าหลักอุทยานวิทยาศาสตร์",
@@ -5838,7 +6186,7 @@ def science_park_home(request):
 
 @login_required(login_url='login')
 def science_park_money(request):
-    
+
     try:
         df = pd.read_csv("""mydj1/static/csv/science_park_kpi.csv""")
         selected_year = df.year.max() # กำหนดให้ ปี ใน dropdown เป็นปีที่มากที่สุดจาก csv
@@ -5847,11 +6195,12 @@ def science_park_money(request):
 
         make_color_growth_rate = pd.DataFrame() # สร้างเป็น globle var เก็บค่า growth rate เพื่อไปแยกสี ในการเเสดงผลบนหน้าจอ
 
-
         if request.method == "POST":
             filter_year =  request.POST["year"]   #รับ ปี จาก dropdown 
             selected_year = int(filter_year)      # ตัวแปร selected_year เพื่อ ให้ใน dropdown หน้าต่อไป แสดงในปีที่เลือกไว้ก่อนหน้า(จาก year)
-    
+
+        re_df = df[df["year"]==int(selected_year)][["year","14","15"]]
+
     except Exception as e: 
             return print(e)
 
@@ -5865,9 +6214,9 @@ def science_park_money(request):
             print(e)
             return None
   
-    def get_info(): # ข้อมูลสำหรับหน้าแรก ของอุทยานวิทย์
+    def get_info(): # ข้อมูลสำหรับรายรับ
         try:
-            re_df = df[df["year"]==int(selected_year)]
+            # re_df = df[df["year"]==int(selected_year)]
             return re_df
 
         except Exception as e: 
@@ -5905,10 +6254,7 @@ def science_park_money(request):
                 a = array(growth_rate)
                 b = a.reshape(1, 15)
                 growth_rate_df = pd.DataFrame(b)
-                # print(growth_rate_df)
-                # print(growth_rate_df.iloc[0])
-                # print(type(growth_rate_df))
-                print(growth_rate_df.iloc[0])
+               
                 return (growth_rate_df.iloc[0])
 
             else: 
@@ -5974,12 +6320,11 @@ def science_park_money(request):
 
     def graph1():  #pie 
         try:
-            raw_df = pd.read_csv("""mydj1/static/csv/science_park_kpi.csv""")
-            df = raw_df[raw_df["year"]==int(selected_year)]
-            new_df = df[["13",'14', '15']]
+           
+            new_df = re_df[['14', '15']]
 
-            data = {    "type":["Economic Impact", "ขายสิทธิบัตร", "งานวิจัย"],
-                        'budget' :  [new_df.iloc[0]['13'], new_df.iloc[0]['14'], new_df.iloc[0]['15'] ],
+            data = {    "type":[ "รายรับจากการขาย/ขอใช้สิทธิบัตร", "รายรับงานวิจัยจากภาคเอกชน"],
+                        'budget' :  [ new_df.iloc[0]['14'], new_df.iloc[0]['15'] ],
                     }
 
             final_df = pd.DataFrame(data,)
@@ -5992,12 +6337,9 @@ def science_park_money(request):
             fig.update_traces(textposition='inside', textfont_size=14)
 
             fig.update_layout(uniformtext_minsize=12 , uniformtext_mode='hide')  #  ถ้าเล็กกว่า 12 ให้ hide 
-            fig.update_layout(legend=dict(orientation="h", yanchor="bottom", y=1, xanchor="right", x=0.9,  font = dict(size = 16),))  # แสดง legend ด้านล่างของกราฟ
+            fig.update_layout(legend=dict(orientation="v", yanchor="bottom", y=1, xanchor="right", x=0.7,  font = dict(size = 16),))  # แสดง legend ด้านล่างของกราฟ
             fig.update_layout( height=460)
             fig.update_layout( margin=dict(l=30, r=30, t=60, b=0))
-
-            # fig.update_layout( annotations=[dict(text="<b> &#3647; {:,.2f}</b>".format(newdf.budget.sum()), x=0.50, y=0.5,  font_color = "black", showarrow=False)]) ##font_size=20,
-
 
             plot_div = plot(fig, output_type='div', include_plotlyjs=False)
             
@@ -6010,8 +6352,8 @@ def science_park_money(request):
         try:
             re_df = df[df["year"]==int(header_year)]
      
-            a = int(re_df.iloc[:,13:].sum(axis=1).iloc[0])
-            b = int(re_df.iloc[:,1:4].sum(axis=1).iloc[0])
+            a = int(re_df.iloc[:,14:16].sum(axis=1).iloc[0])
+            b = int(re_df.iloc[:,1:3].sum(axis=1).iloc[0])
             c = int(re_df.iloc[:,5:8:2].sum(axis=1).iloc[0])
     
             re_df = pd.DataFrame({'money': [a], 'invention': [b], 'cooperation':[c]})
@@ -6022,6 +6364,15 @@ def science_park_money(request):
             re_df = pd.DataFrame({'money': [0], 'invention': [0], 'cooperation':[0]}) # 
 
             return re_df.iloc[0]
+
+    def get_sum_income(): # ข้อมูลรวมรายรับ
+        try:
+            sum_income = re_df[['14','15']].sum(axis=1)
+            print(sum_income.iloc[0])
+            return sum_income.iloc[0]
+
+        except Exception as e: 
+            return None
 
     context={
         'now_year' : (datetime.now().year)+543,
@@ -6034,6 +6385,7 @@ def science_park_money(request):
         'graph1' :graph1(),
         'date' : get_date_file(),
         'header' :get_head_page_data(),
+        'sum' : get_sum_income(),
         'top_bar_title': "รายรับผ่านบริการของอุทยานวิทยาศาสตร์",
         'homepage': True,
         
@@ -6054,11 +6406,12 @@ def science_park_inventions(request):
 
         make_color_growth_rate = pd.DataFrame() # สร้างเป็น globle var เก็บค่า growth rate เพื่อไปแยกสี ในการเเสดงผลบนหน้าจอ
 
-
         if request.method == "POST":
             filter_year =  request.POST["year"]   #รับ ปี จาก dropdown 
             selected_year = int(filter_year)      # ตัวแปร selected_year เพื่อ ให้ใน dropdown หน้าต่อไป แสดงในปีที่เลือกไว้ก่อนหน้า(จาก year)
     
+        re_df = df[df["year"]==int(selected_year)][["1",'2', '3']]
+
     except Exception as e: 
             return print(e)
 
@@ -6072,14 +6425,8 @@ def science_park_inventions(request):
             print(e)
             return None
 
-    def get_info(): # ข้อมูลสำหรับหน้าแรก ของอุทยานวิทย์
-        try:
-            re_df = df[df["year"]==int(selected_year)]
-            # print(re_df)
-            return re_df
-
-        except Exception as e: 
-            return None
+    def get_info(): # ข้อมูลจำนวนที่แสดงในตาราง
+        return re_df
 
     def get_year():
         return df["year"]
@@ -6178,19 +6525,16 @@ def science_park_inventions(request):
         return show
 
     def graph1():  # แสดงกราฟโดนัด 
-        raw_df = pd.read_csv("""mydj1/static/csv/science_park_kpi.csv""")
-        df = raw_df[raw_df["year"]==int(selected_year)]
-        new_df = df[["1",'2', '3']]
 
-        data = {    "type":["งานวิจัย หรือนวัตกรรมที่ใช้ประโยชน์เชิงพาณิชย์",
+        data = {    "ประเภท":["งานวิจัย หรือนวัตกรรมที่ใช้ประโยชน์เชิงพาณิชย์",
                              "ทรัพย์สินทางปัญญา หรือสิทธิบัตร <br>ที่ถูกนำไปใช้ประโยชน์เชิงพาณิชย์",
-                              "ทรัพย์สินทางปัญญา หรือสิทธิบัตร <br>ที่เกิดร่วมกันระหว่างมหาวิทยาลัยและเอกชน"],
-                    'number' :  [new_df.iloc[0]['1'], new_df.iloc[0]['2'], new_df.iloc[0]['3'] ],
+                            ],
+                    'จำนวน' :  [re_df.iloc[0]['1'], re_df.iloc[0]['2'] ],
                 }
 
         final_df = pd.DataFrame(data,)
     
-        fig = px.pie(final_df, values='number', names='type',
+        fig = px.pie(final_df, values='จำนวน', names='ประเภท',
                 color_discrete_sequence=px.colors.qualitative.Pastel[1:],
                 ) #jet
             
@@ -6200,7 +6544,7 @@ def science_park_inventions(request):
         fig.update_layout(legend=dict(orientation="h", yanchor="bottom", y=1, xanchor="right", x=0.7,
                                  font = dict(size = 16),
                         ))  
-        fig.update_layout( height=460)
+        fig.update_layout( height=550)
         fig.update_layout( margin=dict(l=30, r=30, t=60, b=0))
         # fig.update_layout(legend = dict(font = dict(family = "Courier", size = 12, color = "black")))
         # fig.update_layout( annotations=[dict(text="<b> &#3647; {:,.2f}</b>".format(newdf.budget.sum()), x=0.50, y=0.5,  font_color = "black", showarrow=False)]) ##font_size=20,
@@ -6214,8 +6558,8 @@ def science_park_inventions(request):
         try:
             re_df = df[df["year"]==int(header_year)]
  
-            a = int(re_df.iloc[:,13:].sum(axis=1).iloc[0])
-            b = int(re_df.iloc[:,1:4].sum(axis=1).iloc[0])
+            a = int(re_df.iloc[:,14:16].sum(axis=1).iloc[0])
+            b = int(re_df.iloc[:,1:3].sum(axis=1).iloc[0])
             c = int(re_df.iloc[:,5:8:2].sum(axis=1).iloc[0])
     
             re_df = pd.DataFrame({'money': [a], 'invention': [b], 'cooperation':[c]})
@@ -6422,8 +6766,8 @@ def science_park_cooperations(request):
         try:
             re_df = df[df["year"]==int(header_year)]
     
-            a = int(re_df.iloc[:,13:].sum(axis=1).iloc[0])
-            b = int(re_df.iloc[:,1:4].sum(axis=1).iloc[0])
+            a = int(re_df.iloc[:,14:16].sum(axis=1).iloc[0])
+            b = int(re_df.iloc[:,1:3].sum(axis=1).iloc[0])
             c = int(re_df.iloc[:,5:8:2].sum(axis=1).iloc[0])
     
             re_df = pd.DataFrame({'money': [a], 'invention': [b], 'cooperation':[c]})
@@ -6931,6 +7275,52 @@ def science_park_graph(request, value):
         
     }
     return render(request,'importDB/science_park_graph.html',context) 
+
+@login_required(login_url='login')
+def science_park_income_table(request):  # ตารางรายรับ ของอุทยาน โดยรับค่า value มาจาก url
+    
+    def moneyformat(x):  # เอาไว้เปลี่ยน format เป็นรูปเงิน
+        return "{:,.2f}".format(x)
+
+    def get_table(year,source):
+        try:
+            if source == 14:
+                sql_cmd =    """ select kpi_name, number from importdb_science_park_rawdata
+                                    where year = """+str(year)+""" and kpi_number > 1400 and kpi_number < 1500
+                                    """
+            else :  #source == 15
+                sql_cmd =    """ select kpi_name, number from importdb_science_park_rawdata
+                                    where year = """+str(year)+""" and kpi_number > 1500
+                                    """
+
+            con_string = getConstring('sql')
+
+            df = pm.execute_query(sql_cmd, con_string)
+            df['number'] = df['number'].apply(moneyformat)
+        
+            return df
+
+        except Exception as e: 
+            print(e)
+            return None
+    
+    
+    labels = {  "14" : "รายรับจากการขาย/ขอใช้ สิทธิบัตร และทรัพย์สินทางปัญญา", "15" : "รายรับงานวิจัยจากภาคอุตสาหกรรม และภาคเอกชน"}
+
+    temp=[]
+    for k, v in enumerate(request.POST.keys()):  # รับ key ของตัวแปร dictionary จาก ปุ่ม view มาใส่ในตัวแปร source เช่น source = 14  หรือ 15
+        if(k==1):
+            temp = v.split("/")
+    year = temp[0] # เก็บค่า ปี
+    source = temp[1]  # เก็บเลขหัวข้อ
+
+    context={
+        'a_table' : get_table(int(year),int(source)) ,    
+        'year' : year,
+        'source' : labels[source],
+ 
+    }  
+    return render(request,'importDB/science_park_table.html', context)
 
 
 

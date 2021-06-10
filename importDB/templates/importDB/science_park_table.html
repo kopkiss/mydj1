@@ -1,0 +1,74 @@
+{% extends 'importDB/base_2.html' %}
+{% load static %}
+{% block content %}
+{% load plotly_dash %}
+{% load humanize %}
+{% csrf_token %}
+
+    <!-- Content Row -->
+    <div class="container-fluid mx-3 pt-3 pb-3 card pretty_container">
+        <div class = "row">
+            <div class="col " > 
+                <h4 class="subtitle">&nbsp; {{source}} ในปี {{year}}</u></h4><br> 
+            </div>
+        </div>
+        <div class = "row">
+            <div class = "col-sm-12 px-3">
+                <table id = "table_id1" class = " table display" border = '2' align="center" style="width:100%" >
+                    <thead>
+                      <tr bgcolor="#1E4DC2" class = "reservation_fontcolor " style = "text-align: center;">
+                          <!-- <th scope="col" style="width:7%;">#id</th> -->
+                          <th scope="col" style="width:5%;">#</th>
+                          <th scope="col" style="width:30%;">คณะ/สำนัก/สถาบัน</th>
+                          <th scope="col" style="width:20%;">จำนวนเงิน</th>
+
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for row in a_table.itertuples %}
+        
+                        <tr>
+                            <TD class ="c3" align="center">{{forloop.counter}}</TD>
+                            <TD class ="c3" align="left">{{row.kpi_name}}</TD>
+                            <TD class ="c3" align="right">{{row.number}}</TD>
+                        </tr> 
+                       
+                      {% endfor %} 
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+
+{% endblock content %}
+
+{% block js %}
+
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'css/datatables.min.css' %}"/>
+ 
+<script type="text/javascript" src="{% static 'js/pdfmake.min.js' %}" ></script>
+<script type="text/javascript" src="{% static 'js/vfs_fonts.js' %}" ></script>
+<script type="text/javascript" src="{% static 'js/datatables.min.js' %}"></script>
+
+<script>
+    $(document).ready(function(){
+        
+        $('#table_id1').DataTable({
+            dom: 'B<"clear">lfrtip',
+            buttons: {
+                name:'primary',
+                // buttons: ['copy','csv','excel','pdf']
+                buttons: ['copy','csv','excel']
+            },
+            // "order": [[ 1, "desc" ]],
+            "pageLength": 25
+            
+        });
+    });
+
+</script>
+
+{% endblock js %}

@@ -8,7 +8,12 @@ import plotly.express as px
 def save_to_db(tableName, con_string, df):
     try:
         conn = create_engine(con_string,max_identifier_length=128 ,echo=False) 
-        df.to_sql(tableName, conn, if_exists = 'replace', index = True, index_label = 'id' ) # replace , append
+        print("Starting function save_to_db")
+        df.to_sql(tableName, conn, if_exists = 'replace', index = True, index_label = 'id'
+                    # method='multi', 
+                    # ,chunksize = 10000 
+                    ) # replace , append
+        print("func Save_to_DB Finished")
         return True
     except Exception as e:
         print(f'error -save_to_db-> {e}')

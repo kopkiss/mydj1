@@ -151,7 +151,7 @@
                   <form class="mt-1 " name='filter' method=POST  >
                     {% csrf_token %}
                     <div class="font-size-lg">
-                      <b style="display:inline-block; color: black;"> &nbsp;&nbsp;นวัตกรรมเชิงพาณิชย์ | ปีพ.ศ. :&nbsp; </b>
+                      <b style="display:inline-block; color: black;"> &nbsp;&nbsp;นวัตกรรม | ปีพ.ศ. :&nbsp; </b>
                       <select id="year" name = "year" class=" btn ex2 dropdown-toggle" onChange="filter.submit();" style="background-color: rgb(46, 45, 45); color:#ffffff;">
                           {% for y in year  %}
               
@@ -189,6 +189,11 @@
                   </tr>
               </thead>
               <tbody>
+                <tr>
+                  <td colspan="4" style="background-color: rgb(212, 212, 209);">
+                      <b class="ml-3">&#10148; นวัตกรรมเชิงพาณิชย์ </b>
+                  </td>
+                </tr>
 
                 <!-- จำนวนผลงานวิจัย หรือ นวัตกรรมที่ใช้ประโยชน์เชิงพาณิชย์ -->
                 <tr class="pt-5">
@@ -260,6 +265,11 @@
                 </tr>
 
                  <!-- รายรับงานวิจัย -->
+                <tr>
+                  <td colspan="4" style="background-color: rgb(212, 212, 209);">
+                      <b class="ml-3">&#10148; นวัตกรรมที่เกิดร่วมกันระหว่างมหาวิทยาลัยและเอกชน </b>
+                  </td>
+                </tr>
                 <tr class="pt-5">
                   <td>
                     <div class="fa-stack fa-lg fa-2x my-4"  >

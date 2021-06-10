@@ -36,7 +36,8 @@ urlpatterns = [
     path('science_park_inventions/', views.science_park_inventions, name = 'science-park-inventions'),
     path('science_park_cooperations/', views.science_park_cooperations, name = 'science-park-cooperations'),
     path('science_park/graph/<str:value>/', views.science_park_graph, name = 'science-park-graph'),
-    
+    path('science_park_money/show_table', views.science_park_income_table, name = 'science-park-table'),
+
     path('test-page', views.test_page, name = 'test-page'),
     
 ]

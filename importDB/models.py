@@ -30,7 +30,6 @@ class Prpm_v_grt_project_eis(models.Model):
     def __str__(self):  # def นี้ ทำให้ ชื่อของ model ไปแสดงในหน้า /admin 
         return self.psu_project_id
 
-
 class PRPM_v_grt_pj_team_eis(models.Model):
     staff_id = models.IntegerField()
     user_real_name_th = models.CharField(max_length = 300)
@@ -67,7 +66,6 @@ class HRMIS_V_AW_FOR_RANKING(models.Model):
     def __str__(self):  # def นี้ ทำให้ ชื่อของ model ไปแสดงในหน้า /admin 
         return self.STAFF_ID+" "+self.FNAME_THAI+" "+self.LNAME_THAI
 
-
 class PRPM_r_fund_type(models.Model):
     fund_type_id = models.IntegerField()
     fund_type_th = models.CharField(max_length = 300)
@@ -76,7 +74,6 @@ class PRPM_r_fund_type(models.Model):
 
     def __str__(self):  # def นี้ ทำให้ ชื่อของ model ไปแสดงในหน้า /admin 
         return str(self.fund_type_id)+" "+self.fund_type_th 
-
 
 class master_ranking_university_name(models.Model):
     BOOL_CHOICES = ((True,'ใช้'),
@@ -109,11 +106,11 @@ class Science_park_rawdata(models.Model):
 
         return super(Science_park_rawdata, self).save(*args, **kwargs)
 
-
 class Science_park_PITI(models.Model):
     request_no = models.CharField(max_length = 100)
     title = models.CharField(max_length = 1000)
-    rcv_date = models.CharField(max_length = 2)
+    document_rcv_date = models.DateTimeField(blank = True, null = True)
+    register_date = models.DateTimeField(blank = True, null = True)
     type_group = models.CharField(max_length = 15)
 
     def __str__(self):  # def นี้ ทำให้ ชื่อของ model ไปแสดงในหน้า /admin 

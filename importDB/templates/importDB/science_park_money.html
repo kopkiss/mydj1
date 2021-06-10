@@ -126,10 +126,63 @@
   /* text-align: center; */
   border-radius: 25%;
   
-
+  
   }
 
-  
+  div.underline {
+        text-decoration-line: underline;
+        text-decoration-style: double;
+        }
+      
+        .btn-circle{
+        border-radius: 50%;
+        background: #353535;
+        padding: 1px; 
+        font-size: 10px;
+        box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+        color: #fff;
+        text-align: center;
+        font-weight: 600;
+        text-transform: uppercase;
+        
+        }
+
+    .btn-group .btn-or {
+        top: 50%;
+        left: 50%;
+        position: absolute;
+        -webkit-transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+        z-index: 99;
+        box-shadow: 0;
+        border: 1px solid #fff;
+        }
+
+    .btn-or {
+        width: 1.3rem;
+        height: 1.3rem;
+        }
+
+        .revenues-buttons {
+        color: #ffffff !important;
+        font-weight: 600;
+        /* font-weight: bold; #111e6c*/ 
+        background: #353535;
+        padding: 4px;
+        /* border: 1px solid #111e6c !important; */
+        display: inline-block;
+        transition: all 0.4s ease 0s;
+        width: 4.2rem;
+        height: 2rem;
+        }
+    
+    .revenues-buttons:hover {
+        color: #202020 !important;
+        background: #e4e4e4 ;
+        border-color: #000000 !important;
+        transition: all 0.4s ease 0s;
+        }
 
 </style>
     
@@ -156,7 +209,7 @@
                   <form class="mt-1 " name='filter' method=POST  >
                     {% csrf_token %}
                     <div class="font-size-lg">
-                      <b style="display:inline-block; color: black"> &nbsp;&nbsp;รายรับผ่านบริการของอุทยานวิทยาศาสตร์&nbsp;|&nbsp;ปีงบประมาณ :&nbsp; </b>
+                      <b style="display:inline-block; color: black"> &nbsp;&nbsp;รายรับการวิจัยจากภาคเอกชน&nbsp;|&nbsp;ปีงบประมาณ :&nbsp; </b>
                       <select id="year" name = "year" class=" btn ex2 dropdown-toggle" onChange="filter.submit();" style="background-color: rgb(46, 45, 45); color:#ffffff;">
                           {% for y in year  %}
                               {% if y == filter_year%} 
@@ -196,43 +249,8 @@
               </thead>
               <tbody>
 
-                <!-- รายรับ Economic impact -->
-                <tr class="pt-5">
-                  <td>
-                    <div class="fa-stack fa-lg fa-2x my-4"  >
-                      <i class="fa fa-circle fa-stack-2x icon-bg"></i>
-                      <i class="fas fa-wallet fa-stack-1x" style="color: whitesmoke;" ></i>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="widget-subheading text-left" style="margin-top: 40px; margin-left: 30px;" >
-                      <b>รายรับจาก Economic Impact </b>
-                    </div>  
-                  </td>
-                  <td>
-                    <div class=" text-gray-800 text-center">
-                      <div class="h4" style="margin-top: 33px;">
-                        <span>{{sciparkinfo.13|floatformat:2|intcomma }} </span>
-                        <span style=" font-size: 50%; ">บาท</span>  
-                      </div>
-                      {% if show_growth %}
-                      <div  style=" font-size: 90%; "> 
-                        Growth Rate : 
-                        <span style="color:{{color.12}}">{{growth_rate.12|floatformat:2}}%</span>
-                      </div>
-                      {% endif %}
-                    </div>  
-                  </td>
-                  <td class="text-center" style="padding-top: 50px;"> <!--style="border:none; " -->
-                    <a href = '{% url "science-park-graph" value="13"%}' target="_blank"> 
-                      <input  type="submit" value="View Graph" class="btn science-park-buttons " 
-                      style=" border-radius : 25px;  background-color: #333333;" />
-                    </a>
-                  </td>
-                </tr>
-
                 <!-- รายรับจากการขาย/ขอใช้ สิทธิบัตร -->
-                <tr class="pt-5">
+                <tr class="my-5" style=" height: 150px;">
                   <td>
                     <div class="fa-stack fa-lg fa-2x my-4"  >
                       <i class="fa fa-circle fa-stack-2x icon-bg"></i>
@@ -240,13 +258,13 @@
                     </div>
                   </td>
                   <td>
-                    <div class="widget-subheading text-left" style="margin-top: 32px; margin-left: 30px;" >
+                    <div class="text-left" style="margin-top: 32px; margin-left: 30px;" >
                       <b>รายรับจากการขาย/ขอใช้ สิทธิบัตร และทรัพย์สินทางปัญญา </b>
                     </div>  
                   </td>
                   <td>
-                    <div class=" text-gray-800 text-center">
-                      <div class="h4" style="margin-top: 32px;">
+                    <div class="  text-right mr-3">
+                      <div class="h4" style="margin-top: 47px;">
                         <span>{{sciparkinfo.14|floatformat:2|intcomma }}</span>
                         <span style=" font-size: 50%; ">บาท</span>  
                       </div>
@@ -258,30 +276,44 @@
                       {% endif %}
                     </div>  
                   </td>
-                  <td class="text-center" style="padding-top: 50px;"> 
+                  <!-- <td class="text-center" style="padding-top: 50px;"> 
                       <a href = '{% url "science-park-graph" value="14"%}' target="_blank"> 
                         <input  type="submit" value="View Graph" class="btn science-park-buttons " 
                         style=" border-radius : 25px;background-color: #333333;" />
                       </a>
+                  </td> -->
+                  <td class="text-center pb-3 pt-2">
+                    <div class="btn-group btn-group-toggle mt-5 " >
+                        <a href = '{% url "science-park-graph" value="14"%}' target="_blank" > 
+                            <input  type="submit" value="Graph" class="btn revenues-buttons pt-0" 
+                                style="padding-left: 1px;padding-bottom: 2px; border-top-right-radius : 0px; border-bottom-right-radius : 0px; border-top-left-radius : 25px; border-bottom-left-radius : 25px;" />
+                        </a>
+                        <span class="btn-circle btn-or">or</span>
+                        <form action="show_table" target="_blank" method=POST>
+                            {% csrf_token %} 
+                            <input name = {{filter_year}}/14 type="submit" value="Table" class="btn revenues-buttons " 
+                                    style="padding-left: 2px;  border-top-right-radius : 25px; border-bottom-right-radius : 25px; border-top-left-radius : 0px; border-bottom-left-radius : 0px;"> 
+                        </form>
+                    </div>     
                   </td>
                 </tr>
 
                  <!-- รายรับงานวิจัย -->
-                <tr class="pt-5">
-                  <td>
+                <tr class="py-5" style=" height: 150px;">
+                  <td >
                     <div class="fa-stack fa-lg fa-2x my-4"  >
                       <i class="fa fa-circle fa-stack-2x icon-bg"></i>
                       <i class="fas fa-funnel-dollar fa-stack-1x" style="color: whitesmoke;" ></i>
                     </div>
                   </td>
                   <td>
-                    <div class="widget-subheading text-left" style="margin-top: 32px; margin-left: 30px;" >
+                    <div class=" text-left" style="margin-top: 32px; margin-left: 30px;" >
                       <b>รายรับงานวิจัยจากภาคอุตสาหกรรม และภาคเอกชน</b>
                     </div>  
                   </td>
                   <td>
-                    <div class=" text-gray-800 text-center">
-                      <div class="h4" style="margin-top: 32px;">
+                    <div class="  text-right mr-3">
+                      <div class="h4" style="margin-top: 47px;">
                         <span>{{sciparkinfo.15|floatformat:2|intcomma }}</span>
                         <span style=" font-size: 50%; ">บาท</span>  
                       </div>
@@ -293,12 +325,44 @@
                       {% endif %}
                     </div>  
                   </td>
-                  <td class="text-center" style="padding-top: 50px;"> 
+                  <!-- <td class="text-center" style="padding-top: 50px;"> 
                       <a href = '{% url "science-park-graph" value="15"%}' target="_blank"> 
                         <input  type="submit" value="View Graph" class="btn science-park-buttons " 
                         style=" border-radius : 25px; background-color: #333333;" />
                       </a>
+                  </td> -->
+                  <td class="text-center pb-3 pt-2">
+                    <div class="btn-group btn-group-toggle mt-5 " >
+                        <a href = '{% url "science-park-graph" value="15"%}' target="_blank" > 
+                            <input  type="submit" value="Graph" class="btn revenues-buttons pt-0" 
+                                style="padding-left: 1px;padding-bottom: 2px; border-top-right-radius : 0px; border-bottom-right-radius : 0px; border-top-left-radius : 25px; border-bottom-left-radius : 25px;" />
+                        </a>
+                        <span class="btn-circle btn-or">or</span>
+                        <form action="show_table" target="_blank" method=POST>
+                            {% csrf_token %} 
+                            <input name = {{filter_year}}/15 type="submit" value="Table" class="btn revenues-buttons " 
+                                    style="padding-left: 2px;  border-top-right-radius : 25px; border-bottom-right-radius : 25px; border-top-left-radius : 0px; border-bottom-left-radius : 0px;"> 
+                        </form>
+                    </div>     
                   </td>
+                </tr>
+                <!-- รวม -->
+                <tr class="pt-5" >
+                  <td ></td>
+                  <td class="h4 text-right pl-3 text-decoration: underline; text-decoration-style:double;" >
+                    <div class="  underline" style="margin-top: 32px; margin-left: 30px;" >
+                      <b>รวมทั้งหมด</b>
+                    </div> 
+                  </td>
+                  <td>
+                    <div class="  text-right mr-3">
+                      <div class="h3" style="margin-top: 32px;">
+                        <span>{{sum|floatformat:2|intcomma }}</span>
+                        <span style=" font-size: 50%; ">บาท</span>  
+                      </div>
+                    </div>  
+                  </td>
+                  <td ></td>
                 </tr>
               </tbody>
           </table>
