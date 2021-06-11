@@ -25,15 +25,17 @@
                       </tr>
                     </thead>
                     <tbody>
-                      {% for row in a_table.itertuples %}
-        
-                        <tr>
-                            <TD class ="c3" align="center">{{forloop.counter}}</TD>
-                            <TD class ="c3" align="left">{{row.kpi_name}}</TD>
-                            <TD class ="c3" align="right">{{row.number}}</TD>
-                        </tr> 
-                       
-                      {% endfor %} 
+                        {% if year >= "2564" %}
+                            {% for row in a_table.itertuples %}
+                
+                                <tr>
+                                    <TD class ="c3" align="center">{{forloop.counter}}</TD>
+                                    <TD class ="c3" align="left">{{row.kpi_name}}</TD>
+                                    <TD class ="c3" align="right">{{row.number}}</TD>
+                                </tr> 
+                            
+                            {% endfor %} 
+                        {% endif %} 
                     </tbody>
                 </table>
             </div>

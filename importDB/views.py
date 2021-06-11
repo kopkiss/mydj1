@@ -2887,19 +2887,17 @@ def query15(): # Science Park from excel
     now_year = (datetime.now().year)+543
     print(now_year)
     try:      
-        print ("Data#15 is saved")
-        print("Ending Query ...")
+        
                 
         sql_cmd =    """ SELECT year, kpi_number, sum(number) as sum FROM `importdb_science_park_rawdata`
-                        where kpi_number < 16
                         group by 1, 2"""
 
         con_string = getConstring('sql')
 
         df = pm.execute_query(sql_cmd, con_string)
-        print(df)
+        print(df.head())
+
         data_piv = df.pivot(index="year", columns="kpi_number", values="sum")
-        # print(data_piv[:,:16])
 
         #### สร้าง csv เก็บวันที่ update ข้อมูลใหม่ จาก excel ล่าสุด #### 
         sql_cmd = """SELECT DATE(modified) as date
@@ -2921,9 +2919,25 @@ def query15(): # Science Park from excel
         if not os.path.exists("mydj1/static/csv"):
                 os.mkdir("mydj1/static/csv")
         # สร้าง csv ไว้เก็บข้อมูล วันที่เพิ่มข้อมูลใหม่ของ Science park ด้วย excel    
-        date_df.to_csv ("""mydj1/static/csv/last_date_input_science_park_excel.csv""", index = True, header=True)           
-        data_piv.to_csv ("""mydj1/static/csv/science_park_kpi.csv""", index = True, header=True)
-        print ("Data is saved")
+        date_df.to_csv ("""mydj1/static/csv/last_date_input_science_park_excel.csv""", index = True, header=True)      
+        data_piv.to_csv ("""mydj1/static/csv/science_park_excel.csv""", index = True, header=True)
+        
+        raw_df = pd.read_csv("""mydj1/static/csv/science_park_excel.csv""")
+        df_14 = raw_df.filter(regex='^14',axis=1)
+        raw_df['14'] = df_14.iloc[:,1:].sum(axis=1)
+
+        df_15 = raw_df.filter(regex='^15',axis=1)
+        raw_df['15'] = df_15.iloc[:,1:].sum(axis=1)
+
+        ########## save to csv ตาราง  ##########      
+        if not os.path.exists("mydj1/static/csv"):
+                os.mkdir("mydj1/static/csv")
+
+        # สร้าง csv ไว้เก็บข้อมูล วันที่เพิ่มข้อมูลใหม่ของ Science park ด้วย excel     
+        raw_df.to_csv ("""mydj1/static/csv/science_park_excel.csv""", index = True, header=True)
+        
+        print ("Data#15 is saved")
+        print("Ending Query ...")
 
         return checkpoint
 
@@ -5576,15 +5590,24 @@ def pageResearchMan(request):
 @login_required(login_url='login')
 def science_park_home(request):
     
+    try:
+        df_excel = pd.read_csv("""mydj1/static/csv/science_park_excel.csv""", index_col=0)
+        df_piti = pd.read_csv("""mydj1/static/csv/sp_piti.csv""", index_col=0)
+        selected_year = df_excel.year.max() # กำหนดให้ ปี ใน dropdown เป็นปีที่มากที่สุดจาก csv
+        header_year = df_excel.year.max()
+        first_year= df_excel.year.min()
+    
+    except Exception as e: 
+            return print(e)
+
+
     def get_head_page_data(): 
         try:
-            df = pd.read_csv("""mydj1/static/csv/science_park_kpi.csv""")
-            header_year = df.year.max()
 
-
-            re_df = df[df["year"]==int(header_year)]
+            re_df = df_excel[df_excel["year"]==int(header_year)][["year","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"]]
+            
     
-            a = int(re_df.iloc[:,13:].sum(axis=1).iloc[0])
+            a = int(re_df.iloc[:,14:16].sum(axis=1).iloc[0])
             b = int(re_df.iloc[:,1:4].sum(axis=1).iloc[0])
             c = int(re_df.iloc[:,5:8:2].sum(axis=1).iloc[0])
     
@@ -5601,8 +5624,8 @@ def science_park_home(request):
 
     def graph1():  # จำนวนทรัพย์สินทางปัญญา ตามปีงบประมาณ
         try:
-            df = pd.read_csv("""mydj1/static/csv/sp_piti.csv""", index_col=0)
-            df = df[[ 'request_no', 'title',  'document_rcv_date', 'type']]
+            # df = pd.read_csv("""mydj1/static/csv/sp_piti.csv""", index_col=0)
+            df = df_piti[[ 'request_no', 'title',  'document_rcv_date', 'type']]
             df["document_rcv_date"] = pd.to_datetime(df["document_rcv_date"], format='%Y-%m-%d')
             df = df.dropna(axis=0)
             df["document_rcv_date"] = df["document_rcv_date"].apply(fiscal_year)
@@ -5768,8 +5791,8 @@ def science_park_home(request):
 
     def graph2():  # ทรัพย์สินทางปัญญาทั้งหมด
         try:
-            df = pd.read_csv("""mydj1/static/csv/sp_piti.csv""", index_col=0)
-            df = df[[ 'request_no', 'title',  'document_rcv_date', 'type']]
+            # df = pd.read_csv("""mydj1/static/csv/sp_piti.csv""", index_col=0)
+            df = df_piti[[ 'request_no', 'title',  'document_rcv_date', 'type']]
             df["document_rcv_date"] = pd.to_datetime(df["document_rcv_date"], format='%Y-%m-%d')
             df = df.dropna(axis=0)
             df["document_rcv_date"] = df["document_rcv_date"].apply(fiscal_year)
@@ -5833,8 +5856,8 @@ def science_park_home(request):
     def graph3():
         
         try: 
-            df = pd.read_csv("""mydj1/static/csv/sp_piti.csv""", index_col=0)
-            df = df[[ 'request_no', 'title',  'register_date', 'type']]
+            # df = pd.read_csv("""mydj1/static/csv/sp_piti.csv""", index_col=0)
+            df = df_piti[[ 'request_no', 'title',  'register_date', 'type']]
             df["register_date"] = pd.to_datetime(df["register_date"], format='%Y-%m-%d')
             df = df.dropna(axis=0)
             # df = df.fillna(0)
@@ -5999,8 +6022,8 @@ def science_park_home(request):
     
     def graph4():
         try:
-            df = pd.read_csv("""mydj1/static/csv/sp_piti.csv""", index_col=0)
-            df = df[[ 'request_no', 'title', 'register_date', 'type']]
+            # df = pd.read_csv("""mydj1/static/csv/sp_piti.csv""", index_col=0)
+            df = df_piti[[ 'request_no', 'title', 'register_date', 'type']]
             df["register_date"] = pd.to_datetime(df["register_date"], format='%Y-%m-%d')
             df = df.dropna(axis=0)
             df["register_date"] = df["register_date"].apply(fiscal_year)
@@ -6063,8 +6086,8 @@ def science_park_home(request):
 
     def graph5(): # Economic Impact
         try: 
-            df = pd.read_csv("""mydj1/static/csv/science_park_kpi.csv""", index_col=0)   
-            df = df.reset_index()
+            # df = pd.read_csv("""mydj1/static/csv/science_park_excel.csv""", index_col=0)   
+            df = df_excel.reset_index()
 
             df2 = df[-10:-1][['year','13']]  # กราฟเส้นทึบ
             df3 = df[-2:][['year','13']]  # กราฟเส้นประ
@@ -6188,7 +6211,7 @@ def science_park_home(request):
 def science_park_money(request):
 
     try:
-        df = pd.read_csv("""mydj1/static/csv/science_park_kpi.csv""")
+        df = pd.read_csv("""mydj1/static/csv/science_park_excel.csv""")
         selected_year = df.year.max() # กำหนดให้ ปี ใน dropdown เป็นปีที่มากที่สุดจาก csv
         header_year = df.year.max()
         first_year= df.year.min()
@@ -6203,6 +6226,24 @@ def science_park_money(request):
 
     except Exception as e: 
             return print(e)
+
+    def get_head_page_data(): 
+        try:
+            re_df = df[df["year"]==int(header_year)][["year","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"]]
+            a = int(re_df.iloc[:,14:16].sum(axis=1).iloc[0])
+
+            b = int(re_df.iloc[:,1:3].sum(axis=1).iloc[0])
+
+            c = int(re_df.iloc[:,5:8:2].sum(axis=1).iloc[0])
+    
+            re_df = pd.DataFrame({'money': [a], 'invention': [b], 'cooperation':[c]})
+
+            return re_df.iloc[0]
+        
+        except Exception as e: 
+            re_df = pd.DataFrame({'money': [0], 'invention': [0], 'cooperation':[0]}) # 
+
+            return re_df.iloc[0]
 
     def get_date_file():
         try:
@@ -6348,27 +6389,10 @@ def science_park_money(request):
         except Exception as e: 
             return None
 
-    def get_head_page_data(): 
-        try:
-            re_df = df[df["year"]==int(header_year)]
-     
-            a = int(re_df.iloc[:,14:16].sum(axis=1).iloc[0])
-            b = int(re_df.iloc[:,1:3].sum(axis=1).iloc[0])
-            c = int(re_df.iloc[:,5:8:2].sum(axis=1).iloc[0])
-    
-            re_df = pd.DataFrame({'money': [a], 'invention': [b], 'cooperation':[c]})
-
-            return re_df.iloc[0]
-        
-        except Exception as e: 
-            re_df = pd.DataFrame({'money': [0], 'invention': [0], 'cooperation':[0]}) # 
-
-            return re_df.iloc[0]
-
     def get_sum_income(): # ข้อมูลรวมรายรับ
         try:
             sum_income = re_df[['14','15']].sum(axis=1)
-            print(sum_income.iloc[0])
+
             return sum_income.iloc[0]
 
         except Exception as e: 
@@ -6399,7 +6423,7 @@ def science_park_money(request):
 def science_park_inventions(request):
     
     try:
-        df = pd.read_csv("""mydj1/static/csv/science_park_kpi.csv""")
+        df = pd.read_csv("""mydj1/static/csv/science_park_excel.csv""")
         selected_year = df.year.max() # กำหนดให้ ปี ใน dropdown เป็นปีที่มากที่สุดจาก csv
         header_year = df.year.max()
         first_year= df.year.min()
@@ -6556,8 +6580,8 @@ def science_park_inventions(request):
 
     def get_head_page_data(): 
         try:
-            re_df = df[df["year"]==int(header_year)]
- 
+            re_df = df[df["year"]==int(header_year)][["year","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"]]
+            
             a = int(re_df.iloc[:,14:16].sum(axis=1).iloc[0])
             b = int(re_df.iloc[:,1:3].sum(axis=1).iloc[0])
             c = int(re_df.iloc[:,5:8:2].sum(axis=1).iloc[0])
@@ -6593,7 +6617,7 @@ def science_park_inventions(request):
 def science_park_cooperations(request):
     
     try:
-        df = pd.read_csv("""mydj1/static/csv/science_park_kpi.csv""")
+        df = pd.read_csv("""mydj1/static/csv/science_park_excel.csv""")
         selected_year = df.year.max() # กำหนดให้ ปี ใน dropdown เป็นปีที่มากที่สุดจาก csv
         header_year = df.year.max()
         first_year= df.year.min()
@@ -6726,7 +6750,7 @@ def science_park_cooperations(request):
         return show
 
     def graph1():  # แสดงกราฟโดนัด 
-        raw_df = pd.read_csv("""mydj1/static/csv/science_park_kpi.csv""")
+        raw_df = pd.read_csv("""mydj1/static/csv/science_park_excel.csv""")
         df = raw_df[raw_df["year"]==int(selected_year)]
         new_df = df[["5",'7']]
 
@@ -6764,8 +6788,8 @@ def science_park_cooperations(request):
     
     def get_head_page_data(): 
         try:
-            re_df = df[df["year"]==int(header_year)]
-    
+            re_df = df[df["year"]==int(header_year)][["year","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"]]
+            
             a = int(re_df.iloc[:,14:16].sum(axis=1).iloc[0])
             b = int(re_df.iloc[:,1:3].sum(axis=1).iloc[0])
             c = int(re_df.iloc[:,5:8:2].sum(axis=1).iloc[0])
@@ -6802,7 +6826,7 @@ def science_park_graph(request, value):
 
     def graph(source):
         try: 
-            df = pd.read_csv("""mydj1/static/csv/science_park_kpi.csv""", index_col=0)   
+            df = pd.read_csv("""mydj1/static/csv/science_park_excel.csv""", index_col=0)   
             df = df.reset_index()
 
             df2 = df[-10:-1]   # กราฟเส้นทึบ
@@ -7285,12 +7309,14 @@ def science_park_income_table(request):  # ตารางรายรับ ข
     def get_table(year,source):
         try:
             if source == 14:
-                sql_cmd =    """ select kpi_name, number from importdb_science_park_rawdata
+                sql_cmd =    """ select kpi_number,kpi_name, sum(number) as number from importdb_science_park_rawdata
                                     where year = """+str(year)+""" and kpi_number > 1400 and kpi_number < 1500
+                                    group by 1, 2
                                     """
             else :  #source == 15
-                sql_cmd =    """ select kpi_name, number from importdb_science_park_rawdata
+                sql_cmd =    """ select kpi_number,kpi_name, sum(number) as number from importdb_science_park_rawdata
                                     where year = """+str(year)+""" and kpi_number > 1500
+                                    group by 1, 2
                                     """
 
             con_string = getConstring('sql')
