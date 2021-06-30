@@ -216,7 +216,13 @@
                       {% if show_growth %}
                       <div  style=" font-size: 90%; "> 
                         Growth Rate : 
-                        <span style="color:{{color.0}}">{{growth_rate.0|floatformat:2}}%</span>
+                        <span style="color:{{color.0}}">
+                          {% if growth_rate.0 > 0 %}
+                          <b>+{{growth_rate.0|floatformat:2}}%</b>
+                          {% else %}
+                          <b>{{growth_rate.0|floatformat:2}}%</b>
+                          {% endif %}
+                        </span>
                       </div>
                       {% endif %}
                     </div>  
@@ -251,7 +257,13 @@
                       {% if show_growth %}
                       <div  style=" font-size: 90%; "> 
                         Growth Rate : 
-                        <span style="color:{{color.1}}">{{growth_rate.1|floatformat:2}}%</span>
+                        <span style="color:{{color.1}}">
+                          {% if growth_rate.1 > 0 %}
+                          <b>+{{growth_rate.1|floatformat:2}}%</b>
+                          {% else %}
+                          <b>{{growth_rate.1|floatformat:2}}%</b>
+                          {% endif %}
+                        </span>
                       </div>
                       {% endif %}
                     </div>  
@@ -290,7 +302,13 @@
                       {% if show_growth %}
                       <div  style=" font-size: 90%; "> 
                         Growth Rate : 
-                        <span style="color:{{color.2}}">{{growth_rate.2|floatformat:2}}%</span>
+                        <span style="color:{{color.2}}">
+                          {% if growth_rate.2 > 0 %}
+                          <b>+{{growth_rate.2|floatformat:2}}%</b>
+                          {% else %}
+                          <b>{{growth_rate.2|floatformat:2}}%</b>
+                          {% endif %}
+                        </span>
                       </div>
                       {% endif %}
                     </div>  

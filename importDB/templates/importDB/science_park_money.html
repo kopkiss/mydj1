@@ -264,14 +264,20 @@
                   </td>
                   <td>
                     <div class="  text-right mr-3">
-                      <div class="h4" style="margin-top: 47px;">
+                      <div class="h5" style="margin-top: 47px;">
                         <span>{{sciparkinfo.14|floatformat:2|intcomma }}</span>
-                        <span style=" font-size: 50%; ">บาท</span>  
+                        <span style=" font-size: 70%; ">บาท</span>  
                       </div>
                       {% if show_growth %}
                       <div  style=" font-size: 90%; "> 
                         Growth Rate : 
-                        <span style="color:{{color.13}}">{{growth_rate.13|floatformat:2}}%</span>
+                        <span style="color:{{color.12}}">
+                          {% if growth_rate.12 > 0 %}
+                          <b>+{{growth_rate.12|floatformat:2}}%</b>
+                          {% else %}
+                          <b>{{growth_rate.12|floatformat:2}}%</b>
+                          {% endif %}  
+                        </span>
                       </div>
                       {% endif %}
                     </div>  
@@ -313,14 +319,20 @@
                   </td>
                   <td>
                     <div class="  text-right mr-3">
-                      <div class="h4" style="margin-top: 47px;">
+                      <div class="h5" style="margin-top: 47px;">
                         <span>{{sciparkinfo.15|floatformat:2|intcomma }}</span>
-                        <span style=" font-size: 50%; ">บาท</span>  
+                        <span style=" font-size: 70%; ">บาท</span>  
                       </div>
                       {% if show_growth %}
                       <div  style=" font-size: 90%; "> 
                         Growth Rate : 
-                        <span style="color:{{color.14}}">{{growth_rate.14|floatformat:2}}%</span>
+                        <span style="color:{{color.13}}">
+                          {% if growth_rate.13 > 0 %}
+                          <b>+{{growth_rate.13|floatformat:2}}%</b>
+                          {% else %}
+                          <b>{{growth_rate.13|floatformat:2}}%</b>
+                          {% endif %}
+                        </span>
                       </div>
                       {% endif %}
                     </div>  
@@ -356,9 +368,9 @@
                   </td>
                   <td>
                     <div class="  text-right mr-3">
-                      <div class="h3" style="margin-top: 32px;">
+                      <div class="h4" style="margin-top: 32px;">
                         <span>{{sum|floatformat:2|intcomma }}</span>
-                        <span style=" font-size: 50%; ">บาท</span>  
+                        <span style=" font-size: 70%; ">บาท</span>  
                       </div>
                     </div>  
                   </td>

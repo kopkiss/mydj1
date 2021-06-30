@@ -2895,10 +2895,8 @@ def query15(): # Science Park from excel
         con_string = getConstring('sql')
 
         df = pm.execute_query(sql_cmd, con_string)
-        print(df.head())
 
         data_piv = df.pivot(index="year", columns="kpi_number", values="sum")
-
         #### สร้าง csv เก็บวันที่ update ข้อมูลใหม่ จาก excel ล่าสุด #### 
         sql_cmd = """SELECT DATE(modified) as date
             FROM importdb_science_park_rawdata
@@ -2922,19 +2920,19 @@ def query15(): # Science Park from excel
         date_df.to_csv ("""mydj1/static/csv/last_date_input_science_park_excel.csv""", index = True, header=True)      
         data_piv.to_csv ("""mydj1/static/csv/science_park_excel.csv""", index = True, header=True)
         
-        raw_df = pd.read_csv("""mydj1/static/csv/science_park_excel.csv""")
-        df_14 = raw_df.filter(regex='^14',axis=1)
-        raw_df['14'] = df_14.iloc[:,1:].sum(axis=1)
+        # raw_df = pd.read_csv("""mydj1/static/csv/science_park_excel.csv""")
+        # df_14 = raw_df.filter(regex='^14',axis=1)
+        # raw_df['14'] = df_14.iloc[:,1:].sum(axis=1)
 
-        df_15 = raw_df.filter(regex='^15',axis=1)
-        raw_df['15'] = df_15.iloc[:,1:].sum(axis=1)
+        # df_15 = raw_df.filter(regex='^15',axis=1)
+        # raw_df['15'] = df_15.iloc[:,1:].sum(axis=1)
 
-        ########## save to csv ตาราง  ##########      
-        if not os.path.exists("mydj1/static/csv"):
-                os.mkdir("mydj1/static/csv")
+        # ########## save to csv ตาราง  ##########      
+        # if not os.path.exists("mydj1/static/csv"):
+        #         os.mkdir("mydj1/static/csv")
 
-        # สร้าง csv ไว้เก็บข้อมูล วันที่เพิ่มข้อมูลใหม่ของ Science park ด้วย excel     
-        raw_df.to_csv ("""mydj1/static/csv/science_park_excel.csv""", index = True, header=True)
+        # # สร้าง csv ไว้เก็บข้อมูล วันที่เพิ่มข้อมูลใหม่ของ Science park ด้วย excel     
+        # raw_df.to_csv ("""mydj1/static/csv/science_park_excel.csv""", index = True, header=True)
         
         print ("Data#15 is saved")
         print("Ending Query ...")
@@ -2945,6 +2943,55 @@ def query15(): # Science Park from excel
         checkpoint = False
         print('At Query#15: Something went wrong :', e)    
         return checkpoint   
+
+def query15old(): # Science Park EXCEL
+    print("-"*20)
+    print("Starting Query#15 ...")
+    checkpoint = True
+    os.environ["NLS_LANG"] = ".UTF8"  # ทำให้แสดงข้อความเป็น ภาษาไทยได้
+    now_year = (datetime.now().year)+543
+    print(now_year)
+    try:      
+        print ("Data#15 is saved")
+        print("Ending Query ...")
+                
+        sql_cmd =    """ SELECT year, kpi_number, sum(number) as sum FROM `importDB_science_park_rawdata`
+                        group by 1, 2"""
+
+        con_string = getConstring('sql')
+
+        df = pm.execute_query(sql_cmd, con_string)
+        # print(df)
+        data_piv = df.pivot(index="year", columns="kpi_number", values="sum")
+
+    
+        #### สร้าง csv เก็บวันที่ update ข้อมูลใหม่ จาก excel ล่าสุด #### 
+        sql_cmd = """SELECT DATE(modified) as date
+            FROM importDB_science_park_rawdata
+            group by 1
+            order by 1 DESC """
+
+        con_string = getConstring('sql')
+        qery_df = pm.execute_query(sql_cmd, con_string)
+        date = str(qery_df.iloc[0,0].day)+'/'+str(qery_df.iloc[0,0].month)+'/'+str(qery_df.iloc[0,0].year+543)
+
+        data = {"date":[date],}
+        date_df = pd.DataFrame(data,)
+        #######################################################
+
+        ########## save to csv ตาราง  ##########      
+        if not os.path.exists("mydj1/static/csv"):
+                os.mkdir("mydj1/static/csv") 
+        date_df.to_csv ("""mydj1/static/csv/last_date_input_science_park_excel.csv""", index = True, header=True)             
+        data_piv.to_csv ("""mydj1/static/csv/science_park_kpi.csv""", index = True, header=True)
+        print ("Data is saved")
+
+        return checkpoint
+
+    except Exception as e :
+        checkpoint = False
+        print('At Query#15: Something went wrong :', e)    
+        return checkpoint
 
 def query16(): # ISI SCOPUS TCI  3 ปีย้อนหลัง
     print("-"*20)
@@ -5587,11 +5634,15 @@ def pageResearchMan(request):
     
     return render(request,'importDB/research_man.html',context)  
 
+
+############# SCIENCE PARK ##########
 @login_required(login_url='login')
 def science_park_home(request):
     
     try:
-        df_excel = pd.read_csv("""mydj1/static/csv/science_park_excel.csv""", index_col=0)
+        df_excel = pd.read_csv("""mydj1/static/csv/science_park_excel.csv""", )
+
+        print(df_excel)
         df_piti = pd.read_csv("""mydj1/static/csv/sp_piti.csv""", index_col=0)
         selected_year = df_excel.year.max() # กำหนดให้ ปี ใน dropdown เป็นปีที่มากที่สุดจาก csv
         header_year = df_excel.year.max()
@@ -5604,12 +5655,10 @@ def science_park_home(request):
     def get_head_page_data(): 
         try:
 
-            re_df = df_excel[df_excel["year"]==int(header_year)][["year","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"]]
-            
-    
-            a = int(re_df.iloc[:,14:16].sum(axis=1).iloc[0])
+            re_df = df_excel[df_excel["year"]==int(header_year)][["year","1","2","3","5","6","7","8","9","10","11","12","13","14","15"]]
+            a = int(re_df.iloc[:,13:15].sum(axis=1).iloc[0])
             b = int(re_df.iloc[:,1:4].sum(axis=1).iloc[0])
-            c = int(re_df.iloc[:,5:8:2].sum(axis=1).iloc[0])
+            c = int(re_df.iloc[:,4:7:2].sum(axis=1).iloc[0])
     
             re_df = pd.DataFrame({'money': [a], 'invention': [b], 'cooperation':[c]})
 
@@ -6229,12 +6278,11 @@ def science_park_money(request):
 
     def get_head_page_data(): 
         try:
-            re_df = df[df["year"]==int(header_year)][["year","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"]]
-            a = int(re_df.iloc[:,14:16].sum(axis=1).iloc[0])
 
-            b = int(re_df.iloc[:,1:3].sum(axis=1).iloc[0])
-
-            c = int(re_df.iloc[:,5:8:2].sum(axis=1).iloc[0])
+            re_df = df[df["year"]==int(header_year)][["year","1","2","3","5","6","7","8","9","10","11","12","13","14","15"]]
+            a = int(re_df.iloc[:,13:15].sum(axis=1).iloc[0])
+            b = int(re_df.iloc[:,1:4].sum(axis=1).iloc[0])
+            c = int(re_df.iloc[:,4:7:2].sum(axis=1).iloc[0])
     
             re_df = pd.DataFrame({'money': [a], 'invention': [b], 'cooperation':[c]})
 
@@ -6242,7 +6290,6 @@ def science_park_money(request):
         
         except Exception as e: 
             re_df = pd.DataFrame({'money': [0], 'invention': [0], 'cooperation':[0]}) # 
-
             return re_df.iloc[0]
 
     def get_date_file():
@@ -6272,7 +6319,7 @@ def science_park_money(request):
 
         try:
             if selected_year != first_year:
-                newdf = df[(df.year==selected_year) | (df.year==selected_year-1)]
+                newdf = df[(df.year==selected_year) | (df.year==selected_year-1)][["year","1","2","3","5","6","7","8","9","10","11","12","13","14","15"]]
                 
                 now_year_df = newdf[newdf.year==selected_year].iloc[:,1:]
                 list_n = now_year_df.values.tolist()[0]
@@ -6290,12 +6337,10 @@ def science_park_money(request):
                         growth_rate.append((list_n[i] - list_p[i] )/list_p[i]*100)
                 
                 # growth_rate_df = pd.DataFrame(growth_rate)
-
-                
                 a = array(growth_rate)
-                b = a.reshape(1, 15)
+                b = a.reshape(1, 14)
                 growth_rate_df = pd.DataFrame(b)
-               
+                
                 return (growth_rate_df.iloc[0])
 
             else: 
@@ -6312,7 +6357,7 @@ def science_park_money(request):
         try:
             color = pd.DataFrame()
             if selected_year != first_year:
-                newdf = df[(df.year==selected_year) | (df.year==selected_year-1)]
+                newdf = df[(df.year==selected_year) | (df.year==selected_year-1)][["year","1","2","3","5","6","7","8","9","10","11","12","13","14","15"]]
                 
                 now_year_df = newdf[newdf.year==selected_year].iloc[:,1:]
                 list_n = now_year_df.values.tolist()[0]
@@ -6333,9 +6378,10 @@ def science_park_money(request):
                 
                 
                 a = array(growth_rate)
-                b = a.reshape(1, 15)
+                b = a.reshape(1, 14)
                
                 color = [get_color(i)  for i in b[0]]
+                print(color)
                 return color
 
             else: 
@@ -6364,18 +6410,19 @@ def science_park_money(request):
            
             new_df = re_df[['14', '15']]
 
-            data = {    "type":[ "รายรับจากการขาย/ขอใช้สิทธิบัตร", "รายรับงานวิจัยจากภาคเอกชน"],
-                        'budget' :  [ new_df.iloc[0]['14'], new_df.iloc[0]['15'] ],
+            data = {    "ประเภท":[ "รายรับจากการขาย/ขอใช้สิทธิบัตร", "รายรับงานวิจัยจากอุตสาหกรรม และภาคเอกชน"],
+                        'จำนวน' :  [ new_df.iloc[0]['14'], new_df.iloc[0]['15'] ],
                     }
 
             final_df = pd.DataFrame(data,)
         
-            fig = px.pie(final_df, values='budget', names='type',
+            fig = px.pie(final_df, values='จำนวน', names='ประเภท',
                     color_discrete_sequence=px.colors.qualitative.Prism[2:],
       
                     ) #jet
                 
-            fig.update_traces(textposition='inside', textfont_size=14)
+            fig.update_traces(textposition='inside', textfont_size=14,
+                    marker=dict(line=dict(color='#000000', width=1)))
 
             fig.update_layout(uniformtext_minsize=12 , uniformtext_mode='hide')  #  ถ้าเล็กกว่า 12 ให้ hide 
             fig.update_layout(legend=dict(orientation="v", yanchor="bottom", y=1, xanchor="right", x=0.7,  font = dict(size = 16),))  # แสดง legend ด้านล่างของกราฟ
@@ -6434,10 +6481,26 @@ def science_park_inventions(request):
             filter_year =  request.POST["year"]   #รับ ปี จาก dropdown 
             selected_year = int(filter_year)      # ตัวแปร selected_year เพื่อ ให้ใน dropdown หน้าต่อไป แสดงในปีที่เลือกไว้ก่อนหน้า(จาก year)
     
-        re_df = df[df["year"]==int(selected_year)][["1",'2', '3']]
+        re_df = df[df["year"]==int(selected_year)][["1",'2','3']]
 
     except Exception as e: 
             return print(e)
+
+    def get_head_page_data(): 
+        try:
+
+            re_df = df[df["year"]==int(header_year)][["year","1","2","3","5","6","7","8","9","10","11","12","13","14","15"]]
+            a = int(re_df.iloc[:,13:15].sum(axis=1).iloc[0])
+            b = int(re_df.iloc[:,1:4].sum(axis=1).iloc[0])
+            c = int(re_df.iloc[:,4:7:2].sum(axis=1).iloc[0])
+    
+            re_df = pd.DataFrame({'money': [a], 'invention': [b], 'cooperation':[c]})
+
+            return re_df.iloc[0]
+        
+        except Exception as e: 
+            re_df = pd.DataFrame({'money': [0], 'invention': [0], 'cooperation':[0]}) # 
+            return re_df.iloc[0]
 
     def get_date_file():
         try:
@@ -6461,7 +6524,7 @@ def science_park_inventions(request):
 
         try:
             if selected_year != first_year:
-                newdf = df[(df.year==selected_year) | (df.year==selected_year-1)]
+                newdf = df[(df.year==selected_year) | (df.year==selected_year-1)][["year","1","2","3","5","6","7","8","9","10","11","12","13","14","15"]]
                 
                 now_year_df = newdf[newdf.year==selected_year].iloc[:,1:]
                 list_n = now_year_df.values.tolist()[0]
@@ -6482,7 +6545,7 @@ def science_park_inventions(request):
 
                 
                 a = array(growth_rate)
-                b = a.reshape(1, 15)
+                b = a.reshape(1, 14)
                 growth_rate_df = pd.DataFrame(b)
                 
                 return (growth_rate_df.iloc[0])
@@ -6501,7 +6564,7 @@ def science_park_inventions(request):
         try:
             color = pd.DataFrame()
             if selected_year != first_year:
-                newdf = df[(df.year==selected_year) | (df.year==selected_year-1)]
+                newdf = df[(df.year==selected_year) | (df.year==selected_year-1)][["year","1","2","3","5","6","7","8","9","10","11","12","13","14","15"]]
                 
                 now_year_df = newdf[newdf.year==selected_year].iloc[:,1:]
                 list_n = now_year_df.values.tolist()[0]
@@ -6522,7 +6585,7 @@ def science_park_inventions(request):
                 
                 
                 a = array(growth_rate)
-                b = a.reshape(1, 15)
+                b = a.reshape(1, 14)
                
                 color = [get_color(i)  for i in b[0]]
                 return color
@@ -6550,8 +6613,8 @@ def science_park_inventions(request):
 
     def graph1():  # แสดงกราฟโดนัด 
 
-        data = {    "ประเภท":["งานวิจัย หรือนวัตกรรมที่ใช้ประโยชน์เชิงพาณิชย์",
-                             "ทรัพย์สินทางปัญญา หรือสิทธิบัตร <br>ที่ถูกนำไปใช้ประโยชน์เชิงพาณิชย์",
+        data = {    "ประเภท":["งานวิจัย หรือนวัตกรรม",
+                             "ทรัพย์สินทางปัญญา หรือสิทธิบัตร",
                             ],
                     'จำนวน' :  [re_df.iloc[0]['1'], re_df.iloc[0]['2'] ],
                 }
@@ -6562,7 +6625,8 @@ def science_park_inventions(request):
                 color_discrete_sequence=px.colors.qualitative.Pastel[1:],
                 ) #jet
             
-        fig.update_traces(textposition='inside', textfont_size=14)
+        fig.update_traces(textposition='inside', textfont_size=14,
+                marker=dict(line=dict(color='#000000', width=1)))
 
         fig.update_layout(uniformtext_minsize=12 , uniformtext_mode='hide')  #  ถ้าเล็กกว่า 12 ให้ hide 
         fig.update_layout(legend=dict(orientation="h", yanchor="bottom", y=1, xanchor="right", x=0.7,
@@ -6577,22 +6641,6 @@ def science_park_inventions(request):
         plot_div = plot(fig, output_type='div', include_plotlyjs=False)
         
         return plot_div
-
-    def get_head_page_data(): 
-        try:
-            re_df = df[df["year"]==int(header_year)][["year","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"]]
-            
-            a = int(re_df.iloc[:,14:16].sum(axis=1).iloc[0])
-            b = int(re_df.iloc[:,1:3].sum(axis=1).iloc[0])
-            c = int(re_df.iloc[:,5:8:2].sum(axis=1).iloc[0])
-    
-            re_df = pd.DataFrame({'money': [a], 'invention': [b], 'cooperation':[c]})
-
-            return re_df.iloc[0]
-        
-        except Exception as e: 
-            re_df = pd.DataFrame({'money': [0], 'invention': [0], 'cooperation':[0]}) # 
-            return re_df.iloc[0]
 
     context={
         'now_year' : (datetime.now().year)+543,
@@ -6624,13 +6672,28 @@ def science_park_cooperations(request):
 
         make_color_growth_rate = pd.DataFrame() # สร้างเป็น globle var เก็บค่า growth rate เพื่อไปแยกสี ในการเเสดงผลบนหน้าจอ
 
-
         if request.method == "POST":
             filter_year =  request.POST["year"]   #รับ ปี จาก dropdown 
             selected_year = int(filter_year)      # ตัวแปร selected_year เพื่อ ให้ใน dropdown หน้าต่อไป แสดงในปีที่เลือกไว้ก่อนหน้า(จาก year)
     
     except Exception as e: 
             return print(e)
+
+    def get_head_page_data(): 
+        try:
+
+            re_df = df[df["year"]==int(header_year)][["year","1","2","3","5","6","7","8","9","10","11","12","13","14","15"]]
+            a = int(re_df.iloc[:,13:15].sum(axis=1).iloc[0])
+            b = int(re_df.iloc[:,1:4].sum(axis=1).iloc[0])
+            c = int(re_df.iloc[:,4:7:2].sum(axis=1).iloc[0])
+    
+            re_df = pd.DataFrame({'money': [a], 'invention': [b], 'cooperation':[c]})
+
+            return re_df.iloc[0]
+        
+        except Exception as e: 
+            re_df = pd.DataFrame({'money': [0], 'invention': [0], 'cooperation':[0]}) # 
+            return re_df.iloc[0]
 
     def get_date_file():
 
@@ -6643,10 +6706,10 @@ def science_park_cooperations(request):
             print(e)
             return None
 
-    def get_info(): # ข้อมูลสำหรับหน้าแรก ของอุทยานวิทย์
+    def get_info(): 
         try:
             re_df = df[df["year"]==int(selected_year)]
-            # print(re_df)
+            print(re_df)
             return re_df
 
         except Exception as e: 
@@ -6661,7 +6724,7 @@ def science_park_cooperations(request):
 
         try:
             if selected_year != first_year:
-                newdf = df[(df.year==selected_year) | (df.year==selected_year-1)]
+                newdf = df[(df.year==selected_year) | (df.year==selected_year-1)][["year","1","2","3","5","6","7","8","9","10","11","12","13","14","15"]]
                 
                 now_year_df = newdf[newdf.year==selected_year].iloc[:,1:]
                 list_n = now_year_df.values.tolist()[0]
@@ -6682,10 +6745,9 @@ def science_park_cooperations(request):
 
                 
                 a = array(growth_rate)
-                b = a.reshape(1, 15)
+                b = a.reshape(1, 14)
                 growth_rate_df = pd.DataFrame(b)
-
-
+         
                 return (growth_rate_df.iloc[0])
 
             else: 
@@ -6702,7 +6764,7 @@ def science_park_cooperations(request):
         try:
             color = pd.DataFrame()
             if selected_year != first_year:
-                newdf = df[(df.year==selected_year) | (df.year==selected_year-1)]
+                newdf = df[(df.year==selected_year) | (df.year==selected_year-1)][["year","1","2","3","5","6","7","8","9","10","11","12","13","14","15"]]
                 
                 now_year_df = newdf[newdf.year==selected_year].iloc[:,1:]
                 list_n = now_year_df.values.tolist()[0]
@@ -6723,7 +6785,7 @@ def science_park_cooperations(request):
                 
                 
                 a = array(growth_rate)
-                b = a.reshape(1, 15)
+                b = a.reshape(1, 14)
                
                 color = [get_color(i)  for i in b[0]]
                 return color
@@ -6754,22 +6816,23 @@ def science_park_cooperations(request):
         df = raw_df[raw_df["year"]==int(selected_year)]
         new_df = df[["5",'7']]
 
-        data = {    "type":["ความร่วมมือกับบริษัททั้งหมด","ความร่วมมือกับชุมชนทั้งหมด"],
-                    'number' :  [new_df.iloc[0]['5'], new_df.iloc[0]['7'] ],
+        data = {    'ประเภท':["ความร่วมมือกับบริษัททั้งหมด","ความร่วมมือกับชุมชนทั้งหมด"],
+                    'จำนวน' :  [new_df.iloc[0]['5'], new_df.iloc[0]['7'] ],
                 }
 
         final_df = pd.DataFrame(data,)
     
-        fig = px.pie(final_df, values='number', names='type',
+        fig = px.pie(final_df, values='จำนวน', names='ประเภท',
                 color_discrete_sequence=px.colors.qualitative.Safe,
                 ) #jet
             
-        fig.update_traces(textposition='inside', textfont_size=14)
+        fig.update_traces(textposition='inside', textfont_size=14,
+                marker=dict(line=dict(color='#000000', width=1)))
 
         fig.update_layout(uniformtext_minsize=12 , uniformtext_mode='hide')  #  ถ้าเล็กกว่า 12 ให้ hide 
         fig.update_layout(legend=dict(orientation="v", 
                     yanchor="bottom", 
-                    y=1, 
+                    y=1.05, 
                     xanchor="right",
                     x=0.7, 
                     font = dict(size = 16),
@@ -6786,23 +6849,6 @@ def science_park_cooperations(request):
         
         return plot_div
     
-    def get_head_page_data(): 
-        try:
-            re_df = df[df["year"]==int(header_year)][["year","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"]]
-            
-            a = int(re_df.iloc[:,14:16].sum(axis=1).iloc[0])
-            b = int(re_df.iloc[:,1:3].sum(axis=1).iloc[0])
-            c = int(re_df.iloc[:,5:8:2].sum(axis=1).iloc[0])
-    
-            re_df = pd.DataFrame({'money': [a], 'invention': [b], 'cooperation':[c]})
-
-            return re_df.iloc[0]
-        
-        except Exception as e: 
-            re_df = pd.DataFrame({'money': [0], 'invention': [0], 'cooperation':[0]}) # 
-            return re_df.iloc[0]
-
-
     context={
         'now_year' : (datetime.now().year)+543,
         'sciparkinfo' : get_info(),
@@ -6826,9 +6872,7 @@ def science_park_graph(request, value):
 
     def graph(source):
         try: 
-            df = pd.read_csv("""mydj1/static/csv/science_park_excel.csv""", index_col=0)   
-            df = df.reset_index()
-
+            df = pd.read_csv("""mydj1/static/csv/science_park_excel.csv""",)   
             df2 = df[-10:-1]   # กราฟเส้นทึบ
             df3 = df[-2:]  # กราฟเส้นประ
             fig = object
@@ -6837,10 +6881,10 @@ def science_park_graph(request, value):
                 "2":("จำนวนทรัพย์สินทางปัญญา หรือ สิทธิบัตรที่ถูกนำไปใช้ประโยชน์เชิงพาณิชย์","จำนวน","ปี พ.ศ."),
                 "3":("จำนวนทรัพย์สินทางปัญญา หรือ สิทธิบัตรที่เกิดร่วมกันระหว่างมหาวิทยาลัยและเอกชน","จำนวน","ปี พ.ศ."),
                 "4":("จำนวนคู่ความร่วมมือ","จำนวน","ปี พ.ศ."),
-                "5":("จำนวนคู่ความร่วมมือ กับบริษัท","กับบริษัท"),
-                "6":("จำนวนคู่ความร่วมมือ กับบริษัท ในภูมิภาค (จังหวัด)","กับบริษัทในภูมิภาค","ปี พ.ศ."),
-                "7":("จำนวนคู่ความร่วมมือ กับชุมชน","กับชุมชน","ปี พ.ศ."),
-                "8":("จำนวนคู่ความร่วมมือ กับชุมชน ในภูมิภาค  (จังหวัด)","กับชุมชน ในภูมิภาค","ปี พ.ศ."),
+                # "5":("จำนวนคู่ความร่วมมือ กับบริษัท","กับบริษัท"),
+                # "6":("จำนวนคู่ความร่วมมือ กับบริษัท ในภูมิภาค (จังหวัด)","กับบริษัทในภูมิภาค","ปี พ.ศ."),
+                # "7":("จำนวนคู่ความร่วมมือ กับชุมชน","กับชุมชน","ปี พ.ศ."),
+                # "8":("จำนวนคู่ความร่วมมือ กับชุมชน ในภูมิภาค  (จังหวัด)","กับชุมชน ในภูมิภาค","ปี พ.ศ."),
                 "9":("จำนวนบริษัทหรือหน่วยงานที่มา License ผลงานทรัพย์สินทางปัญญาของมหาวิทยาลัย","จำนวน","ปี พ.ศ."),
                 "10":("จำนวนบริษัทหรือหน่วยงานที่มา License ผลงานทรัพย์สินทางปัญญาของมหาวิทยาลัย ที่ active ภายใน 3 ปีย้อนหลัง","จำนวน","ปี พ.ศ."),
                 "11":("จำนวนบริษัท Start Up ที่ดำเนินการผ่านอุทยานวิทยาศาสตร์","จำนวน","ปี พ.ศ."),
@@ -7069,19 +7113,19 @@ def science_park_graph(request, value):
                 ##ตาราง
                 fig.add_trace(
                                 go.Table(
-                                    columnwidth = [100,150,100,150,150,150],
+                                    columnwidth = [100,100,150,150,150],
                                     header=dict(values=[f"<b>ปี พ.ศ.</b>",
-                                                    f"<b>ความร่วมมือทั้งหมด</b>", 
-                                                    f"<b>กับบริษัท</b>",
-                                                    f"<b>กับบริษัทในภูมิภาค</b>",
-                                                    f"<b>กับในชุมชน</b>",
-                                                    f"<b>กับชุมชนในภูมิภาค</b>",
+                                                    # f"<b>ความร่วมมือทั้งหมด</b>", 
+                                                    f"<b>บริษัททั้งหมด</b>",
+                                                    f"<b>บริษัทในภูมิภาค</b>",
+                                                    f"<b>ในชุมชนทั้งหมด</b>",
+                                                    f"<b>ชุมชนในภูมิภาค</b>",
                                                     ],
                                                 fill = dict(color='#C2D4FF'),
                                                 align = ['center'] * 2,
                                                 height=40),
                                     cells=dict(values=[df['year'], 
-                                                    df['4'],
+                                                    # df['4'],
                                                     df['5'],
                                                     df['6'],
                                                     df['7'],
@@ -7159,6 +7203,10 @@ def science_park_graph(request, value):
                 fig.add_trace(go.Bar(x=df2['year'], y=df2[source],
                 name="บริษัททั้งหมด", # กำหนด ชื่อเวลา hover เอา mouse ชี้บนเส้น
                 legendgroup = "A", # กำหนดกลุ่ม ของเส้น เพื่อ สามารถกด show หรือ ไม่ show กราฟได้
+                textposition="inside",
+                textfont_color="white",
+                textangle=0,
+                texttemplate="%{y}",
                 marker_color='#04849C', marker_line_color='rgb(8,48,107)',
                 marker_line_width=1.5, opacity=1,  
                 ), row=1, col=1)  
@@ -7202,6 +7250,10 @@ def science_park_graph(request, value):
                 name="บริษัททั้งหมด",
                 showlegend=False,
                 legendgroup = "A",
+                textposition="inside",
+                textfont_color="black",
+                textangle=0,
+                texttemplate="%{y}",
                 marker_color='rgb(158,202,225)', marker_line_color='rgb(8,48,107)',
                 marker_line_width=1.5, opacity=1
                  ))

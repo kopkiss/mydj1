@@ -9,6 +9,7 @@ from .models import PRPM_r_fund_type
 from .models import master_ranking_university_name
 from .models import HRMIS_V_AW_FOR_RANKING
 from .models import Science_park_rawdata
+from .models import Science_park_PITI
 
 from import_export.admin import ImportExportModelAdmin
 
