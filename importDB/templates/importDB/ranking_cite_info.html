@@ -1,0 +1,103 @@
+{% extends 'importDB/base_2.html' %}
+{% load static %}
+{% block content %}
+{% load plotly_dash %}
+{% load humanize %}
+
+
+
+
+<div class="container-fluid">
+  <!-- <div class="row" >
+    <div class="col-xs-12 col-md-12 col-lg-12 "  >
+      <div class="pr-3 mb-1" style=" float: right;">
+        <b>ข้อมูลจาก ระบบ PubsWatch</b>
+        <span class = "px-2" style="font-size:15px; background-color: coral;  border-radius: 30px; "><b>Last updated: </b> {{date}}</span>
+      </div> 
+    </div>
+  </div> -->
+  <div class="row ">
+    <div class="col-lg-3">         
+      <div class="row mb-3 ml-4 mr-2" >
+        <div class="card pretty_container" style="position: relative;width: 100%;height: 10rem;">
+          <div class="row" >
+            <div class="col-xs-12 col-md-12 col-lg-12 "  >
+              <h5 class = "subtitle mt-3 mb-3 ml-3" style="display:inline-block;">&nbsp; Sum of Times Cited</h5> 
+              <!-- <h5 class = "subtitle mt-3 mb-3 ml-3" style="display:inline-block;">&nbsp; จำนวนการถูกอ้างอิงทั้งหมด (ISI-WoS) </h5> -->
+              <div class="pt-3 pr-3" style=" float: right;">
+                <img src="{% static 'img/bulb_2251110.png' %}" 
+                  title="Sum of Times Cited: This is the total number of citations to all
+                  items in the results set." 
+                  alt="Sum of Times Cited (ISI-WoS)"   
+                  style="display: block; margin-left: auto; margin-right: auto;" 
+                  width="20" height="20"/> 
+              </div>
+            </div>
+          </div>
+          <div class=" h2 text-info mb-1 mt-1 ml-5" >
+            {{re.total_cited|intcomma}}
+          </div>
+        </div>
+      </div>
+      <div class="row mb-3 ml-4 mr-2" >
+        <div class="card pretty_container" style="position: relative;width: 100%;height: 10rem;">
+          <div class="row" >
+            <div class="col-xs-12 col-md-12 col-lg-12 "  >
+              <h5 class = "subtitle mt-3 mb-3 ml-3" style="display:inline-block;">&nbsp; Avg. Citations per Item</h5> 
+              <div class="pt-3 pr-3" style=" float: right;">
+                <img src="{% static 'img/bulb_2251110.png' %}" 
+                  title="Average citations per item: This is the average number of
+                  citing articles for all items in the results set. It is the sum of the
+                  times cited count divided by the number of results in the set."  
+                  style="display: block; margin-left: auto; margin-right: auto;" 
+                  width="20" height="20"/> 
+              </div>
+            </div>
+          </div>
+          <div class=" h2 text-info mb-1 mt-1 ml-5 " >
+            {{re.avg_cited_per_item |floatformat:2|intcomma}}
+          </div>
+        </div>
+      </div>
+      <div class="row mb-3 ml-4 mr-2" >
+        <div class="card pretty_container" style="position: relative;width: 100%;height: 10rem;">
+          <div class="row" >
+            <div class="col-xs-12 col-md-12 col-lg-12 "  >
+              <h5 class = "subtitle mt-3 mb-3 ml-3" style="display:inline-block;">&nbsp; Avg. Citations per Year</h5> 
+              <div class="pt-3 pr-3" style=" float: right;">
+                <img src="{% static 'img/bulb_2251110.png' %}" 
+                  title="Average citations per year: This is the average number of
+                  citing articles for all years in the results set. It is the sum of the
+                  times cited count in all years divided by the number of years in the set."  
+                  style="display: block; margin-left: auto; margin-right: auto;" 
+                  width="20" height="20"/>
+              </div>
+            </div>
+          </div>
+          <div class=" h2 text-info mb-1 mt-1 ml-5" >
+            {{re.avg_cited_per_year |floatformat:2|intcomma}}
+          </div>
+        </div>
+      </div>
+      
+    </div>
+    <div class=" col-lg-7 ml-4 mb-3 mr-2 card pretty_container " > 
+      <h5 class = "subtitle mt-3 mb-0 ml-3"> &nbsp; Top ten most cited publications</h5> 
+      <!-- <h5 class = "subtitle mt-3 mb-0 ml-3"> &nbsp;จำนวนการถูกอ้างอิงต่อปี 10ปีย้อนหลัง (ISI-WoS) </h5> -->
+      <span class = "pl-2 pr-5" style="width: 100%;" >
+        {{ line_chart_cited | safe }}
+      </span> 
+    </div>
+  </div>
+  
+</div>
+
+
+{% endblock content %}
+
+{% block js %}
+<script>
+
+</script>
+
+{% endblock js %}

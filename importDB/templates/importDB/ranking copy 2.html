@@ -1,0 +1,432 @@
+{% extends 'importDB/base.html' %}
+{% load static %}
+{% block content %}
+{% load plotly_dash %}
+{% load humanize %}
+
+
+
+
+<div class="container-fluid">
+  <div class="row" >
+    <div class="col-xs-12 col-md-12 col-lg-12 "  >
+      <div class="pr-3 mb-1" style=" float: right;">
+        <b>ข้อมูลจาก ระบบ PubsWatch</b>
+        <span class = "px-2" style="font-size:15px; background-color: coral;  border-radius: 30px; "><b>Last updated: </b> {{date}}</span>
+      </div> 
+    </div>
+  </div>
+  <div class="row "  >
+    <div class=" ranking-col1 ml-4 mb-3 mr-2 card pretty_container">
+      <div class="row" >
+        <span class ="ranking-com_pre-button-col1 mt-1 ml-4">
+          <h5 class = "subtitle mt-2 ml-2" style="display:inline-block"> &nbsp; จำนวนการตีพิมพ์ต่อปี (Scopus, ISI-WoS, TCI)</h5>
+        </span>
+        <span class ="ranking-com_pre-button-col1 mt-2 ml-4" >
+          <form action="comparing" target="_blank" method=GET style="display:inline-block; ">
+            <input name = Comparing type="submit" value="Comparison" class="btn-shadow btn btn-info" style="width:auto; "/>
+          </form>
+          <form action="prediction" target="_blank" method=GET style="display:inline-block;  ">
+            <input name = Prediction type="submit" value="Prediction" class="btn-shadow btn btn-success" style="width:auto; "/>
+          </form>
+        </span> 
+      </div>
+      <span class = "pl-3 pr-5">
+        {{ line_chart_publication | safe }}
+      </span>
+    </div>
+    <div class=" ranking-col2 ">
+      <div class="row mb-3 ml-4 mr-2">
+        <input type="checkbox" id="red_flip" class="more_flip" aria-hidden="true">
+        <div class="card pretty_container content_flip " style="position: relative; width: 100%; height: 10rem; ">
+          <div class = "front_flip red-card">
+            <div class= "inner_flip ">
+              <label for="red_flip"  aria-hidden="true" style="cursor: pointer;" >
+                <div class="row" >
+                  <div class = "col">
+                    <h5 class = " subtitle mt-2 mb-1 ml-3" style=" background-color :transparent">&nbsp;จำนวนการตีพิมพ์รวมในฐาน Scopus </h5> 
+                  </div>
+                </div>
+                <hr class=" my-1">
+                <div class="row" >
+                  <div class = "col">
+                    <div class="card-body h2 text-danger mx-3" style="text-align: center; font-size: 300%;   " >
+                      <span>{{ total_publication.sco |intcomma }}</span>
+                    </div>
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+          <div class = "back_flip">
+            <div class= "inner_flip ">
+              <label for="red_flip"  aria-hidden="true" style="cursor: pointer;" >
+                <div class="row mx-1 mt-1" >
+                  <div class = "col">
+                    <h5 class = "subtitle my-1 " style=" background-color :transparent">&nbsp;จำนวนการอ้างอิงในฐาน Scopus </h5> 
+                  </div>
+                </div>
+                <hr class=" my-1">
+                <div class="row" >
+                  <div class = "col-sm-6 pt-1" style=" height: auto; ">
+                    <div class = "pl-3 " style="font-size: 1.2rem !important; font-weight: 400; opacity: .4 !important; text-align: right; ">
+                      Total Citations
+                    </div>
+                  </div>
+                  <div class = "col-sm-6 pt-1" style=" height: auto; ">
+                    <div class = "pl-3 " style="font-size: 1.2rem !important; font-weight: bold;  text-align: lift;  ">
+                      {{re.scopus_total_cited|intcomma}}
+                    </div>
+                  </div>
+                </div>
+                <hr class=" my-2 "  width="300">
+                <div class="row" >
+                  <div class = "col-sm-6 " style=" height: auto; ">
+                    <div style="font-size: 1em !important; font-weight: 400; opacity: .4 !important; text-align: center;">
+                      Avg. Citations / Item
+                    </div>
+                    <div class = "pl-3" style="font-size: 1.2rem !important; font-weight: bold; text-align: center;">
+                      {{re.scopus_avg_cited_per_item |floatformat:2|intcomma}}
+                    </div>
+                  </div>
+                  <div class = "col-sm-6" style=" height: auto;  ">
+                    <div style="font-size: 1em !important; font-weight: 400; opacity: .4 !important; text-align: center;">
+                        Avg. Citations / Year
+                    </div>
+                    <div class="pl-3" style="font-size: 1.2rem !important; font-weight: bold; text-align: center; ">
+                      {{re.scopus_avg_cited_per_year |floatformat:2|intcomma}}
+                    </div>
+                  </div>
+                </div> 
+              </label>
+            </div>
+          </div>
+        </div>
+      </div> 
+
+      <div class="row mb-3 ml-4 mr-2">
+        <input type="checkbox" id="blue_flip" class="more_flip" aria-hidden="true">
+        <div class="card pretty_container blue-card content_flip" style="position: relative;width: 100%;height: 10rem; ">
+          <div class = "front_flip">
+            <div class= "inner_flip ">
+              <label for="blue_flip"  aria-hidden="true" style="cursor: pointer;" >
+                <div class="row " >
+                  <div class = "col">
+                    <h5 class = "subtitle mt-2 mb-1 ml-3 " style="background-color :transparent; " >&nbsp;จำนวนการตีพิมพ์รวมในฐาน ISI-WoS</h5> 
+                  </div>
+                </div>
+                <hr class=" my-1">
+                <div class="row" >
+                  <div class = "col">
+                    <div class="card-body h2 text-primary mx-3" style="text-align: center; font-size: 300%;   " >
+                        <span>{{ total_publication.isi |intcomma }}</span>
+                    </div>
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+          <div class = "back_flip">
+            <div class= "inner_flip ">
+              <label for="blue_flip"  aria-hidden="true" style="cursor: pointer;" >
+                <div class="row" >
+                  <div class = "col">
+                    <h5 class = "subtitle mt-3 ml-2" style="background-color :transparent; " >&nbsp;ISI-WoS</h5> 
+                    <hr class="mt-2 mb-0">
+                  </div>
+                </div>
+                <div class="row mx-2 " >
+                  <div class = "col-sm-4 pt-2 " style=" height: auto; position: relative; ">
+                    <div style="font-size: 1rem !important; font-weight: 400; opacity: .4 !important;">
+                        Total Citations
+                    </div>
+                    <div class="widget-content">
+                      <div class="widget-content-outer">
+                        <div class="widget-content-wrapper">
+                          <div class = "pl-3" style="font-size: 1.2rem !important; text-align: center; font-weight: bold; ">
+                            {{re.isi_total_cited|intcomma}}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class = "col-sm-4 pt-2 vl" style=" height: auto; position: relative; ">
+                    <div style="font-size: 1rem !important; font-weight: 400; opacity: .4 !important;">
+                        Avg. Citations / Item
+                    </div>
+                    <div class="widget-content">
+                      <div class="widget-content-outer">
+                        <div class="widget-content-wrapper">
+                          <div class="pl-3" style="font-size: 1.2rem !important; font-weight: bold; ">
+                            {{re.isi_avg_cited_per_item |floatformat:2|intcomma}}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div> 
+                  <div class = "col-sm-4 pt-2" style=" height: auto; align-items: center; position: relative;">
+                    <div style="font-size: 1rem !important; font-weight: 400; opacity: .4 !important;">
+                      Avg. Citations / Year
+                    </div>
+                    <div class="widget-content">
+                      <div class="widget-content-outer">
+                        <div class="widget-content-wrapper">
+                          <div class = "pl-3 " style="font-size: 1.2rem !important; font-weight: bold;  ">
+                            {{re.isi_avg_cited_per_year |floatformat:2|intcomma}}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="row mb-3 ml-4 mr-2">
+        <input type="checkbox" id="yellow_flip" class="more_flip" aria-hidden="true">
+        <div class="card pretty_container yellow-card content_flip" style="position: relative;width: 100%;height: 10rem; ">
+          <div class = "front_flip">
+            <div class= "inner_flip ">
+              <label for="yellow_flip"  aria-hidden="true" style="cursor: pointer;" >
+                <div class="row " >
+                  <div class = "col">
+                    <h5 class = "subtitle mt-2 mb-1 ml-3" style="background-color :transparent">&nbsp;จำนวนการตีพิมพ์รวมในฐาน TCI</h5> 
+                  </div>
+                </div>
+                <hr class=" my-1">
+                <div class="row" >
+                  <div class = "col">
+                    <div class="card-body h2 text-warning mx-3" style="text-align: center; font-size: 300%;   " >
+                      <span>{{ total_publication.tci |intcomma }}</span>
+                    </div>
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+          <div class = "back_flip">
+            <div class= "inner_flip ">
+              <label for="yellow_flip"  aria-hidden="true" style="cursor: pointer;" >
+                <div class="row" >
+                  <div class = "col">
+                    <h5 class = "subtitle mt-3 ml-2 " style="background-color :transparent; " >&nbsp;TCI</h5> 
+                    <hr class="mt-2 mb-0">
+                  </div>
+                </div>
+                <div class="row mx-2 " >
+                  <div class = "col-sm-4 pt-2 " style=" height: auto; position: relative; ">
+                    <div style="font-size: 1rem !important; font-weight: 400; opacity: .4 !important; ">
+                        Total Citations
+                    </div>
+                    <div class="widget-content">
+                      <div class="widget-content-outer">
+                        <div class="widget-content-wrapper">
+                          <div class = "pl-3" style="font-size: 1.2rem !important; font-weight: bold;">
+                            {{re.tci_total_cited|intcomma}}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class = "col-sm-4 pt-2 vl" style=" height: auto; position: relative; ">
+                    <div style="font-size: 1rem !important; font-weight: 400; opacity: .4 !important;">
+                        Avg. Citations / Item
+                    </div>
+                    <div class="widget-content">
+                      <div class="widget-content-outer">
+                        <div class="widget-content-wrapper">
+                          <div class="pl-3" style="font-size: 1.2rem !important; font-weight: bold;">
+                            {{re.tci_avg_cited_per_item |floatformat:2|intcomma}}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div> 
+                  <div class = "col-sm-4 pt-2" style=" height: auto; align-items: center; position: relative;">
+                    <div style="font-size: 1rem !important; font-weight: 400; opacity: .4 !important;">
+                      Avg. Citations / Year
+                    </div>
+                    <div class="widget-content">
+                      <div class="widget-content-outer">
+                        <div class="widget-content-wrapper">
+                          <div class = "pl-3 " style="font-size: 1.2rem !important; font-weight: bold; ">
+                            {{re.tci_avg_cited_per_year |floatformat:2|intcomma}}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>  
+    </div>
+  </div>
+  
+  {% if focus %} 
+    <div id="researcharea" class="row " >
+  {% else %}    
+    <div class="row " >
+  {%endif%}
+    <div class=" ml-4 mb-3 mr-3 mr-4 card pretty_container" style="width:100% ">
+      <div class ="row ml-3 mt-3">
+        <div class=" ranking-re-area-col1 mb-1" >
+          <form name='filter' method=POST  class="pt-1">
+            {% csrf_token %}
+            <div class="subtitle card-header-title " style="width:90% "><h5 style="display:inline-block;" > &nbsp;ISI-WoS Research Areas | ปี พ.ศ. : &nbsp;</h5>
+              <select id="year" name = "year" class=" btn ex2 btn-primary dropdown-toggle" onChange="filter.submit();">
+                  {% for y in year  %}
+                      {% if y == filter_year%} 
+                          <option value="{{ y }}" selected>{{ y }} </option>
+                      {% else %}
+                          <option value="{{ y }}" >{{ y }} </option>
+                      {%endif%}
+                  {% endfor %}
+              </select>
+            </div>  
+          </form>
+        </div>
+        <div class=" ranking-re-area-col2 " >
+          <form action="research_area_moreinfo " name='filter_area' method=POST target="_blank" style="border-style:solid;  border-radius: 30px; border-color: rgb(138, 224, 220); width:600px;" >
+            {% csrf_token %}
+            <div class="pt-1 pb-1"><h6 style="display:inline-block;"> &nbsp;&nbsp;&nbsp;&nbsp;ข้อมูลรายปี :&nbsp; </h6>
+              <select id="area" name = "area" class=" btn ex2 btn-info dropdown-toggle ">
+                <option selected="selected" disabled>- - โปรดระบุ Research Areas - -</option>
+                <!-- - - โปรดระบุ Research Areas - - -->
+                {% for area in areas_selecter  %}
+                  
+                  <option value="{{ area }}" >{{ area }} </option>
+                {% endfor %}
+              </select>
+              <input id = "btnSubmit" type="submit" value="Refine" class="btn-shadow btn btn-danger ml-2"  style="width:80px; "/>  
+              &nbsp;
+            </div>
+          </form>
+        </div>
+        <!-- <form action="comparing" target="_blank" method=GET style="display:inline-block; ">
+          <input name = Comparing type="submit" value="Comparison" class="btn-shadow btn btn-info" style="width:auto; "/>
+        </form> -->
+      </div>
+      <div id="bar" name = 'bar'>
+        {{ bar_chart | safe }}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- <div class="card2" tabindex="0">
+  <span class="card__infoicon2">
+    <i class="fa fa-info"></i>
+  </span>
+  <h1 class="card__title2">This is a title</h1>
+  <p class="card__description2">Lorem ipsum dolor sit amet and this is all the lorem ipsum text I remember</p>
+  
+  <p class="card__credits2">Thanks 
+    <a class="card__reference2" href="https://www.youtube.com/channel/UCVyRiMvfUNMA1UPlDPzG5Ow">Gary Simon</a> 
+    for the inspiration
+  </p>
+</div> -->
+
+  <!-- <div class="card_flip " style="width: 100%;">
+    <input type="checkbox" id="font_flip" class="more" aria-hidden="true">
+    <div class="content">
+        <div class="front"  >
+          <div class="inner pretty_container yellow-card" style="border-style:double;">
+            <label class = "h2 text-primary" for="font_flip"  aria-hidden="true" style="border-style: dashed; text-align: center; font-size: 300% ;cursor: pointer;" >
+              <div class="row" >
+                <div class = "col">
+                  <h5 class = "subtitle mb-1" style="background-color :transparent; text-align: left;" >&nbsp;จำนวนการตีพิมพ์รวมในฐาน ISI-WoS</h5> 
+                </div>
+              </div>
+              {{ total_publication.isi |intcomma }}
+            </label>
+          </div>
+        </div>
+        <div class="back">
+            <div class="inner">
+                <div class="info">
+                    <span>5</span>
+                    <div class="icon">
+                        <i class="fas fa-users"></i>
+                        <span>people</span>
+                    </div>
+                </div>
+                <div class="info">
+                    <span>4</span>
+                    <div class="icon">
+                        <i class="fas fa-door-open"></i>
+                        <span>rooms</span>
+                    </div>
+                </div>
+                <div class="info">
+                    <span>3</span>
+                    <div class="icon">
+                        <i class="fas fa-bed"></i>
+                        <span>beds</span>
+                    </div>
+                </div>
+                <div class="info">
+                    <span>1</span>
+                    <div class="icon">
+                        <i class="fas fa-bath"></i>
+                        <span>bath</span>
+                    </div>
+                </div>
+                <div class="description">
+                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Vitae, accusamus.</p>
+                    <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Voluptates earum nostrum ipsam
+                        ullam, reiciendis nam consectetur? Doloribus voluptate architecto possimus perferendis
+                        tenetur nemo amet temporibus, enim soluta nam, debitis.</p>
+                </div>
+                <div class="location">Warsaw, Poland</div>
+                <div class="price">38€ / day</div>
+                <label for="font_flip" class="button return" aria-hidden="true">
+                    <i class="fas fa-arrow-left"></i>
+                </label>
+            </div>
+        </div>
+    </div> -->
+  </div>
+
+{% endblock content %}
+
+{% block js %}
+<script>
+  // src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js">
+
+  window.location.hash = '#researcharea'; //ถ้า เลือกจาก dropdown ให้เลื่อนหน้าเว็บลงมา ที่ bar graph
+
+  // $('select').on('change', function() {
+  //   var value = $(this).val();
+    
+  //   if (value == "categ") {
+  //     $('#bar1').show();
+  //     $('#bar2').hide();
+  //   } else if (value == "resea") {
+  //     $('#bar2').show();
+  //     $('#bar1').hide();
+  //   }
+  // });
+  $(document).ready( function () { 
+    $("#btnSubmit").attr('disabled',true)
+  } );
+
+  $("select").on('change',function(){
+   if($(this).find('option:selected').text()=="- - โปรดระบุ Research Areas - -")
+       $("#btnSubmit").attr('disabled',true)
+   else
+       $("#btnSubmit").attr('disabled',false)
+  });
+
+  
+  
+
+</script>
+
+
+{% endblock js %}

@@ -1,0 +1,114 @@
+{% extends 'importDB/base_2.html' %}
+{% load static %}
+{% block content %}
+{% load plotly_dash %}
+{% load humanize %}
+
+
+<div class="container-fluid mx-3 pt-3 pb-3 card pretty_container">
+  <div class = "row">
+    <div class="col " > 
+        <h4 class="subtitle">&nbsp; รายละเอียด Research Funds ในปีงบประมาณ {{year}}</h4><br> 
+    </div>
+  </div>
+  <div class = "row">
+    <div class = "col-sm-12 px-3">
+        <table id="table_id1" class="display table table-responsive responsive" style="width:100%">
+          <!-- class = " table table-responsive bgcolor-table-head table-borderless display responsive nowrap table-hover align-middle mb-0" -->
+          <thead>
+            <tr bgcolor="#1E4DC2" class = "reservation_fontcolor ">
+                <th scope="col" >#</th>
+                <th scope="col" style="width:15%;">Leader</th>
+                <th scope="col" style="width:40%;">Project Title</th>
+                <th scope="col" style="width:18%;">Funding Agency</th>
+                <th scope="col" >Amount</th>
+                <th scope="col" >Date</th>
+                <th scope="col" style="width:13%;">Financial Info.</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in data.itertuples %}
+              <tr>
+                  <TD class ="c3" align="center">{{forloop.counter}}</TD>
+                  <TD class ="c3" align="left">{{row.leader_name_surname_th}}</TD>
+                  <TD class ="c3" align="left">{{row.project_name_th}}</TD>
+                  <TD class ="c3" align="left">{{row.fund_type_th}}</TD>
+                  <TD class ="c3" align="left">{{row.sum_budget_plan}}</TD>
+                  <TD class ="c3" align="left">{{row.project_start_date}}</TD>
+                  <TD class ="c3" align="left">{{row.RDO_PROJECT_ID}}</b></TD>
+              </tr>  
+            {% endfor %} 
+          </tbody>
+        </table>
+      </span>
+    </div>
+  </div>
+</div>
+
+
+
+
+{% endblock content %}
+
+{% block js %}
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'css/datatables.min.css' %}"/>
+ 
+<script type="text/javascript" src="{% static 'js/pdfmake.min.js' %}" ></script>
+<script type="text/javascript" src="{% static 'js/vfs_fonts.js' %}" ></script>
+<script type="text/javascript" src="{% static 'js/datatables.min.js' %}"></script>
+
+    <script>
+      // $(document).ready(function(){
+      //   $('#span2').hide();
+      // });
+
+      // $('select').on('change', function() {
+      //   var value = $(this).val();
+        
+      //   if (value == "national") {  // ในประเทศ
+      //     $('#span1').show();
+      //     $('#span2').hide();
+
+      //   } else if (value == "international") {  // ต่างประเทศ
+      //     $('#span2').show();
+      //     $('#span1').hide();
+      //     }
+      // });
+      $(document).ready(function() {
+          $('#table_id1').DataTable({
+            dom: 'B<"clear">lfrtip',
+            buttons: {
+              name:'primary',
+              // buttons: ['copy','csv','excel','pdf']
+              buttons: ['copy','csv','excel']
+            },
+            "pageLength": 25
+          });
+      } );  
+      // $('#table_id1').DataTable({
+      //     dom: 'B<"clear">lfrtip',
+      //     buttons: {
+      //         name:'primary',
+      //         // buttons: ['copy','csv','excel','pdf']
+      //         buttons: ['copy','csv','excel']
+      //     },
+      //     "order": [[ 1, "asc" ]],
+      //     "pageLength": 25
+          
+      // });
+
+      // $('#table_id2').DataTable({
+      //     dom: 'B<"clear">lfrtip',
+      //     buttons: {
+      //         name:'primary',
+      //         // buttons: ['copy','csv','excel','pdf']
+      //         buttons: ['copy','csv','excel']
+      //     },
+      //     "order": [[ 2, "desc" ]],
+      //     "pageLength": 25
+      // });
+
+    </script>
+
+{% endblock js %}

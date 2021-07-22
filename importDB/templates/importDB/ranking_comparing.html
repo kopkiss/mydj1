@@ -8,36 +8,51 @@
 
 
 <div class="container-fluid">
-  <div class="row"  >
-    <div class="col-lg-7 ml-5 mb-1  "  >
-    </div>
-    <div class="col-lg-4 ml-4 mb-1  "  style="font-size:15px;" align="right">
-      Last updated: {{date}}
+  <div class="row" >
+    <div class="col-xs-12 col-md-12 col-lg-12 "  >
+      <div class="pr-3 mb-1" style=" float: right;">
+        <span class = "px-2" style="font-size:15px; background-color: coral;  border-radius: 30px; "><b>Last updated: </b> {{date}}</span>
+      </div> 
     </div>
   </div>
   <div class="row "  >
     <div class=" col-lg  mx-3 mb-3 card pretty_container " style="width:100%;">
-      <h5 class = "subtitle mt-3 mb-0"> &nbsp;Comparison of Scopus Publications per Year </h5>
-        
+      <span>
+        <h5 class = "subtitle mt-3  mb-0" > &nbsp;Comparison of 
+          <span style="color:red;"> Scopus </span>
+          Publications per Year 
+        </h5>
+      </span>
+      <span class = "pl-2 pr-5">
         {{ line_sco | safe }}
-      
+      </span>
     </div>
   </div>
   <div class="row"  >
     
-    <div class=" col-lg mx-3 mb-3 card pretty_container " style="width:100%;">
-      <h5 class = "subtitle mt-3 mb-0"> &nbsp;Comparison of ISI-WoS Publications per Year </h5>
-      
+    <div class=" col-lg mx-3 mb-3  card pretty_container " style="width:100%;">
+      <span>
+        <h5 class = "subtitle mt-3 mb-0"> &nbsp;Comparison of  
+          <span style="color:royalblue; "> ISI-WoS </span>
+          Publications per Year 
+        </h5>
+      </span>
+      <span class = "pl-2 pr-5">
         {{ line_isi | safe }}
-      
+      </span>
     </div>
-  </div>
+  </div> 
   <div class="row"  >
-    <div class=" col-lg  mx-3 mb-3 card pretty_container " style="width:100%;">
-      <h5 class = "subtitle mt-3 mb-0"> &nbsp;Comparison of TCI Publications per Year </h5>
-        
+    <div class=" col-lg  mx-3 mb-3 card pretty_container " style="width:100%;"> 
+      <span>
+        <h5 class = "subtitle mt-3 mb-0"> &nbsp;Comparison of
+          <span style="color:#F39C12; display:inline-block;"> TCI </span>
+          Publications per Year 
+        </h5>
+      </span>
+      <span class = "pl-2 pr-5">
         {{ line_tci | safe }}
-      
+      </span>
     </div>
   </div>
 </div>

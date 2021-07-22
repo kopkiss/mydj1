@@ -3,17 +3,17 @@
 {% block content %}
 {% load plotly_dash %}
 {% load humanize %}
-
+{% csrf_token %}
 
     <!-- Content Row -->
-    <div class="container-fluid m-3">
+    <div class="container-fluid mx-3 pt-3 pb-3 card pretty_container">
         <div class = "row">
-            <div class="col" > 
+            <div class="col " > 
                 <h4 class="subtitle">&nbsp; {{source}} ในปี {{year}}</u></h4><br> 
             </div>
         </div>
         <div class = "row">
-            <div class = "col-sm-12">
+            <div class = "col-sm-12 px-3">
                 <table id = "table_id1" class = " table display" border = '2' align="center" style="width:100%" >
                     <thead>
                       <tr bgcolor="#1E4DC2" class = "reservation_fontcolor " style = "text-align: center;">
@@ -46,8 +46,8 @@
 
                       {% endfor %} 
                     </tbody>
-                  </table>
-              </div>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -57,12 +57,12 @@
 
 {% block js %}
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/jszip-2.5.0/dt-1.10.20/af-2.3.4/b-1.6.1/b-colvis-1.6.1/b-html5-1.6.1/b-print-1.6.1/cr-1.5.2/fc-3.3.0/kt-2.5.1/r-2.2.3/rg-1.1.1/rr-1.2.6/sl-1.3.1/datatables.min.css"/>
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'css/datatables.min.css' %}"/>
  
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/v/dt/jszip-2.5.0/dt-1.10.20/af-2.3.4/b-1.6.1/b-colvis-1.6.1/b-html5-1.6.1/b-print-1.6.1/cr-1.5.2/fc-3.3.0/kt-2.5.1/r-2.2.3/rg-1.1.1/rr-1.2.6/sl-1.3.1/datatables.min.js"></script>
+<script type="text/javascript" src="{% static 'js/pdfmake.min.js' %}" ></script>
+<script type="text/javascript" src="{% static 'js/vfs_fonts.js' %}" ></script>
+<script type="text/javascript" src="{% static 'js/datatables.min.js' %}"></script>
 
 <script>
     $(document).ready(function(){

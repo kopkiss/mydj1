@@ -1,0 +1,143 @@
+
+{% load static %}
+{% block content %}
+{% load plotly_dash %}
+{% load humanize %}
+
+
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400&display=swap" rel="stylesheet">
+	<!-- href="{% static 'css/bootstrap.min.css' %}"  -->
+    <link rel="stylesheet" href=" {% static 'fonts/icomoon/style.css' %}">   
+
+    <link rel="stylesheet" href=" {% static 'css/login/owl.carousel.min.css' %}">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href=" {% static 'css/login/bootstrap.min.css' %}">
+    
+    <!-- Style -->
+    <link rel="stylesheet" href=" {% static 'css/login/style.css' %}">
+    <style>
+      .bg-image{
+          
+          background-image: url( "{% static 'img/bg_1.jpg' %}");
+      }
+
+      .button {
+        display: inline-block;
+        border-radius: 4px;
+        background-color: rgb(0,60,113);
+        border: none;
+        color: #FFFFFF;
+        text-align: center;
+        font-size: 20px;
+        width: 100%;
+        height: 54px;
+        padding-left: 30px;
+        padding-right: 30px;
+        transition: all 0.5s;
+        cursor: pointer;
+        margin: 5px;
+      }
+
+      .button span {
+        cursor: pointer;
+        display: inline-block;
+        position: relative;
+        transition: 0.5s;
+      }
+
+      .button span:after {
+        content: '\00bb';
+        position: absolute;
+        opacity: 0;
+        top: 0;
+        right: -20px;
+        transition: 0.5s;
+      }
+
+      .button:hover span {
+        padding-right: 25px;
+      }
+
+      .button:hover span:after {
+        opacity: 1;
+        right: 0;
+      } 
+       
+    </style>
+    <title>::ESS:: ระบบสนับสนุนผู้บริหารระดับสูง (Executive Support Systems)</title>
+  </head>
+  <body>
+  
+
+  <div class="d-lg-flex half">
+    <div class="bg order-1 order-md-2 bg-image"></div>
+    <div class="contents order-2 order-md-1">
+
+      <div class="container">
+        <div class="row align-items-center justify-content-center">
+          <div class="col-md-7" >
+            <img src="{% static 'img/logologin.png' %}" alt="banner" style="width:60%; display: block;margin-left: auto; margin-right: auto;" class = "mb-5" >
+            <div class="col-ml-7" >
+              <h3>Sign In <img src="{% static 'img/logo_psupassport.png' %}" alt="lgpsupass" style="width:20%; float: right;"></h3>
+              <p>
+                *กรุณา Log in ด้วย PSU Passport</p>
+                {% for message in messages %}
+					        <p id="messages" style="color: rgb(255, 0, 0);">{{message}}</p>
+                {% endfor %}   
+            </div>
+            <form id="login-form" action="" method="post">
+              {% csrf_token %}
+              <div class="form-group first">
+                <label for="username">Username</label>
+                <input type="text" name="username"  class="form-control">
+
+              </div>
+              <div class="form-group last mb-3">
+                <label for="password">Password</label>
+                <input type="password" name="password"  class="form-control" >
+                
+              </div>
+              
+              <div class="d-flex mb-5 align-items-center">
+                <label class="control control--checkbox mb-0"><span class="caption">Remember me</span>
+                  <input type="checkbox" />
+                  <div class="control__indicator"></div>
+                </label>
+                <span class="ml-auto"><a href="https://passport.psu.ac.th/index.php?content=forgetpass" class="forgot-pass" target="_blank">Forgot Password</a></span> 
+              </div>
+              
+              <!-- <input type="submit" value="Login" class="btn btn-block" style="background-color:rgb(0,60,113); color:whitesmoke; vertical-align:middle"> -->
+              <!-- <input type="submit" value="Login" class="btn btn-block button" style=" vertical-align:middle"> -->
+              <button class="button mb-4" style="vertical-align:middle"><span>login </span></button>  
+              
+              <div class=" text-center ">
+                <h6  style="color: rgb(160, 160, 160)"> มหาวิทยาลัยสงขลานครินทร์ - Prince of Songkla University</h6>
+              </div>
+            
+            </form>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+    
+    
+    
+    <script src="{% static 'js/login/jquery-3.3.1.min.js' %}"></script>
+    <script src="{% static 'js/login/popper.min.js' %}"></script>
+    <script src="{% static 'js/login/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/login/main.js' %}"></script>
+   
+  </body>
+</html>
+{% endblock content %}

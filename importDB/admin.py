@@ -8,6 +8,10 @@ from .models import PRPM_v_grt_pj_budget_eis
 from .models import PRPM_r_fund_type
 from .models import master_ranking_university_name
 from .models import HRMIS_V_AW_FOR_RANKING
+from .models import Science_park_rawdata
+from .models import Science_park_PITI
+
+from import_export.admin import ImportExportModelAdmin
 
 
 # Register your models here.
@@ -23,6 +27,7 @@ admin.site.register(PRPM_v_grt_pj_team_eis)
 admin.site.register(PRPM_v_grt_pj_budget_eis)
 admin.site.register(PRPM_r_fund_type)
 admin.site.register(HRMIS_V_AW_FOR_RANKING)
+
 
 # ตัวอย่าง ถ้าต้องการให้แสดง ตาราง ในหน้า admin 
 # 1. สร้าง class ที่ต้องการให้แสดง
@@ -43,6 +48,11 @@ class master_university_name(admin.ModelAdmin):
     # list_editable = ['name_eng']  # สามารถ เพิ่ม การแก้ไข ฟิวล์ได้ ในหน้าแรกเลย ไม่ต้องกดเข้าไปข้างใน
 # 2. register ชื่อ ฐานข้อมูล และ ชื่อ class 
 admin.site.register(master_ranking_university_name, master_university_name )
+
+@admin.register(Science_park_rawdata)
+class ViewAdmin(ImportExportModelAdmin):
+    pass
+
 
 
 

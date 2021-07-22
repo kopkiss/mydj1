@@ -1,0 +1,275 @@
+{% extends 'importDB/base_3.html' %}
+{% load static %}
+{% block content %}
+{% load plotly_dash %}
+{% load humanize %}
+
+
+<style type="text/css">
+
+
+    /* @media screen and (min-width: 1px) and (max-width: 1330px)  {
+    .sci-park-col1{
+        width:100% !important;
+        }
+        .sci-park-col2{
+        width:100% !important;
+        }
+        
+    }
+
+    @media screen and (min-width: 1331px) and (max-width: 9999px)   {
+    .sci-park-col1{
+        width:45% !important;
+        }
+      .sci-park-col2{
+        width:55% !important;
+        }
+    }
+
+    @media screen and (min-width: 1px) and (max-width: 1403px)  {
+    .sci-park-col1{
+        width:100% !important;
+        }
+        .sci-park-col2{
+        width:100% !important;
+        }
+        
+    }
+
+    @media screen and (min-width: 1404px) and (max-width: 9999px)   {
+    .sci-park-col1{
+        width:70% !important;
+        }
+      .sci-park-col2{
+        width:30% !important;
+        }
+    }
+    */
+    @media screen and (min-width: 1px) and (max-width: 1330px)  {
+    .sci-park-col1{
+        width:100% !important;
+        }
+        .sci-park-col2{
+        width:100% !important;
+        }
+        
+    }
+
+    @media screen and (min-width: 1331px) and (max-width: 9999px)   {
+    .sci-park-col1{
+        width:45% !important;
+        }
+      .sci-park-col2{
+        width:55% !important;
+        }
+    }
+
+    @media screen and (min-width: 1px) and (max-width: 1403px)  {
+    .sci-park-col1{
+        width:100% !important;
+        }
+        .sci-park-col2{
+        width:100% !important;
+        }
+        
+    }
+
+    @media screen and (min-width: 1404px) and (max-width: 9999px)   {
+    /* .sci-park-col1{
+        width:70% !important;
+        }
+      .sci-park-col2{
+        width:30% !important;
+        }
+    } */
+    .sci-park-col1{
+        width:60% !important;
+        }
+      .sci-park-col2{
+        width:40% !important;
+        }
+    }
+
+  .card_sci{
+        transition: 0.4s;
+        }
+  .card_sci:hover {
+        transform: scale(1.05, 1.05);
+        }
+
+  .circle-icon {
+    background: #ffc0c0;
+    /* width: 100px;
+    height: 100px; */
+    border-radius: 50%;
+    text-align: center;
+    line-height: 100px;
+    vertical-align: middle;
+    padding: 30px;
+}
+
+.circle-icon2 {
+    background: #ffc0c0;
+    vertical-align: middle;
+    padding:30px;
+    border-radius: 50%;
+}
+
+.icon-bg-1 {
+    color: #F1C40F;
+}
+
+.icon-bg-2 {
+    color: #228B22;
+}
+
+.icon-bg-3 {
+    color: #eca129;
+}
+
+.icon-bg-4 {
+    color: #2E86C1;
+}
+
+.science-park-buttons {
+        color: #ffffff !important;
+        font-weight: 600;
+        /* font-weight: bold; #111e6c*/ 
+        background: rgb(6, 86, 167);
+        padding: 4px;
+        /* border: 1px solid #111e6c !important; */
+        display: inline-block;
+        transition: all 0.4s ease 0s;
+        width: 8rem;
+        height: 2rem;
+        }
+    
+  .science-park-buttons:hover {
+      color: #202020 !important;
+      background: #fcfafa !important;
+      border-color: #000000 !important;
+      transition: all 0.4s ease 0s;
+      }
+
+    .todo-indicator {
+        position: absolute;
+        width: 4px;
+        height: 60%;
+        border-radius: .3rem;
+        left: .625rem;
+        top: 20%;
+        opacity: .6;
+        transition: opacity .2s;
+    }
+    .bg-warning1 {
+    background-color: #f7b924 !important;
+    }
+
+    .flex-container {
+  /* width: 30%; */
+  height: 50px;
+  background-color: rgba(42, 236, 227, 0.3);
+  /* text-align: center; */
+  border-radius: 25%;
+  
+
+  }
+
+  
+
+</style>
+    
+<div class="container-fluid">
+  <div class="row mx-2" >
+    <div class="col-xs-12 col-md-12 col-lg-12 "  >
+      <div class="pr-3 mb-1" style=" float: right;">
+        <b>ข้อมูลจากระบบ PITI-IPOP &nbsp;</b> 
+        <span class = "px-2" style="font-size:15px; background-color: coral;  border-radius: 30px; "><b>Last updated: </b> {{date}}</span>
+      </div> 
+    </div>
+  </div>
+
+  <!-- row1 -->
+  <div class="row ml-3 mr-4 my-2" >
+    <div class=" sci-park-col1 d-flex mb-2 " >
+      <div class="card pretty_container"  style="width:100%; " > 
+        <h5 class = "subtitle mx-3 mt-3 " style="float: left;display: inline;"> 
+          &nbsp; ทรัพย์สินทางปัญญาที่<u>ยื่นจดทะเบียนกับกรมฯ</u> ตามปีงบประมาณ 
+          <span style="font-size: 80%;">(15 ปีย้อนหลัง)</span>
+        </h5>              
+        <hr>
+        <div class=" mx-4 my-2" >
+        {{ plot1 | safe }}
+        </div>
+      </div>
+    </div>  
+
+    <!-- Pie graph -->
+    <div class=" sci-park-col2 d-flex mb-2" >  
+      <div class="row mx-2 " style="width: 100%;">
+        <div class="card pretty_container " style="width: 100%;">
+          <h5 class = "subtitle mx-3 mt-3 "> &nbsp; ทรัพย์สินทางปัญญา<u>ยื่นจดทะเบียนกับกรมฯ</u> ทั้งหมด</h5>                     
+          <hr>
+          <div class=" mx-4" > 
+              {{ plot2 | safe }}
+          </div> 
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- row2 -->
+  <div class="row ml-3 mr-4 my-2" >
+    <div class=" sci-park-col1 d-flex mb-2 " >
+      <div class="card pretty_container"  style="width:100%; " > 
+        <h5 class = "subtitle mx-3 mt-3 " style="float: left;display: inline;"> &nbsp; ทรัพย์สินทางปัญญาที่<u>จดทะเบียนกับกรมฯ</u> ตามปีงบประมาณ 
+          <span style="font-size: 80%;">(15 ปีย้อนหลัง)</span>
+        </h5>              
+        <hr>
+        <div class=" mx-4 my-2" >
+        {{ plot3 | safe }}
+        </div>
+      </div>
+    </div>  
+
+    <!-- Pie graph -->
+    <div class=" sci-park-col2 d-flex mb-2" >  
+      <div class="row mx-2 " style="width: 100%;">
+        <div class="card pretty_container " style="width: 100%;">
+          <h5 class = "subtitle mx-3 mt-3 "> &nbsp; ทรัพย์สินทางปัญญา<u>จดทะเบียนกับกรมฯ</u> ทั้งหมด</h5>                     
+          <hr>
+          <div class=" mx-4" > 
+              {{ plot4 | safe }}
+          </div> 
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- row3 -->
+  <div class="row my-2 mr-3 ml-1" >
+    <div class=" col-xl-12 d-flex mb-2 " >
+      <div class="card pretty_container"  style="width:100%; " > 
+        <h5 class = "subtitle mx-3 mt-3 " style="float: left;display: inline;"> &nbsp; รายรับจาก Economic Impact <span style="font-size: 80%;">(10 ปีย้อนหลัง) </span></h5>              
+        <hr>
+        <div class=" mx-4 my-2" >
+        {{ plot5 | safe }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+</div>
+
+      
+      
+
+   
+    
+
+    
+  
+    
+{% endblock content %}

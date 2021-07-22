@@ -32,7 +32,7 @@ ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [  # เป็นการบอกว่า ในชั้น ของตึก Mydj1 มีชั้นอะไรบ้าง เช่นชั้น importDB 
     'django.contrib.admin',
-    'django.contrib.auth',
+    'django.contrib.auth', # ใช้จัดการ user เช่น login logout
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -47,6 +47,13 @@ INSTALLED_APPS = [  # เป็นการบอกว่า ในชั้น
     'corsheaders',
     #---------- celery
     'django_celery_beat',
+    'django_extensions',
+    #----------- https runserver
+    # runserver_plus
+    # 'werkzeug_debugger_runserver',
+    # 'django_extensions',
+    # 'sslserver',
+    'import_export',
 ]
 
 MIDDLEWARE = [
@@ -89,7 +96,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'mydj1.wsgi.application'
 
 CORS_ORIGIN_ALLOW_ALL = False
-CORS_ORIGIN_WHITELIST = ('http://127.0.0.1:8000',)
+CORS_ORIGIN_WHITELIST = ('http://127.0.0.1:8000','https://ess.psu.ac.th:8081',"http://192.168.116.58:8000")
 
 # CORS_ALLOW_METHODS = [
 #     'DELETE',
@@ -113,6 +120,19 @@ DATABASES = {
         'HOST':'localhost',
         'PORT':''
     }
+    
+    # MySql เครื่อง server
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.mysql', #เปลี่ยนจาก sqlite3 เป็น mysql
+    #     'NAME': 'mydj2', #ชื่อฐานข้อมูล
+    #     'USER': 'root',
+    #     'PASSWORD':'esspsu63**',
+    #     'HOST':'localhost',
+    #     # 'HOST':'ess.psu.ac.th',
+    #     'PORT':''
+    # }
+
+
     # 'default': {
     #     'ENGINE': 'django.db.backends.oracle', #เปลี่ยนจาก sqlite3 เป็น mysql
     #     'NAME': 'oraldb1', #ชื่อฐานข้อมูล
@@ -196,13 +216,34 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'mydj1/static')
 ]
 
+########## set ค่าในการ login and logout ##################################
+LOGIN_URL = 'login'
+LOGOUT_REDIRECT_URL = 'login'  # เมื่อกดปุ่ม logout ให้วิ่ง ไปที่ name = 'login' ในไฟล์ urls.py
+LOGIN_REDIRECT_URL = 'home-page' # เมื่อ loginเสร็จ ให้วิ่ง ไปที่ name = 'home-page' ในไฟล์ urls.py
+
+############### Handle session logout อัตโนมัติ ############################
+SESSION_COOKIE_AGE = 60 * 60 #  5 * 60 = 5 นาที
+# SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
+# SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# MIDDLEWARE_CLASSES = ['importDB.middleware.AutoLogout',]
+# Auto logout delay in minutes
+# AUTO_LOGOUT_DELAY = 1 #equivalent to 5 minutes
+##########################################################################
  
 # Access-Control-Allow-Origin : http://localhost:3000
 # Access-Control-Allow-Credentials : true
 # Access-Control-Allow-Methods : GET, POST, OPTIONS
 # Access-Control-Allow-Headers : Origin, Content-Type, Accept
 
-CELERY_BROKER_URL = 'redis://h:p00634b4bbcaae541336b6ae31adc8d93e2cd88f1886df232b8006d9ff8e9d27f@ec2-52-72-186-42.compute-1.amazonaws.com:22939'
+
+##### ใช้ในการ update ข้อมูล โดยการใช้ Celery Scheduler #####
+# CELERY_BROKER_URL = 'redis://h:p00634b4bbcaae541336b6ae31adc8d93e2cd88f1886df232b8006d9ff8e9d27f@ec2-54-160-125-169.compute-1.amazonaws.com:28879'
+CELERY_BROKER_URL ='redis://localhost:6379'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERYBEAT_SCHEDULER = 'djcelery_schedulers_DatabaseScheduler'
+#########################################################
+

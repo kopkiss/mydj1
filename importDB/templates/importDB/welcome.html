@@ -4,80 +4,58 @@
 {% load plotly_dash %}
 {% load humanize %}
 
+
+<style type="text/css">
+
+
+
+
+</style>
     <!-- Content Row -->
 
 
     <!-- <div class="container-fluid m-3">
       <button type="button" id = "tci" onclick="updateArticleDisplayResult('Prince Of Songkla University')" class = "btn btn-primary mb-3">tci</button>
     </div> -->
+    
 
     <div class="container-fluid">
+      
       <div class="row"  >
-        <div class=" col-lg-7 col-sm-12 mx-3 mb-3 card " style="width:100%;"> 
-          <h5 class = "subtitle mt-3 mb-0"> &nbsp;แหล่งทุน 7 ประเภท 10 ปี ย้อนหลัง</h5>           
-            {{ plot7 | safe }}
+        <div class=" ranking-col1 ml-3 mb-3 mr-2 card pretty_container" > 
+          <h5 class = "subtitle mx-3 mt-3 "> &nbsp; จำนวนโครงการวิจัยที่ได้รับการจัดสรร และรอการจัดสรรงบประมาณ</h5>           
+          <hr>
+          <div class=" mx-4" > 
+              {{ plot4 | safe }}
+          </div>
         </div>
-        <div class=" col-lg-4 col-sm-12 mx-3 mb-3 card" style="width:100%;">            
-          <h5 class = "subtitle mt-3 mb-0">&nbsp;รายได้งานวิจัย ปี <script>document.write(new Date().getFullYear()+543)</script> แยกตามแหล่งเงิน </h5> 
-            {{ plot8 | safe }}
-        </div>
-      </div>
-      <div class="row" >
-        <div class=" col-lg-7 col-sm-12 mx-3 mb-3 card " style="width:100%;"> 
-          <h5 class = "subtitle mt-3 mb-0"> &nbsp; รายได้งานวิจัย 10 ปีย้อนหลัง แยกตามวิทยาเขต</h5>           
-              {{ plot3 | safe }}
-        </div>
-        <div class=" col-lg-4 col-sm-12 mx-3 mb-3 card " style="width:100%;"> 
-          <h5 class = "subtitle mt-3 mb-0"> &nbsp;รายได้งานวิจัย ปี <script>document.write(new Date().getFullYear()+543)</script> แยกตามวิทยาเขต</h5>           
-              {{ plot5 | safe }}
+        <div class=" ranking-col2 ml-2 mb-3 card pretty_container" >            
+          <h5 class = "subtitle mx-3 mt-3 mb-0">&nbsp; รายได้โครงการวิจัย 10 ปี ย้อนหลัง </h5>
+          <hr>
+          <div class=" mx-2 " >  
+            {{ plot3 | safe }}
+          </div>
         </div>
       </div>
-      <div class="row" >
-        <div class=" col-lg-7 col-sm-12 mx-3 mb-3 card " style="width:100%;"> 
-          <h5 class = "subtitle mt-3 mb-0"> &nbsp;รายได้งานวิจัยทั้งหมด 10 ปี ย้อนหลัง</h5>           
+      <div class="row"  >
+        <div class=" ranking-col1 ml-3 mb-3 mr-2 card pretty_container" > 
+          <h5 class = "subtitle mx-3 mt-3 "> &nbsp; จำนวนการตีพิมพ์ในฐาน Scopus, ISI-WoS และ TCI </h5>           
+          <hr>
+          <div class=" mx-4" > 
               {{ plot1 | safe }}
+          </div>
         </div>
-        <div class=" col-lg-4 col-sm-12 mb-4 mx-4 card" style="width:100%;">            
-
-        </div>
-      </div>
-      <div class="row" >
-        <div class=" col-lg-7 col-sm-12 mb-4 mx-4 card " style="width:100%;">            
-          {{ plot9 | safe }}
-        </div>
-        <div class=" col-lg-4 col-sm-12 mb-4 mx-4 card" style="width:100%;">            
-
+        <div class=" ranking-col2 ml-2 mb-3 card pretty_container" >            
+          <h5 class = "subtitle mx-3 mt-3 mb-0">&nbsp; จำนวนผู้วิจัย 10 ปี ย้อนหลัง</h5>
+          <hr>
+          <div class=" mx-2 " >  
+            {{ plot2 | safe }}
+          </div>
         </div>
       </div>
-      <!-- <div class="row" >
-        <div class=" col-lg-7 col-sm-12 mb-4 mx-4 card " style="width:100%;">            
-
-        </div>
-        <div class=" col-lg-4 col-sm-12 mb-4 mx-4 card" style="width:100%;">            
-
-        </div>
-      </div>
-      <div class="row" >
-        <div class=" col-lg-7 col-sm-12 mb-4 mx-4 card " style="width:100%;">            
-
-        </div>
-        <div class=" col-lg-4 col-sm-12 mb-4 mx-4 card" style="width:100%;">            
-
-        </div>
-      </div>
-      <div class="row" >
-        <div class=" col-lg-7 col-sm-12 mb-4 mx-4 card " style="width:100%;">            
-
-        </div>
-        <div class=" col-lg-4 col-sm-12 mb-4 mx-4 card" style="width:100%;">            
-
-        </div>
-      </div> -->
-      
-      
-    
     </div>
 
+    
   
     
 {% endblock content %}

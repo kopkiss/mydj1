@@ -1,0 +1,410 @@
+{% extends 'importDB/base_3.html' %}
+{% load static %}
+{% block content %}
+{% load plotly_dash %}
+{% load humanize %}
+
+
+<style type="text/css">
+
+
+    @media screen and (min-width: 1px) and (max-width: 1330px)  {
+    .sci-park-col1{
+        width:100% !important;
+        }
+        .sci-park-col2{
+        width:100% !important;
+        }
+        
+    }
+
+    @media screen and (min-width: 1331px) and (max-width: 9999px)   {
+    .sci-park-col1{
+        width:45% !important;
+        }
+      .sci-park-col2{
+        width:55% !important;
+        }
+    }
+
+    @media screen and (min-width: 1px) and (max-width: 1403px)  {
+    .sci-park-col1{
+        width:100% !important;
+        }
+        .sci-park-col2{
+        width:100% !important;
+        }
+        
+    }
+
+    @media screen and (min-width: 1404px) and (max-width: 9999px)   {
+    /* .sci-park-col1{
+        width:70% !important;
+        }
+      .sci-park-col2{
+        width:30% !important;
+        }
+    } */
+    .sci-park-col1{
+        width:60% !important;
+        }
+      .sci-park-col2{
+        width:40% !important;
+        }
+    }
+
+  .card_sci{
+        transition: 0.4s;
+        }
+  .card_sci:hover {
+        transform: scale(1.05, 1.05);
+        }
+
+  .circle-icon {
+    background: #ffc0c0;
+    /* width: 100px;
+    height: 100px; */
+    border-radius: 50%;
+    text-align: center;
+    line-height: 100px;
+    vertical-align: middle;
+    padding: 30px;
+}
+
+.circle-icon2 {
+    background: #ffc0c0;
+    vertical-align: middle;
+    padding:30px;
+    border-radius: 50%;
+}
+
+
+.icon-bg {
+    color: #424242;
+}
+
+
+
+.science-park-buttons {
+        color: #ffffff !important;
+        font-weight: 600;
+        /* font-weight: bold; #111e6c*/ 
+        background: rgb(6, 86, 167);
+        padding: 4px;
+        /* border: 1px solid #111e6c !important; */
+        display: inline-block;
+        transition: all 0.4s ease 0s;
+        width: 8rem;
+        height: 2rem;
+        }
+    
+  .science-park-buttons:hover {
+      color: #202020 !important;
+      background: #fcfafa !important;
+      border-color: #000000 !important;
+      transition: all 0.4s ease 0s;
+      }
+
+    .todo-indicator {
+        position: absolute;
+        width: 4px;
+        height: 60%;
+        border-radius: .3rem;
+        left: .625rem;
+        top: 20%;
+        opacity: .6;
+        transition: opacity .2s;
+    }
+    .bg-warning1 {
+    background-color: #f7b924 !important;
+    }
+
+    .flex-container {
+  /* width: 30%; */
+  height: 50px;
+  background-color: rgba(42, 236, 227, 0.3);
+  /* text-align: center; */
+  border-radius: 25%;
+  
+  
+  }
+
+  div.underline {
+        text-decoration-line: underline;
+        text-decoration-style: double;
+        }
+      
+        .btn-circle{
+        border-radius: 50%;
+        background: #353535;
+        padding: 1px; 
+        font-size: 10px;
+        box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+        color: #fff;
+        text-align: center;
+        font-weight: 600;
+        text-transform: uppercase;
+        
+        }
+
+    .btn-group .btn-or {
+        top: 50%;
+        left: 50%;
+        position: absolute;
+        -webkit-transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+        z-index: 99;
+        box-shadow: 0;
+        border: 1px solid #fff;
+        }
+
+    .btn-or {
+        width: 1.3rem;
+        height: 1.3rem;
+        }
+
+        .revenues-buttons {
+        color: #ffffff !important;
+        font-weight: 600;
+        /* font-weight: bold; #111e6c*/ 
+        background: #353535;
+        padding: 4px;
+        /* border: 1px solid #111e6c !important; */
+        display: inline-block;
+        transition: all 0.4s ease 0s;
+        width: 4.2rem;
+        height: 2rem;
+        }
+    
+    .revenues-buttons:hover {
+        color: #202020 !important;
+        background: #e4e4e4 ;
+        border-color: #000000 !important;
+        transition: all 0.4s ease 0s;
+        }
+
+</style>
+    
+<div class="container-fluid">
+  <div class="row mx-2" >
+    
+    <div class="col-xs-12 col-md-12 col-lg-12 "  >
+      <!-- <a style="float:left;" href='{% url "science-park-home"%}'>กลับหน้าหลักอุทยาน</a> -->
+      <div class="pr-3" style=" float: right; ">
+        <b>ข้อมูลจากอุทยานวิทยาศาสตร์ &nbsp;</b> 
+        <span class = "px-2" style="font-size:15px; background-color: coral;  border-radius: 30px; "><b>Last updated: </b> {{date}}</span>
+      </div> 
+    </div>
+  </div>
+  <div class="row ml-3 mr-4 my-2" >
+    <div class=" sci-park-col1 d-flex mb-2" >
+      <div class="card pretty_container " style="position: relative; width: 100%;">
+        <!-- เลือกปี -->
+        <div class="row" >
+          <div class = "col " style="width: 100%;">
+            <div class="card-header pt-2 " style="width:100%; background-color: rgba(177, 231, 210, 0.575)" >
+              <div class= "row pt-1 ">
+                <div class="col-xs-12 col-md-12 col-lg-12 "  >
+                  <form class="mt-1 " name='filter' method=POST  >
+                    {% csrf_token %}
+                    <div class="font-size-lg">
+                      <b style="display:inline-block; color: black"> &nbsp;&nbsp;รายรับการวิจัยจากภาคเอกชน&nbsp;|&nbsp;ปีงบประมาณ :&nbsp; </b>
+                      <select id="year" name = "year" class=" btn ex2 dropdown-toggle" onChange="filter.submit();" style="background-color: rgb(46, 45, 45); color:#ffffff;">
+                          {% for y in year  %}
+                              {% if y == filter_year%} 
+                                  <option value="{{ y }}" selected>{{ y }} </option>
+                              {% else %}
+                                  <option value="{{ y }}" >{{ y }} </option>
+                              {%endif%}
+                          {% endfor %}
+                      </select>
+                      
+                      <img src="{% static 'img/question-mark-logo.png' %}" style="float:right;"
+                      title="รายรับผ่านบริการของอุทยานวิทยาศาสตร์ คือ รายรับจากการขาย/ขอใช้บริการผ่านทางหน่วยงานอุทยานวิทยาศาสตร์ 
+                      ประกอบด้วย การขายสิทธิบัตรหรือทรัพย์สินทางปัญญาในรูปแบบต่างๆ รายรับงานวิจัยจากภาคอุตสาหกรรมและเอกชน 
+                      รายรับที่แสดง Impact ทางสังคมและเศรษฐกิจ เป็นต้น" 
+                      style="display: block; margin-left: auto; margin-right: auto; " 
+                      width="15" height="15"
+                      /> 
+
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Table -->
+        <div class= "row mx-0 " >
+          <table id = "table_id1" class = " table mb-0 " style="width:100%; color:black; " >
+            <thead >
+                <tr class = "reservation_fontcolor " style="background-color: #333333;">
+                      <th class="text-center " style="width: 5%; ">#</th>
+                      <th class="text-center " style="width: 30%; ">รายการ</th>
+                      <th class="text-center " style="width: 30%; ">จำนวนเงิน</th>
+                      <th class="text-center " style="width: 20%; "></th>
+                  </tr>
+              </thead>
+              <tbody>
+
+                <!-- รายรับจากการขาย/ขอใช้ สิทธิบัตร -->
+                <tr class="my-5" style=" height: 150px;">
+                  <td>
+                    <div class="fa-stack fa-lg fa-2x my-4"  >
+                      <i class="fa fa-circle fa-stack-2x icon-bg"></i>
+                      <i class="fas fa-money-bill fa-stack-1x" style="color: whitesmoke;" ></i>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="text-left" style="margin-top: 32px; margin-left: 30px;" >
+                      <b>รายรับจากการขาย/ขอใช้ สิทธิบัตร และทรัพย์สินทางปัญญา </b>
+                    </div>  
+                  </td>
+                  <td>
+                    <div class="  text-right mr-3">
+                      <div class="h5" style="margin-top: 47px;">
+                        <span>{{sciparkinfo.14|floatformat:2|intcomma }}</span>
+                        <span style=" font-size: 70%; ">บาท</span>  
+                      </div>
+                      {% if show_growth %}
+                      <div  style=" font-size: 90%; "> 
+                        Growth Rate : 
+                        <span style="color:{{color.12}}">
+                          {% if growth_rate.12 > 0 %}
+                          <b>+{{growth_rate.12|floatformat:2}}%</b>
+                          {% else %}
+                          <b>{{growth_rate.12|floatformat:2}}%</b>
+                          {% endif %}  
+                        </span>
+                      </div>
+                      {% endif %}
+                    </div>  
+                  </td>
+                  <!-- <td class="text-center" style="padding-top: 50px;"> 
+                      <a href = '{% url "science-park-graph" value="14"%}' target="_blank"> 
+                        <input  type="submit" value="View Graph" class="btn science-park-buttons " 
+                        style=" border-radius : 25px;background-color: #333333;" />
+                      </a>
+                  </td> -->
+                  <td class="text-center pb-3 pt-2">
+                    <div class="btn-group btn-group-toggle mt-5 " >
+                        <a href = '{% url "science-park-graph" value="14"%}' target="_blank" > 
+                            <input  type="submit" value="Graph" class="btn revenues-buttons pt-0" 
+                                style="padding-left: 1px;padding-bottom: 2px; border-top-right-radius : 0px; border-bottom-right-radius : 0px; border-top-left-radius : 25px; border-bottom-left-radius : 25px;" />
+                        </a>
+                        <span class="btn-circle btn-or">or</span>
+                        <form action="show_table" target="_blank" method=POST>
+                            {% csrf_token %} 
+                            <input name = {{filter_year}}/14 type="submit" value="Table" class="btn revenues-buttons " 
+                                    style="padding-left: 2px;  border-top-right-radius : 25px; border-bottom-right-radius : 25px; border-top-left-radius : 0px; border-bottom-left-radius : 0px;"> 
+                        </form>
+                    </div>     
+                  </td>
+                </tr>
+
+                 <!-- รายรับงานวิจัย -->
+                <tr class="py-5" style=" height: 150px;">
+                  <td >
+                    <div class="fa-stack fa-lg fa-2x my-4"  >
+                      <i class="fa fa-circle fa-stack-2x icon-bg"></i>
+                      <i class="fas fa-funnel-dollar fa-stack-1x" style="color: whitesmoke;" ></i>
+                    </div>
+                  </td>
+                  <td>
+                    <div class=" text-left" style="margin-top: 32px; margin-left: 30px;" >
+                      <b>รายรับงานวิจัยจากภาคอุตสาหกรรม และภาคเอกชน</b>
+                    </div>  
+                  </td>
+                  <td>
+                    <div class="  text-right mr-3">
+                      <div class="h5" style="margin-top: 47px;">
+                        <span>{{sciparkinfo.15|floatformat:2|intcomma }}</span>
+                        <span style=" font-size: 70%; ">บาท</span>  
+                      </div>
+                      {% if show_growth %}
+                      <div  style=" font-size: 90%; "> 
+                        Growth Rate : 
+                        <span style="color:{{color.13}}">
+                          {% if growth_rate.13 > 0 %}
+                          <b>+{{growth_rate.13|floatformat:2}}%</b>
+                          {% else %}
+                          <b>{{growth_rate.13|floatformat:2}}%</b>
+                          {% endif %}
+                        </span>
+                      </div>
+                      {% endif %}
+                    </div>  
+                  </td>
+                  <!-- <td class="text-center" style="padding-top: 50px;"> 
+                      <a href = '{% url "science-park-graph" value="15"%}' target="_blank"> 
+                        <input  type="submit" value="View Graph" class="btn science-park-buttons " 
+                        style=" border-radius : 25px; background-color: #333333;" />
+                      </a>
+                  </td> -->
+                  <td class="text-center pb-3 pt-2">
+                    <div class="btn-group btn-group-toggle mt-5 " >
+                        <a href = '{% url "science-park-graph" value="15"%}' target="_blank" > 
+                            <input  type="submit" value="Graph" class="btn revenues-buttons pt-0" 
+                                style="padding-left: 1px;padding-bottom: 2px; border-top-right-radius : 0px; border-bottom-right-radius : 0px; border-top-left-radius : 25px; border-bottom-left-radius : 25px;" />
+                        </a>
+                        <span class="btn-circle btn-or">or</span>
+                        <form action="show_table" target="_blank" method=POST>
+                            {% csrf_token %} 
+                            <input name = {{filter_year}}/15 type="submit" value="Table" class="btn revenues-buttons " 
+                                    style="padding-left: 2px;  border-top-right-radius : 25px; border-bottom-right-radius : 25px; border-top-left-radius : 0px; border-bottom-left-radius : 0px;"> 
+                        </form>
+                    </div>     
+                  </td>
+                </tr>
+                <!-- รวม -->
+                <tr class="pt-5" >
+                  <td ></td>
+                  <td class="h4 text-right pl-3 text-decoration: underline; text-decoration-style:double;" >
+                    <div class="  underline" style="margin-top: 32px; margin-left: 30px;" >
+                      <b>รวมทั้งหมด</b>
+                    </div> 
+                  </td>
+                  <td>
+                    <div class="  text-right mr-3">
+                      <div class="h4" style="margin-top: 32px;">
+                        <span>{{sum|floatformat:2|intcomma }}</span>
+                        <span style=" font-size: 70%; ">บาท</span>  
+                      </div>
+                    </div>  
+                  </td>
+                  <td ></td>
+                </tr>
+              </tbody>
+          </table>
+        </div>
+      </div>
+    </div>  
+
+    <!-- Pie graph -->
+    <div class=" sci-park-col2 d-flex mb-2" >  
+      <div class="row mx-2 " style="width: 100%;">
+        <div class="card pretty_container " style="width: 100%;">
+            <div class="card-header pt-3 pb-4" style=" color:black; width:100%; background-color: rgba(177, 231, 210, 0.575);" >
+                <b>สัดส่วนรายรับ | ปี : {{filter_year}} </b>
+            </div>
+            <div class="card-body"  style="width:100%; " > 
+                {{ graph1 | safe }}
+            </div> 
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+      
+      
+
+   
+    
+
+    
+  
+    
+{% endblock content %}

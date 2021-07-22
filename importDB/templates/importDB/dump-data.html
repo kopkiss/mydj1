@@ -1,0 +1,213 @@
+{% extends 'importDB/base_2.html' %}
+{% block content %}
+    <!-- Content Row -->
+    
+    <div class="container ml-2">
+        <form action = "" method ="POST">
+            {% csrf_token %}
+            
+            <table class="table" style="width:100%;">
+                <thead class="thead-dark">
+                <tr> 
+                    <th scope="col">  </th>
+                    <th scope="col"> # </th>
+                    <th scope="col" >TableName</th>
+                    <th scope="col" >Action</th>
+                    <th scope="col">Result</th>
+                    <th scope="col">Last Updated</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr style="color:black; background-color:#D6EAF8;">
+                        <td colspan="3" class=" pt-3"><b>&#10148; ข้อมูลจากระบบ PRPM </b></td>
+                        <td colspan="3"><button type="submit" name="row"  value ="All1" class="btn btn-warning">นำเข้าทั้งหมด</button></td>
+                    </tr>
+                    <tr>
+                        <td> </td>
+                        <td>1</td>
+                        <td>Prpm_v_grt_project_eis</td>
+                        <td><button type="submit" name="row" value ="Dump1" class="btn btn-info" style="width: 115px;">นำเข้า</button></td>
+                        <td>
+                            {% if whichrow == 'row1' %}
+                                {{result}}
+                            {% elif whichrow == 'all1' %}
+                                {{dumpallresults.0}}
+                            {%endif%}
+                        </td>
+                        <td>
+                            
+                            {{time.d1}}
+                            
+                        </td>
+                    </tr>
+                    <tr>
+                        <td> </td>
+                        <td>2</td>
+                        <td>PRPM_v_grt_pj_team_eis</td>
+                        <td><button type="submit" name="row" value ="Dump2" class="btn btn-info" style="width: 115px;">นำเข้า</button></td>
+                        <td>
+                            {% if whichrow == 'row2' %}
+                                {{result}}
+                            {% elif whichrow == 'all1' %}
+                                {{dumpallresults.1}}
+                            {%endif%}
+                        </td>
+                        <td>
+                            
+                            {{time.d2}}
+                            
+                        </td>
+                    </tr>
+                    <tr>
+                        <td> </td>
+                        <td>3</td>
+                        <td>PRPM_v_grt_pj_budget_eis</td>
+                        <td><button type="submit" name="row"  value ="Dump3" class="btn btn-info" style="width: 115px;">นำเข้า</button></td>
+                        <td>
+                            {% if whichrow == 'row3' %}
+                                {{result}}
+                            {% elif whichrow == 'all1' %}
+                                {{dumpallresults.2}}
+                            {%endif%}
+                        </td>
+                        <td>
+                            
+                            {{time.d3}}
+                            
+                        </td>
+                    </tr>
+                    <tr>
+                        <td> </td>
+                        <td>4</td>
+                        <td>PRPM_r_fund_type_eis</td>
+                        <td><button type="submit" name="row"  value ="Dump4" class="btn btn-info" style="width: 115px;">นำเข้า</button></td>
+                        <td>
+                            {% if whichrow == 'row4' %}
+                                {{result}}
+                            {% elif whichrow == 'all1' %}
+                                {{dumpallresults.3}}
+                            {%endif%}
+                        </td>
+                        <td>
+                            
+                            {{time.d4}}
+                            
+                        </td>
+                    </tr>
+                    <tr>
+                        <td> </td>
+                        <td>5</td>
+                        <td>PRPM_v_grt_pj_assistant_eis</td>
+                        <td><button type="submit" name="row"  value ="Dump5" class="btn btn-info" style="width: 115px;">นำเข้า</button></td>
+                        <td>
+                            {% if whichrow == 'row5' %}
+                                {{result}}
+                            {% elif whichrow == 'all1' %}
+                                {{dumpallresults.4}}
+                            {%endif%}
+                        </td>
+                        <td>
+                            
+                            {{time.d5}}
+                            
+                        </td>
+                    </tr>
+                    <tr style="color:black; background-color:#D6EAF8;">
+                        <td colspan="6" class=" pt-3"><b>&#10148; ข้อมูลจากระบบ HRIMS </b></td>
+                        <!-- <td colspan="3"><button type="submit" name="row"  value ="all2" class="btn btn-warning">นำเข้าทั้งหมด</button></td> -->
+                    </tr>
+                    <tr>
+                        <td> </td>
+                        <td>6</td>
+                        <td>HRMIS.V_AW_FOR_RANKING</td>
+                        <td><button type="submit" name="row"  value ="Dump6" class="btn btn-info" style="width: 115px;">นำเข้า</button></td>
+                        <td>
+                            {% if whichrow == 'row6'%}
+                                {{result}}
+                            {%endif%}
+                        </td>
+                        <td>
+                            
+                            {{time.d6}}
+                            
+                        </td>
+                    </tr>
+                    <tr style="color:black; background-color:#D6EAF8;">
+                        <td colspan="3" class=" pt-3"><b>&#10148; ข้อมูลจากระบบ PSUSWATCH </b></td>
+                        <td colspan="3"><button type="submit" name="row"  value ="All2" class="btn btn-warning">นำเข้าทั้งหมด</button></td>
+                    </tr>
+                    <tr>
+                        <td> </td>
+                        <td>7</td>
+                        <td>PSU Publication</td>
+                        <td><button type="submit" name="row"  value ="Dump7" class="btn btn-info" style="width: 115px;">นำเข้า</button></td>
+                        <td>
+                            {% if whichrow == 'row7'%}
+                                {{result}}
+                            {% elif whichrow == 'all2' %}
+                                {{dumpallresults.0}}
+                            {%endif%}
+                        </td>
+                        <td>
+                            {{time.d7}}   
+                        </td>
+                    </tr>
+                    <tr>
+                        <td> </td>
+                        <td>8</td>
+                        <td>Other Universities Publication</td>
+                        <td><button type="submit" name="row"  value ="Dump8" class="btn btn-info" style="width: 115px;">นำเข้า</button></td>
+                        <td>
+                            {% if whichrow == 'row8'%}
+                                {{result}}
+                            {% elif whichrow == 'all2' %}
+                                {{dumpallresults.1}}
+                            {%endif%}
+                        </td>
+                        <td>
+                            {{time.d8}}   
+                        </td>
+                    </tr>
+                    <tr style="color: black; background-color:#D6EAF8;">
+                        <td colspan="3" class=" pt-3"><b>&#10148; ข้อมูลจากหน่วยงานอุทยานวิทยาศาสตร์ </b></td>
+                        <!-- <td colspan="3"><button type="submit" name="row"  value ="all3" class="btn btn-warning">นำเข้าทั้งหมด</button></td> -->
+                    </tr>
+                    <tr>
+                        <td> </td>
+                        <td>9</td>
+                        <td> Raw Data from PITI </td>
+                        <td><button type="submit" name="row"  value ="Dump9" class="btn btn-info" style="width: 115px;">นำเข้า</button></td>
+                        <td>
+                            {% if whichrow == 'row9'%}
+                                {{result}}
+                            {%endif%}
+                        </td>
+                        <td>
+                            
+                            {{time.d9}}
+                            
+                        </td>
+                    </tr>
+                    <!-- <tr>
+                        <td> </td>
+                        <td>9</td>
+                        <td> B </td>
+                        <td><button type="submit" name="row"  value ="Dump9" class="btn btn-info" style="width: 115px; text-align: center">นำเข้า</button></td>
+                        <td>
+                            {% if whichrow == 'row9'%}
+                                {{result}}
+                            {%endif%}
+                        </td>
+                        <td>
+                            {{time.d9}}   
+                        </td>
+                    </tr> -->
+                </tbody>
+            </table>
+        </form>   
+    </div> 
+    
+
+    
+{% endblock %}
+    

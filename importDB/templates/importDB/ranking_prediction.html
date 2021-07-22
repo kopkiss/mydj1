@@ -5,23 +5,31 @@
 {% load humanize %}
 
 <div class="container-fluid">
-  <div class="row mb-3 mx-1 card pretty_container " style="width:100%; background-color:#D6EAF8; "  >
-    <div class=" col-lg-12 mt-3 mb-3 ml-5" style="text-align: left;  font-size: 2em; width:100%; ">
-      เลือกฐานข้อมูล : 
-      <form  name='filter' method=POST style="display: inline;" >
-        {% csrf_token %}
-          <select id="data" name = "data" class=" mb-1 btn ex2 btn-info dropdown-toggle" onChange="filter.submit();" style=" width:15%; ">
-            {% for ranking in ranking_name  %}
-                {% if ranking == filter_ranking %} 
-                    <option value="{{ ranking }}" selected>{{ ranking }} </option>
-                {% else %}
-                    <option value="{{ ranking }}" >{{ ranking }} </option>
-                {%endif%}
-            {% endfor %}
-        </select>
-      </form>
+
+    
+    <div class="card pretty_container mb-3" style=" width: auto;">
+      <div class="row mt-3 mb-1 ml-3" >
+        <div class = "col" >
+          <h4 class = "subtitle  " style="display: inline;">&nbsp;Prediction จำนวนงานวิจัยที่ได้รับการตีพิมพ์ | ฐานข้อมูล : </h4> 
+        
+          <form  name='filter' method=POST style="display: inline;" >
+            {% csrf_token %}
+              <select id="data" name = "data" class=" mb-1  btn ex2 btn-info dropdown-toggle" onChange="filter.submit();" style=" width:15%; ">
+                {% for ranking in ranking_name  %}
+                    {% if ranking == filter_ranking %} 
+                        <option value="{{ ranking }}" selected>{{ ranking }} </option>
+                    {% else %}
+                        <option value="{{ ranking }}" >{{ ranking }} </option>
+                    {%endif%}
+                {% endfor %}
+            </select>
+          </form>
+        </div>
+      </div>
     </div>
-  </div>
+
+    
+  
   <div class="row " >
     <div class="col mx-3 mb-3 card pretty_container "  >
       {{ graph | safe }}

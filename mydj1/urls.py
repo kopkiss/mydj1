@@ -16,10 +16,17 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from importDB import views
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('ess-admin/', admin.site.urls),
     path('', include('importDB.urls')),
 
+    path('login/' , views.login_2, name = 'login'),
 
+    # ปกรติ ต้องใช้ code ในการ login ข้างล่างนี้ แต่เนื่องจาก ต้องทำการเช็คระบบจากระบบ PSU passport จึงทำให้ต้องใช้ views.login_
+    # path('login/', auth_views.LoginView.as_view(template_name='importDB/login.html') , name = 'login'),
+    
+    # ส่วนการ logout สามารถใช้ logout ได้ปรกติ
+    path('logout/', auth_views.LogoutView.as_view() , name = 'logout')
 ]
