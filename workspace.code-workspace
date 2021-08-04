@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"name": "esssite",
+			"uri": "sftp://ess@ess.psu.ac.th/home/ess/esssite"
+		},
+		{
+			"path": "D:\\dev\\TigerAlert"
+		}
+	],
+	"settings": {
+		"git.ignoreLimitWarning": true
+	}
+}
