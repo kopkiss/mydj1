@@ -7560,6 +7560,58 @@ def login_2(request):
     }
     return render(request,'importDB/login.html',context)
 
+def login_psupassport(request):  ##  login ด้วย psupassport
+    print("---login---")
+    username = ""
+    passowrd = ""
+    default_pass = 'pass11111' #รหัสหลอก เพื่อให้ เข้า auth ของ Django ได้
+    
+    if request.method == "POST":
+        username = request.POST.get('username') # RO ใช้ username = request.POST['username']
+        password = request.POST.get('password')
+        print("---by user---", username)
+        user_list = list()
+        user = object()
+        if username.find("admin") == -1:  ## ถ้า user ขึ้นต้นด้วย admin ให้ ใช้ login django  ถ้าไม่ใช่ ให้ login psu-passport
+            print("psu-login")
+            password = password.replace("`", "\\`")  # ทำการ เพิ่ม \ ให้กับ password ที่มี อัขระพิเศษ คือ `
+            password = password.replace("$", "\\$")  # ทำการ เพิ่ม \ ให้กับ password ที่มี อัขระพิเศษ คือ $
+            password = "\"\"\""+password+"\"\"\""  # ทำการ ใส่ "  " ให้กับ password เพราะ อาจจะมี charactor พิเศษ ที่ทำให้เกิด error เช่น มี & | not ใน password
+            
+
+            proc = subprocess.Popen("""php importDB/index.php """+username+""" """+password , shell=True, stdout=subprocess.PIPE) #Call function authentication from PHP
+            
+            script_response = proc.stdout.read()
+            decode = script_response.decode("utf-8")  # ทำการ decode จาก bit เป็น string
+            print("list --> ",decode)
+            user_list = decode.split(",") # split ข้อมูล ด้วย ,
+            
+            user = authenticate(request, username = user_list[1] , password = default_pass) # นำ รหัสพนักงาน  มาตรวจสอบว่าอยู่ใน ฐานข้อมูล django หรือไม่ โดยใช้รหัส default
+
+            if ((user_list[0] == "1") & (user is not None)):  # ถ้า เจอ user ใน ระบบ psupassport และ เจอ user ใน ฐานข้อมูล django ให้ทำการเข้าสู่ระบบได้
+                login(request, user)  # ทำการเข้าสู่ระบบ
+                return redirect('home-page')  # เมื่อเข้าสู่ระบบเเล้ว ทำการเปิดหน้าแรกของ page
+            else:
+                # print("ไม่พบ user")
+                messages.info(request, 'Username หรือ password ไม่ถูกต้อง')
+
+        else:
+            print("admin-login")   ## login ด้วย admin django user
+            user = authenticate(request, username = username , password = password) # login ด้วย user pass ในฐานข้อมูล Django
+            if (user is not None):  # ถ้า เจอ user ใน ระบบ psupassport และ เจอ user ใน ฐานข้อมูล django ให้ทำการเข้าสู่ระบบได้
+                login(request, user)  # ทำการเข้าสู่ระบบ
+                return redirect('home-page')  # เมื่อเข้าสู่ระบบเเล้ว ทำการเปิดหน้าแรกของ page
+            else:
+                # print("ไม่พบ user")
+                messages.info(request, 'Username หรือ password ไม่ถูกต้อง')
+
+
+    context={
+        
+    }
+    return render(request,'importDB/login.html',context)
+
+
 
 # %%
 print("Running")
