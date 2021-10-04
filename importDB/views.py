@@ -1724,7 +1724,7 @@ def chrome_driver_get_catagories_ISI(driver):
 ################################################################################################
 #### "function ย่อย" ในการ query ข้อมูล ที่จะเเสดงใน dashboard หรือ html โดย จะถูกเรียกใช้จากฟังก์ชั่นหลัก####
 ################################################################################################
-def query1(): # 12 types of budget, budget_of_fac
+def query11(): # 12 types of budget, budget_of_fac
     print("-"*20)
     print("Starting Query#1 ...")
     checkpoint = True
@@ -1819,6 +1819,164 @@ def query1(): # 12 types of budget, budget_of_fac
                             ORDER BY 1 
                                 ),
                                 temp2 AS ( SELECT psu_project_id, user_full_name_th, camp_name_thai, fac_name_thai, research_position_id, research_position_th, lu_percent FROM importdb_prpm_v_grt_pj_team_eis WHERE psu_staff = "Y" ORDER BY 1 ),
+                                temp3 AS ( SELECT psu_project_id, fund_budget_year AS submit_year FROM importDB_prpm_v_grt_project_eis ),
+                                temp4 AS (
+                            SELECT
+                                t1.psu_project_id,
+                                t3.submit_year,
+                                t1.budget_year,
+                                budget_source_group_id,
+                                budget_amount,
+                                user_full_name_th,
+                                camp_name_thai,
+                                fac_name_thai,
+                                research_position_th,
+                                lu_percent,
+                                lu_percent / 100 * budget_amount AS final_budget 
+                            FROM
+                                temp1 AS t1
+                                JOIN temp2 AS t2 ON t1.psu_project_id = t2.psu_project_id
+                                JOIN temp3 AS t3 ON t1.psu_project_id = t3.psu_project_id 
+                            WHERE
+                                submit_year > 2553 
+                                AND research_position_id <> 2 
+                            ORDER BY 2 
+                                ),
+                                temp5 AS (
+                            SELECT
+                                sg1.budget_source_group_id,
+                                sg1.budget_source_group_th,
+                                budget_year,
+                                camp_name_thai,
+                                fac_name_thai,
+                                sum( final_budget ) AS sum_final_budget 
+                            FROM
+                                temp4
+                                JOIN importDB_budget_source_group AS sg1 ON temp4.budget_source_group_id = sg1.budget_source_group_id 
+                            GROUP BY 1, 2, 3, 4, 5 
+                            ORDER BY
+                                1 
+                                ) SELECT
+                                budget_year,
+                                A.budget_source_group_id,
+                                A.budget_source_group_th,
+                                B.type,
+                                camp_name_thai,
+                                fac_name_thai,
+                                sum( sum_final_budget ) AS sum_final_budget 
+                            FROM
+                                temp5 AS A
+                                JOIN importDB_budget_source_group AS B ON A.budget_source_group_id = B.budget_source_group_id 
+                            where budget_year between """+str(fiscal_year-9)+""" and """+str(fiscal_year)+"""
+                            GROUP BY 1, 2, 3, 4, 5, 6
+                                """
+
+        # con_string = getConstring('sql')
+        df = pm.execute_query(sql_cmd, con_string)
+        df.to_csv ("""mydj1/static/csv/budget_of_fac.csv""", index = False, header=True)
+    
+        print ("Data#2 is saved")
+        print("Ending Query#1 ...")
+        return checkpoint
+
+    except Exception as e :
+        checkpoint = False
+        print('At Query#1: Something went wrong :', e)
+        return checkpoint
+
+def query1(): # 12 types of budget, budget_of_fac
+    print("-"*20)
+    print("Starting Query#1 ...")
+    checkpoint = True
+    os.environ["NLS_LANG"] = ".UTF8"  # ทำให้แสดงข้อความเป็น ภาษาไทยได้
+    fiscal_year = get_fiscal_year() # ปีงบประมาณ
+    print("ปีงบประมาณ",fiscal_year)
+    try:   
+        sql_cmd =  """with temp1 as ( 
+                        select psu_project_id, budget_year, budget_source_group_id, sum(budget_amount) as budget_amount
+                        from importDB_prpm_v_grt_pj_budget_eis
+                        where budget_group = 4 
+                        group by 1, 2,3
+                        order by 1
+                    ),
+                    
+                    temp2 as (
+                        select psu_project_id, user_full_name_th, camp_name_thai, fac_name_thai,research_position_id,research_position_th ,lu_percent
+                        from importDB_prpm_v_grt_pj_team_eis
+                        where psu_staff = "Y" 
+                        order by 1
+                    ),
+                    
+                    temp3 as (
+                        select psu_project_id, fund_budget_year as submit_year
+                        from importDB_prpm_v_grt_project_eis
+                    ),
+                    
+                    temp4 as (
+            
+                        select t1.psu_project_id,t3.submit_year, t1.budget_year, budget_source_group_id, budget_amount, user_full_name_th, camp_name_thai,fac_name_thai, research_position_th,lu_percent, lu_percent/100*budget_amount as final_budget
+                        from temp1 as t1
+                        join temp2 as t2 on t1.psu_project_id = t2.psu_project_id
+                        join temp3 as t3 on t1.psu_project_id = t3.psu_project_id
+                        where 
+                            submit_year > 2553 and 
+                            research_position_id <> 2 
+                        order by 2
+                    ),
+
+                    temp5 as (
+                                            
+                            select  sg1.budget_source_group_id,sg1.budget_source_group_th, budget_year,camp_name_thai, fac_name_thai, sum(final_budget) as sum_final_budget
+                            from temp4 
+                            join importDB_budget_source_group as sg1 on temp4.budget_source_group_id = sg1.budget_source_group_id
+                            group by 1,2,3,4,5
+                            order by 1
+                    )
+                            
+                        select budget_year, budget_source_group_id,budget_source_group_th, sum(sum_final_budget) as sum_final_budget
+                    from temp5
+                    where budget_year between """+str(fiscal_year-9)+""" and """+str(fiscal_year)+"""
+                    group by 1,2,3 """
+
+        con_string = getConstring('sql')
+
+        df = pm.execute_query(sql_cmd, con_string)
+        print(df)
+        ############## build dataframe for show in html ##################
+        index_1 = df["budget_year"].unique()
+        df2 = pd.DataFrame(columns=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],index = index_1)  
+ 
+        for index, row in df.iterrows():
+            df2[int(row['budget_source_group_id'])][row["budget_year"]] = row['sum_final_budget']
+ 
+        df2 = df2.fillna(0.0)
+        df2 = df2.sort_index(ascending=False)
+        df2 = df2.head(10).sort_index()
+            
+        
+        ########## save to csv ตาราง เงิน 12 ประเภท ##########      
+        if not os.path.exists("mydj1/static/csv"):
+                os.mkdir("mydj1/static/csv")
+                
+        df2.to_csv ("""mydj1/static/csv/12types_of_budget.csv""", index = True, header=True)
+        print ("Data#1 is saved")
+        #################################################
+        ################# save ตาราง แยกคณะ #############
+        #################################################
+        sql_cmd =  """WITH temp1 AS (
+                            SELECT
+                                psu_project_id,
+                                budget_year,
+                                budget_source_group_id,
+                                sum( budget_amount ) AS budget_amount 
+                            FROM
+                                importDB_prpm_v_grt_pj_budget_eis 
+                            WHERE
+                                budget_group = 4 
+                            GROUP BY 1, 2, 3 
+                            ORDER BY 1 
+                                ),
+                                temp2 AS ( SELECT psu_project_id, user_full_name_th, camp_name_thai, fac_name_thai, research_position_id, research_position_th, lu_percent FROM importDB_prpm_v_grt_pj_team_eis WHERE psu_staff = "Y" ORDER BY 1 ),
                                 temp3 AS ( SELECT psu_project_id, fund_budget_year AS submit_year FROM importDB_prpm_v_grt_project_eis ),
                                 temp4 AS (
                             SELECT
